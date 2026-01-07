@@ -1,25 +1,57 @@
 import admin from 'firebase-admin';
 
 // Initialize Firebase Admin
-const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
-  ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
-  : null;
+// Support both FIREBASE_SERVICE_ACCOUNT (full JSON) and individual env vars
+let firebaseInitialized = false;
 
-if (serviceAccount) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
-} else {
-  // For development, use default credentials or skip
-  console.warn('Firebase service account not found. Some features may not work.');
-}
+const initializeFirebase = () => {
+  if (firebaseInitialized) return true;
+
+  try {
+    // Option 1: Full service account JSON
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+      });
+      firebaseInitialized = true;
+      console.log('Firebase initialized with service account JSON');
+      return true;
+    }
+
+    // Option 2: Individual environment variables
+    if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+      admin.initializeApp({
+        credential: admin.credential.cert({
+          projectId: process.env.FIREBASE_PROJECT_ID,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+          // Private key comes with escaped newlines from env vars
+          privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+        }),
+      });
+      firebaseInitialized = true;
+      console.log('Firebase initialized with individual env vars');
+      return true;
+    }
+
+    console.error('Firebase credentials not configured! Authentication will NOT work.');
+    return false;
+  } catch (error) {
+    console.error('Error initializing Firebase:', error);
+    return false;
+  }
+};
+
+// Initialize on module load
+initializeFirebase();
 
 export const verifyToken = async (token) => {
+  if (!firebaseInitialized) {
+    console.error('Firebase not initialized - cannot verify token');
+    throw new Error('Firebase authentication not configured');
+  }
+
   try {
-    if (!serviceAccount) {
-      // Mock verification for development
-      return { uid: 'dev-user', email: 'dev@test.com' };
-    }
     const decodedToken = await admin.auth().verifyIdToken(token);
     return decodedToken;
   } catch (error) {
@@ -30,8 +62,8 @@ export const verifyToken = async (token) => {
 
 export const sendPushNotification = async (token, title, body, data = {}) => {
   try {
-    if (!serviceAccount) {
-      console.log('Push notification (dev):', { title, body, data });
+    if (!firebaseInitialized) {
+      console.log('Push notification skipped (Firebase not initialized):', { title, body, data });
       return;
     }
 
