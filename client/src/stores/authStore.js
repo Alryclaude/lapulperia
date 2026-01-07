@@ -87,7 +87,10 @@ export const useAuthStore = create(
       logout: async () => {
         try {
           await signOut(auth);
+          // Clear all auth state
           set({ user: null, token: null, isAuthenticated: false });
+          // Clear localStorage to prevent stale data
+          localStorage.removeItem('auth-storage');
         } catch (error) {
           console.error('Logout error:', error);
         }

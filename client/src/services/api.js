@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { auth } from './firebase';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
@@ -10,16 +11,13 @@ const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   async (config) => {
-    // Get token from localStorage (set by auth store)
-    const authStorage = localStorage.getItem('auth-storage');
-    if (authStorage) {
+    // Get fresh token from Firebase (not from localStorage)
+    if (auth?.currentUser) {
       try {
-        const { state } = JSON.parse(authStorage);
-        if (state?.token) {
-          config.headers.Authorization = `Bearer ${state.token}`;
-        }
+        const token = await auth.currentUser.getIdToken();
+        config.headers.Authorization = `Bearer ${token}`;
       } catch (e) {
-        // Invalid JSON, ignore
+        console.error('Error getting Firebase token:', e);
       }
     }
     return config;
