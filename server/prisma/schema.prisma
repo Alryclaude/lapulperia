@@ -1,0 +1,415 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CLIENT
+  PULPERIA
+}
+
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  PREPARING
+  READY
+  DELIVERED
+  CANCELLED
+}
+
+enum JobApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum PulperiaStatus {
+  OPEN
+  CLOSING_SOON
+  CLOSED
+  VACATION
+}
+
+// Usuarios
+model User {
+  id                  String              @id @default(cuid())
+  email               String              @unique
+  name                String
+  avatar              String?
+  phone               String?
+  role                Role                @default(CLIENT)
+  firebaseUid         String              @unique
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  pulperia            Pulperia?
+  orders              Order[]
+  reviews             Review[]
+  jobApplications     JobApplication[]
+  serviceCatalogs     ServiceCatalog[]
+  pushSubscriptions   PushSubscription[]
+  favorites           Favorite[]
+  shoppingLists       ShoppingList[]
+  productAlerts       ProductAlert[]
+  loyaltyPoints       LoyaltyPoint[]
+
+  @@index([email])
+  @@index([firebaseUid])
+}
+
+// Pulperias (Negocios)
+model Pulperia {
+  id                  String          @id @default(cuid())
+  userId              String          @unique
+  name                String
+  description         String?
+  logo                String?
+  logoPublicId        String?
+  banner              String?
+  bannerPublicId      String?
+  phone               String?
+  whatsapp            String?
+
+  // Ubicacion
+  latitude            Float
+  longitude           Float
+  address             String
+  reference           String?         // "Frente al palo de mango"
+
+  // Estado
+  status              PulperiaStatus  @default(CLOSED)
+  statusChangedAt     DateTime        @default(now())
+  vacationMessage     String?
+  vacationUntil       DateTime?
+
+  // Historia del negocio
+  foundedYear         Int?
+  story               String?
+  storyImages         String[]
+
+  // Estadisticas
+  totalSales          Int             @default(0)
+  totalOrders         Int             @default(0)
+  rating              Float           @default(0)
+  reviewCount         Int             @default(0)
+
+  // Configuracion
+  acceptsDelivery     Boolean         @default(false)
+  acceptsPickup       Boolean         @default(true)
+
+  isVerified          Boolean         @default(false)
+  isPermanentlyClosed Boolean         @default(false)
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products            Product[]
+  orders              Order[]
+  jobs                Job[]
+  reviews             Review[]
+  favorites           Favorite[]
+  achievements        Achievement[]
+  loyaltyProgram      LoyaltyProgram?
+  dailyStats          DailyStat[]
+
+  @@index([latitude, longitude])
+  @@index([status])
+}
+
+// Productos
+model Product {
+  id                  String          @id @default(cuid())
+  pulperiaId          String
+  name                String
+  description         String?
+  price               Float
+  category            String?
+  imageUrl            String
+  imagePublicId       String
+
+  isAvailable         Boolean         @default(true)
+  isFeatured          Boolean         @default(false)      // Producto del dia
+  featuredUntil       DateTime?
+  viewsToday          Int             @default(0)
+  totalViews          Int             @default(0)
+
+  // Stock management
+  outOfStock          Boolean         @default(false)
+  sellsQuickly        Boolean         @default(false)      // Badge automatico
+
+  // Temporada
+  isSeasonal          Boolean         @default(false)
+  seasonalTag         String?                               // "Verano", "Navidad"
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  pulperia            Pulperia        @relation(fields: [pulperiaId], references: [id], onDelete: Cascade)
+  orderItems          OrderItem[]
+  productAlerts       ProductAlert[]
+
+  @@index([pulperiaId])
+  @@index([category])
+  @@index([isAvailable, outOfStock])
+}
+
+// Ordenes
+model Order {
+  id                  String          @id @default(cuid())
+  orderNumber         String          @unique
+  userId              String
+  pulperiaId          String
+  status              OrderStatus     @default(PENDING)
+  total               Float
+  notes               String?                               // Notas del cliente
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  acceptedAt          DateTime?
+  readyAt             DateTime?
+  deliveredAt         DateTime?
+  cancelledAt         DateTime?
+  cancelReason        String?
+
+  user                User            @relation(fields: [userId], references: [id])
+  pulperia            Pulperia        @relation(fields: [pulperiaId], references: [id])
+  items               OrderItem[]
+
+  @@index([userId])
+  @@index([pulperiaId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id                  String          @id @default(cuid())
+  orderId             String
+  productId           String
+  quantity            Int
+  priceAtTime         Float
+  productName         String                                // Snapshot del nombre
+  productImage        String                                // Snapshot de la imagen
+
+  order               Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product             Product         @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+}
+
+// Empleos
+model Job {
+  id                  String          @id @default(cuid())
+  pulperiaId          String
+  title               String
+  description         String
+  requirements        String?
+  salary              String?
+  isPartTime          Boolean         @default(false)
+  isUrgent            Boolean         @default(false)
+  isActive            Boolean         @default(true)
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  pulperia            Pulperia        @relation(fields: [pulperiaId], references: [id], onDelete: Cascade)
+  applications        JobApplication[]
+
+  @@index([pulperiaId])
+  @@index([isActive])
+}
+
+model JobApplication {
+  id                  String                  @id @default(cuid())
+  jobId               String
+  userId              String
+  coverLetter         String?
+  cvUrl               String?
+  cvPublicId          String?
+  status              JobApplicationStatus    @default(PENDING)
+  responseMessage     String?
+  contactInfo         String?                               // Info de contacto si es aceptado
+
+  createdAt           DateTime                @default(now())
+  updatedAt           DateTime                @updatedAt
+
+  job                 Job                     @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user                User                    @relation(fields: [userId], references: [id])
+
+  @@unique([jobId, userId])
+  @@index([userId])
+}
+
+// Catalogo de servicios (freelancers)
+model ServiceCatalog {
+  id                  String          @id @default(cuid())
+  userId              String
+  profession          String
+  description         String?
+  images              String[]
+  imagePublicIds      String[]
+  contactPhone        String?
+  contactWhatsapp     String?
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([profession])
+}
+
+// Reviews
+model Review {
+  id                  String          @id @default(cuid())
+  userId              String
+  pulperiaId          String
+  rating              Int                                   // 1-5
+  comment             String?
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  user                User            @relation(fields: [userId], references: [id])
+  pulperia            Pulperia        @relation(fields: [pulperiaId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, pulperiaId])
+  @@index([pulperiaId])
+}
+
+// Favoritos
+model Favorite {
+  id                  String          @id @default(cuid())
+  userId              String
+  pulperiaId          String
+  notifyOnOpen        Boolean         @default(false)
+
+  createdAt           DateTime        @default(now())
+
+  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pulperia            Pulperia        @relation(fields: [pulperiaId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, pulperiaId])
+}
+
+// Lista de mandados
+model ShoppingList {
+  id                  String          @id @default(cuid())
+  userId              String
+  name                String
+  items               String[]
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// Alertas de productos (avisame cuando llegue)
+model ProductAlert {
+  id                  String          @id @default(cuid())
+  userId              String
+  productId           String
+  notified            Boolean         @default(false)
+
+  createdAt           DateTime        @default(now())
+
+  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product             Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}
+
+// Push subscriptions
+model PushSubscription {
+  id                  String          @id @default(cuid())
+  userId              String
+  endpoint            String
+  p256dh              String
+  auth                String
+
+  createdAt           DateTime        @default(now())
+
+  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// Logros
+model Achievement {
+  id                  String          @id @default(cuid())
+  pulperiaId          String
+  type                String                                // FIRST_SALE, STREAK_7, etc.
+  unlockedAt          DateTime        @default(now())
+
+  pulperia            Pulperia        @relation(fields: [pulperiaId], references: [id], onDelete: Cascade)
+
+  @@unique([pulperiaId, type])
+}
+
+// Programa de lealtad
+model LoyaltyProgram {
+  id                  String          @id @default(cuid())
+  pulperiaId          String          @unique
+  pointsPerPurchase   Int             @default(1)
+  rewardThreshold     Int             @default(10)
+  rewardDescription   String          @default("Un regalo especial")
+  isActive            Boolean         @default(true)
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  pulperia            Pulperia        @relation(fields: [pulperiaId], references: [id], onDelete: Cascade)
+  points              LoyaltyPoint[]
+}
+
+model LoyaltyPoint {
+  id                  String          @id @default(cuid())
+  loyaltyProgramId    String
+  userId              String
+  points              Int             @default(0)
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  loyaltyProgram      LoyaltyProgram  @relation(fields: [loyaltyProgramId], references: [id], onDelete: Cascade)
+  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([loyaltyProgramId, userId])
+}
+
+// Estadisticas diarias
+model DailyStat {
+  id                  String          @id @default(cuid())
+  pulperiaId          String
+  date                DateTime        @db.Date
+  totalSales          Float           @default(0)
+  totalOrders         Int             @default(0)
+  topProducts         Json?                                 // Array de {productId, count}
+
+  pulperia            Pulperia        @relation(fields: [pulperiaId], references: [id], onDelete: Cascade)
+
+  @@unique([pulperiaId, date])
+  @@index([date])
+}
+
+// Eventos y fiestas
+model Event {
+  id                  String          @id @default(cuid())
+  name                String
+  description         String?
+  startDate           DateTime
+  endDate             DateTime?
+  location            String?
+
+  createdAt           DateTime        @default(now())
+
+  @@index([startDate])
+}

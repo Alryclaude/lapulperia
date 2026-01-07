@@ -1,0 +1,106 @@
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useAuthStore } from './stores/authStore';
+
+// Layout
+import Layout from './components/layout/Layout';
+import AuthLayout from './components/layout/AuthLayout';
+
+// Pages
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import PulperiaProfile from './pages/PulperiaProfile';
+import ProductDetail from './pages/ProductDetail';
+import Cart from './pages/Cart';
+import Orders from './pages/Orders';
+import OrderDetail from './pages/OrderDetail';
+import Jobs from './pages/Jobs';
+import JobDetail from './pages/JobDetail';
+import Services from './pages/Services';
+import ServiceCatalog from './pages/ServiceCatalog';
+import Profile from './pages/Profile';
+import Settings from './pages/Settings';
+import Search from './pages/Search';
+import Favorites from './pages/Favorites';
+
+// Pulperia Pages
+import Dashboard from './pages/pulperia/Dashboard';
+import ManageProducts from './pages/pulperia/ManageProducts';
+import ManageOrders from './pages/pulperia/ManageOrders';
+import ManageJobs from './pages/pulperia/ManageJobs';
+import PulperiaSettings from './pages/pulperia/PulperiaSettings';
+
+// Components
+import StarField from './components/layout/StarField';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import PulperiaRoute from './components/auth/PulperiaRoute';
+
+function App() {
+  const { initialize, isLoading } = useAuthStore();
+
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <StarField />
+      <Routes>
+        {/* Public Routes */}
+        <Route element={<Layout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/pulperia/:id" element={<PulperiaProfile />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/jobs" element={<Jobs />} />
+          <Route path="/job/:id" element={<JobDetail />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/service/:id" element={<ServiceCatalog />} />
+        </Route>
+
+        {/* Auth Routes */}
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+        </Route>
+
+        {/* Protected Routes (logged in users) */}
+        <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/order/:id" element={<OrderDetail />} />
+          <Route path="/favorites" element={<Favorites />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/my-services" element={<ServiceCatalog isOwner />} />
+        </Route>
+
+        {/* Pulperia Routes */}
+        <Route element={<PulperiaRoute><Layout isPulperia /></PulperiaRoute>}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/manage/products" element={<ManageProducts />} />
+          <Route path="/manage/orders" element={<ManageOrders />} />
+          <Route path="/manage/jobs" element={<ManageJobs />} />
+          <Route path="/pulperia/settings" element={<PulperiaSettings />} />
+        </Route>
+
+        {/* 404 */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
+  );
+}
+
+export default App;
