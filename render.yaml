@@ -58,7 +58,7 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        value: https://lapulperia-api.onrender.com
+        value: https://lapulperia-api.onrender.com/api
       - key: VITE_FIREBASE_API_KEY
         sync: false
       - key: VITE_FIREBASE_AUTH_DOMAIN
