@@ -129,3 +129,9 @@ export const statsApi = {
   getInsights: () => api.get('/stats/insights'),
   export: (params) => api.get('/stats/export', { params }),
 };
+
+export const userApi = {
+  getStats: () => api.get('/auth/me'),
+  getProfile: () => api.get('/auth/me'),
+  updateProfile: (data) => api.patch('/auth/me', data),
+};

@@ -15,7 +15,14 @@ const Profile = () => {
     queryFn: () => userApi.getStats(),
   });
 
-  const stats = data?.data || {};
+  const userData = data?.data?.user || {};
+  const stats = {
+    orders: userData._count?.orders || 0,
+    reviews: userData._count?.reviews || 0,
+    favorites: userData._count?.favorites || 0,
+    pendingOrders: 0,
+    achievements: userData.pulperia?.achievements || [],
+  };
 
   const menuItems = [
     {
