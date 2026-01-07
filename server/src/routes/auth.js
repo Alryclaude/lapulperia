@@ -166,46 +166,6 @@ router.post('/create-pulperia', authenticate, async (req, res) => {
   }
 });
 
-// TEMPORARY: Reset database endpoint - DELETE THIS AFTER USE
-router.post('/reset-database', async (req, res) => {
-  try {
-    const { secretKey } = req.body;
-
-    // Simple protection - change this key if needed
-    if (secretKey !== 'LIMPIAR-PULPERIA-2024') {
-      return res.status(403).json({ error: { message: 'Clave incorrecta' } });
-    }
-
-    // Delete all data in correct order (respecting foreign keys)
-    await prisma.loyaltyPoint.deleteMany();
-    await prisma.loyaltyProgram.deleteMany();
-    await prisma.achievement.deleteMany();
-    await prisma.dailyStat.deleteMany();
-    await prisma.pushSubscription.deleteMany();
-    await prisma.productAlert.deleteMany();
-    await prisma.shoppingList.deleteMany();
-    await prisma.favorite.deleteMany();
-    await prisma.review.deleteMany();
-    await prisma.jobApplication.deleteMany();
-    await prisma.job.deleteMany();
-    await prisma.serviceCatalog.deleteMany();
-    await prisma.orderItem.deleteMany();
-    await prisma.order.deleteMany();
-    await prisma.product.deleteMany();
-    await prisma.pulperia.deleteMany();
-    await prisma.user.deleteMany();
-    await prisma.event.deleteMany();
-
-    res.json({
-      success: true,
-      message: 'Base de datos limpiada exitosamente. ELIMINA ESTE ENDPOINT!'
-    });
-  } catch (error) {
-    console.error('Reset database error:', error);
-    res.status(500).json({ error: { message: 'Error al limpiar base de datos', details: error.message } });
-  }
-});
-
 // Delete account
 router.delete('/me', authenticate, async (req, res) => {
   try {
