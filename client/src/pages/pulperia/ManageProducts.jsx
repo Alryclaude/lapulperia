@@ -266,8 +266,8 @@ const ManageProducts = () => {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50">
-          <div className="bg-white rounded-t-2xl sm:rounded-2xl max-w-lg w-full max-h-[90vh] sm:max-h-[85vh] flex flex-col sm:m-4">
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-[100]">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl max-w-lg w-full max-h-[85vh] sm:max-h-[85vh] flex flex-col sm:m-4">
             <div className="p-4 border-b flex items-center justify-between flex-shrink-0">
               <h2 className="text-xl font-bold text-gray-900">
                 {editProduct ? 'Editar Producto' : 'Nuevo Producto'}
@@ -411,7 +411,10 @@ const ManageProducts = () => {
               </div>
 
               {/* Fixed Action Buttons */}
-              <div className="p-4 border-t bg-white flex-shrink-0 pb-safe">
+              <div
+                className="p-4 border-t bg-white flex-shrink-0"
+                style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+              >
                 <div className="flex gap-3">
                   <button type="button" onClick={closeModal} className="btn-secondary flex-1">
                     Cancelar
