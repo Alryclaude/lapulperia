@@ -267,8 +267,8 @@ const ManageProducts = () => {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50">
-          <div className="bg-white rounded-t-2xl sm:rounded-2xl max-w-lg w-full max-h-[85vh] sm:max-h-[90vh] flex flex-col sm:m-4">
-            <div className="p-5 border-b flex items-center justify-between flex-shrink-0">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl max-w-lg w-full max-h-[90vh] sm:max-h-[85vh] flex flex-col sm:m-4">
+            <div className="p-4 border-b flex items-center justify-between flex-shrink-0">
               <h2 className="text-xl font-bold text-gray-900">
                 {editProduct ? 'Editar Producto' : 'Nuevo Producto'}
               </h2>
@@ -277,158 +277,160 @@ const ManageProducts = () => {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto flex-1 pb-safe">
-              {/* Image */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Imagen del producto
-                </label>
-                <div className="relative">
-                  {imagePreview ? (
-                    <div className="relative aspect-square rounded-xl overflow-hidden">
-                      <img src={imagePreview} alt="" className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setImageFile(null);
-                          setImagePreview(editProduct?.imageUrl || null);
-                        }}
-                        className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
+            <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+              {/* Scrollable Content */}
+              <div className="p-4 space-y-4 overflow-y-auto flex-1">
+                {/* Image */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Imagen del producto
+                  </label>
+                  <div className="relative">
+                    {imagePreview ? (
+                      <div className="relative aspect-square rounded-xl overflow-hidden max-w-[200px]">
+                        <img src={imagePreview} alt="" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setImageFile(null);
+                            setImagePreview(editProduct?.imageUrl || null);
+                          }}
+                          className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-primary-500 hover:bg-primary-50/50 transition-colors">
+                        <ImageIcon className="w-8 h-8 text-gray-400 mb-2" />
+                        <span className="text-sm text-gray-500">Click para subir imagen</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageChange}
+                          className="hidden"
+                        />
+                      </label>
+                    )}
+                  </div>
+                </div>
+
+                {/* Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nombre *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="input"
+                    required
+                  />
+                </div>
+
+                {/* Price */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Precio (Lempiras) *
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    className="input"
+                    required
+                  />
+                </div>
+
+                {/* Category */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Categoria
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    placeholder="Ej: Bebidas, Abarrotes..."
+                    className="input"
+                  />
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Descripcion
+                  </label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="input min-h-[60px]"
+                    placeholder="Opcional..."
+                  />
+                </div>
+
+                {/* Badges */}
+                <div className="space-y-2">
+                  <label className="flex items-center gap-3 p-2 bg-gray-50 rounded-xl cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.isFeatured}
+                      onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
+                      className="w-5 h-5 rounded text-primary-600"
+                    />
+                    <div>
+                      <p className="font-medium text-gray-900 text-sm">Producto Destacado</p>
                     </div>
-                  ) : (
-                    <label className="flex flex-col items-center justify-center aspect-square border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-primary-500 hover:bg-primary-50/50 transition-colors">
-                      <ImageIcon className="w-12 h-12 text-gray-400 mb-2" />
-                      <span className="text-sm text-gray-500">Click para subir imagen</span>
-                      <span className="text-xs text-gray-400">Max 10MB</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="hidden"
-                      />
-                    </label>
+                  </label>
+
+                  <label className="flex items-center gap-3 p-2 bg-gray-50 rounded-xl cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.isSeasonal}
+                      onChange={(e) => setFormData({ ...formData, isSeasonal: e.target.checked })}
+                      className="w-5 h-5 rounded text-primary-600"
+                    />
+                    <div>
+                      <p className="font-medium text-gray-900 text-sm">Producto de Temporada</p>
+                    </div>
+                  </label>
+
+                  {formData.isSeasonal && (
+                    <input
+                      type="text"
+                      value={formData.seasonalTag}
+                      onChange={(e) => setFormData({ ...formData, seasonalTag: e.target.value })}
+                      placeholder="Etiqueta: Verano, Navidad..."
+                      className="input"
+                    />
                   )}
                 </div>
               </div>
 
-              {/* Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nombre *
-                </label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="input"
-                  required
-                />
-              </div>
-
-              {/* Price */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Precio (Lempiras) *
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                  className="input"
-                  required
-                />
-              </div>
-
-              {/* Category */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Categoria
-                </label>
-                <input
-                  type="text"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  placeholder="Ej: Bebidas, Abarrotes, Lacteos..."
-                  className="input"
-                />
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Descripcion
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="input min-h-[80px]"
-                  placeholder="Descripcion opcional..."
-                />
-              </div>
-
-              {/* Badges */}
-              <div className="space-y-3">
-                <label className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.isFeatured}
-                    onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
-                    className="w-5 h-5 rounded text-primary-600"
-                  />
-                  <div>
-                    <p className="font-medium text-gray-900">Producto Destacado</p>
-                    <p className="text-sm text-gray-500">Aparecera con badge especial</p>
-                  </div>
-                </label>
-
-                <label className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.isSeasonal}
-                    onChange={(e) => setFormData({ ...formData, isSeasonal: e.target.checked })}
-                    className="w-5 h-5 rounded text-primary-600"
-                  />
-                  <div>
-                    <p className="font-medium text-gray-900">Producto de Temporada</p>
-                    <p className="text-sm text-gray-500">Mangos, nacatamales, etc.</p>
-                  </div>
-                </label>
-
-                {formData.isSeasonal && (
-                  <input
-                    type="text"
-                    value={formData.seasonalTag}
-                    onChange={(e) => setFormData({ ...formData, seasonalTag: e.target.value })}
-                    placeholder="Etiqueta: Verano, Navidad, Semana Santa..."
-                    className="input"
-                  />
-                )}
-              </div>
-
-              {/* Submit */}
-              <div className="flex gap-3 pt-4">
-                <button type="button" onClick={closeModal} className="btn-secondary flex-1">
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={createMutation.isPending || updateMutation.isPending}
-                  className="btn-primary flex-1"
-                >
-                  {(createMutation.isPending || updateMutation.isPending) ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <Check className="w-5 h-5" />
-                      {editProduct ? 'Guardar' : 'Crear'}
-                    </>
-                  )}
-                </button>
+              {/* Fixed Action Buttons */}
+              <div className="p-4 border-t bg-white flex-shrink-0 pb-safe">
+                <div className="flex gap-3">
+                  <button type="button" onClick={closeModal} className="btn-secondary flex-1">
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={createMutation.isPending || updateMutation.isPending}
+                    className="btn-primary flex-1"
+                  >
+                    {(createMutation.isPending || updateMutation.isPending) ? (
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <Check className="w-5 h-5" />
+                        {editProduct ? 'Guardar' : 'Crear'}
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </form>
           </div>

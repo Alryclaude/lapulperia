@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Store, MapPin, Phone, Clock, Camera, Save, Trash2, Download,
@@ -39,7 +39,7 @@ const PulperiaSettings = () => {
   const [bannerPreview, setBannerPreview] = useState(null);
 
   // Sync form when data loads
-  useState(() => {
+  React.useEffect(() => {
     if (pulperia) {
       setFormData({
         name: pulperia.name || '',

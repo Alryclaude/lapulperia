@@ -79,9 +79,8 @@ const Services = () => {
       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
         <button
           onClick={() => setCategory('')}
-          className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap ${
-            !category ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-600'
-          }`}
+          className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap ${!category ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-600'
+            }`}
         >
           Todos
         </button>
@@ -89,9 +88,8 @@ const Services = () => {
           <button
             key={cat}
             onClick={() => setCategory(cat)}
-            className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap ${
-              category === cat ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-600'
-            }`}
+            className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap ${category === cat ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-600'
+              }`}
           >
             {cat}
           </button>
@@ -175,7 +173,7 @@ const Services = () => {
           <Wrench className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">No hay servicios</h2>
           <p className="text-gray-500 mb-6">Se el primero en ofrecer tus servicios</p>
-          <Link to="/profile/services" className="btn-primary">
+          <Link to="/my-services" className="btn-primary">
             Ofrecer mis Servicios
           </Link>
         </div>
