@@ -49,12 +49,8 @@ export const pulperiaApi = {
   getMine: () => api.get('/pulperias/me'),
   update: (data) => api.patch('/pulperias/me', data),
   updateStatus: (data) => api.patch('/pulperias/me/status', data),
-  uploadLogo: (formData) => api.post('/pulperias/me/logo', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  }),
-  uploadBanner: (formData) => api.post('/pulperias/me/banner', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  }),
+  uploadLogo: (formData) => api.post('/pulperias/me/logo', formData),
+  uploadBanner: (formData) => api.post('/pulperias/me/banner', formData),
   toggleFavorite: (id, data) => api.post(`/pulperias/${id}/favorite`, data),
   setupLoyalty: (data) => api.post('/pulperias/me/loyalty', data),
   setVacation: (data) => api.patch('/pulperias/me/status', { status: 'VACATION', ...data }),

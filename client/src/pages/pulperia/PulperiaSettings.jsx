@@ -142,7 +142,10 @@ const PulperiaSettings = () => {
   };
 
   const handleSave = () => {
-    updateMutation.mutate(formData);
+    updateMutation.mutate({
+      ...formData,
+      foundedYear: formData.foundedYear ? parseInt(formData.foundedYear) : undefined,
+    });
   };
 
   const handleVacation = () => {
