@@ -20,6 +20,24 @@
     min-height: 100dvh;
   }
 
+  /* Dark mode base styles */
+  .dark body,
+  .dark {
+    @apply bg-gray-900 text-gray-100;
+  }
+
+  .dark .card {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  .dark .input {
+    @apply bg-gray-800 border-gray-600 text-gray-100 placeholder:text-gray-500;
+  }
+
+  .dark .btn-secondary {
+    @apply bg-gray-700 text-gray-100 border-gray-600 hover:bg-gray-600;
+  }
+
   /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 8px;

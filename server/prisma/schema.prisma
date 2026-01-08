@@ -103,6 +103,7 @@ model Pulperia {
 
   isVerified          Boolean         @default(false)
   isPermanentlyClosed Boolean         @default(false)
+  isOnlineOnly        Boolean         @default(false)
 
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt

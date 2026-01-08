@@ -28,7 +28,12 @@ const Login = () => {
         navigate('/register', { state: { isNewUser: true } });
       } else {
         toast.success('Bienvenido de vuelta!');
-        navigate(from, { replace: true });
+        // Redirect based on user role
+        if (result.user?.role === 'PULPERIA') {
+          navigate('/dashboard', { replace: true });
+        } else {
+          navigate(from === '/login' ? '/' : from, { replace: true });
+        }
       }
     } catch (error) {
       console.error('Login error:', error);

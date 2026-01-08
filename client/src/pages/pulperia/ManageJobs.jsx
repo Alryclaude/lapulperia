@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  Plus, Briefcase, Edit2, Trash2, X, Check, Users, Eye, EyeOff, Clock
+  Plus, Briefcase, Edit2, Trash2, X, Check, Users, Eye, EyeOff, Clock,
+  CheckCircle, XCircle, Mail
 } from 'lucide-react';
 import { jobApi } from '../../services/api';
 import toast from 'react-hot-toast';
@@ -58,6 +59,16 @@ const ManageJobs = () => {
   const toggleActiveMutation = useMutation({
     mutationFn: ({ id, isActive }) => jobApi.update(id, { isActive }),
     onSuccess: () => queryClient.invalidateQueries(['my-jobs']),
+  });
+
+  const updateApplicationMutation = useMutation({
+    mutationFn: ({ applicationId, status }) => jobApi.updateApplication(applicationId, { status }),
+    onSuccess: (_, vars) => {
+      const statusText = vars.status === 'ACCEPTED' ? 'aceptada' : 'rechazada';
+      toast.success(`Aplicación ${statusText}`);
+      queryClient.invalidateQueries(['my-jobs']);
+    },
+    onError: () => toast.error('Error al actualizar aplicación'),
   });
 
   const openModal = (job = null) => {
@@ -342,13 +353,71 @@ const ManageJobs = () => {
                           <p className="font-medium text-gray-900">{app.user.name}</p>
                           <p className="text-sm text-gray-500">{app.user.email}</p>
                         </div>
+                        {/* Status Badge */}
+                        <div>
+                          {app.status === 'PENDING' && (
+                            <span className="badge-warning">Pendiente</span>
+                          )}
+                          {app.status === 'ACCEPTED' && (
+                            <span className="badge-success">Aceptado</span>
+                          )}
+                          {app.status === 'REJECTED' && (
+                            <span className="badge-error">Rechazado</span>
+                          )}
+                        </div>
                       </div>
-                      {app.message && (
-                        <p className="text-gray-600 mt-3">{app.message}</p>
+                      {app.coverLetter && (
+                        <p className="text-gray-600 mt-3">{app.coverLetter}</p>
                       )}
-                      <p className="text-xs text-gray-400 mt-2">
-                        {new Date(app.createdAt).toLocaleDateString('es-HN')}
-                      </p>
+                      {app.contactInfo && (
+                        <p className="text-sm text-gray-500 mt-2">
+                          <strong>Contacto:</strong> {app.contactInfo}
+                        </p>
+                      )}
+                      <div className="flex items-center justify-between mt-3">
+                        <span className="text-xs text-gray-400">
+                          {new Date(app.createdAt).toLocaleDateString('es-HN')}
+                        </span>
+
+                        {/* Action Buttons */}
+                        {app.status === 'PENDING' && (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => updateApplicationMutation.mutate({
+                                applicationId: app.id,
+                                status: 'ACCEPTED'
+                              })}
+                              disabled={updateApplicationMutation.isPending}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200"
+                            >
+                              <CheckCircle className="w-4 h-4" />
+                              Aceptar
+                            </button>
+                            <button
+                              onClick={() => updateApplicationMutation.mutate({
+                                applicationId: app.id,
+                                status: 'REJECTED'
+                              })}
+                              disabled={updateApplicationMutation.isPending}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200"
+                            >
+                              <XCircle className="w-4 h-4" />
+                              Rechazar
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Contact button for accepted */}
+                        {app.status === 'ACCEPTED' && app.user.email && (
+                          <a
+                            href={`mailto:${app.user.email}?subject=Aplicación aceptada - ${viewApplications.title}`}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-primary-100 text-primary-700 rounded-lg text-sm font-medium hover:bg-primary-200"
+                          >
+                            <Mail className="w-4 h-4" />
+                            Contactar
+                          </a>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>

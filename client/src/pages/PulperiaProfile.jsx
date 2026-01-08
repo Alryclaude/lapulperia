@@ -3,12 +3,13 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   MapPin, Phone, Star, Heart, Share2, Clock, MessageCircle,
-  ChevronRight, Package, ExternalLink
+  ChevronRight, Package, ExternalLink, MessageSquare
 } from 'lucide-react';
 import { pulperiaApi, productApi, reviewApi } from '../services/api';
 import { useAuthStore } from '../stores/authStore';
 import ProductCard from '../components/products/ProductCard';
 import MiniMap from '../components/map/MiniMap';
+import ReviewForm from '../components/ReviewForm';
 import toast from 'react-hot-toast';
 
 const PulperiaProfile = () => {
@@ -106,8 +107,8 @@ const PulperiaProfile = () => {
         <div className="absolute top-4 left-4">
           <span className={`badge text-white ${statusColors[pulperia.status]}`}>
             {pulperia.status === 'OPEN' ? 'Abierto' :
-             pulperia.status === 'CLOSING_SOON' ? 'Por cerrar' :
-             pulperia.status === 'VACATION' ? 'Vacaciones' : 'Cerrado'}
+              pulperia.status === 'CLOSING_SOON' ? 'Por cerrar' :
+                pulperia.status === 'VACATION' ? 'Vacaciones' : 'Cerrado'}
           </span>
         </div>
 
@@ -116,9 +117,8 @@ const PulperiaProfile = () => {
           {isAuthenticated && (
             <button
               onClick={() => favoriteMutation.mutate()}
-              className={`p-2.5 rounded-xl backdrop-blur-sm transition-colors ${
-                isFavorite ? 'bg-red-500 text-white' : 'bg-white/20 text-white hover:bg-white/30'
-              }`}
+              className={`p-2.5 rounded-xl backdrop-blur-sm transition-colors ${isFavorite ? 'bg-red-500 text-white' : 'bg-white/20 text-white hover:bg-white/30'
+                }`}
             >
               <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
             </button>
@@ -216,9 +216,8 @@ const PulperiaProfile = () => {
           <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-hide mb-4">
             <button
               onClick={() => setSelectedCategory(null)}
-              className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap ${
-                !selectedCategory ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-600'
-              }`}
+              className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap ${!selectedCategory ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-600'
+                }`}
             >
               Todos
             </button>
@@ -226,9 +225,8 @@ const PulperiaProfile = () => {
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap ${
-                  selectedCategory === cat ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-600'
-                }`}
+                className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap ${selectedCategory === cat ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-600'
+                  }`}
               >
                 {cat}
               </button>
@@ -247,6 +245,75 @@ const PulperiaProfile = () => {
           <div className="text-center py-12 text-gray-500">
             <Package className="w-12 h-12 mx-auto mb-3 text-gray-300" />
             <p>No hay productos disponibles</p>
+          </div>
+        )}
+      </div>
+
+      {/* Reviews Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+            <MessageSquare className="w-5 h-5" />
+            Reseñas
+          </h2>
+          {pulperia.reviewCount > 0 && (
+            <span className="text-gray-500">{pulperia.reviewCount} reseñas</span>
+          )}
+        </div>
+
+        {/* Review Form */}
+        <ReviewForm pulperiaId={id} />
+
+        {/* Existing Reviews */}
+        {pulperia.reviews && pulperia.reviews.length > 0 ? (
+          <div className="space-y-3">
+            {pulperia.reviews.map((review) => (
+              <div key={review.id} className="card p-4">
+                <div className="flex items-start gap-3">
+                  {review.user.avatar ? (
+                    <img
+                      src={review.user.avatar}
+                      alt={review.user.name}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-gray-600 font-medium">
+                        {review.user.name.charAt(0)}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-gray-900">{review.user.name}</span>
+                      <div className="flex items-center gap-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-4 h-4 ${i < review.rating
+                                ? 'text-amber-400 fill-amber-400'
+                                : 'text-gray-300'
+                              }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    {review.comment && (
+                      <p className="text-gray-600 mt-1">{review.comment}</p>
+                    )}
+                    <span className="text-xs text-gray-400 mt-1 block">
+                      {new Date(review.createdAt).toLocaleDateString('es-HN')}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            <MessageSquare className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+            <p>Aún no hay reseñas</p>
+            <p className="text-sm">Sé el primero en dejar una reseña</p>
           </div>
         )}
       </div>

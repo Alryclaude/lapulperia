@@ -46,6 +46,7 @@ export default api;
 export const pulperiaApi = {
   getAll: (params) => api.get('/pulperias', { params }),
   getById: (id) => api.get(`/pulperias/${id}`),
+  getMine: () => api.get('/pulperias/me'),
   update: (data) => api.patch('/pulperias/me', data),
   updateStatus: (data) => api.patch('/pulperias/me/status', data),
   uploadLogo: (formData) => api.post('/pulperias/me/logo', formData, {
@@ -56,6 +57,7 @@ export const pulperiaApi = {
   }),
   toggleFavorite: (id, data) => api.post(`/pulperias/${id}/favorite`, data),
   setupLoyalty: (data) => api.post('/pulperias/me/loyalty', data),
+  setVacation: (data) => api.patch('/pulperias/me/status', { status: 'VACATION', ...data }),
   close: () => api.post('/pulperias/me/close'),
 };
 
@@ -63,10 +65,19 @@ export const productApi = {
   search: (params) => api.get('/products/search', { params }),
   getByPulperia: (pulperiaId, params) => api.get(`/products/pulperia/${pulperiaId}`, { params }),
   getById: (id) => api.get(`/products/${id}`),
+  getMyProducts: (params) => api.get('/products/my-products', { params }),
   create: (formData) => api.post('/products', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
-  update: (id, data) => api.patch(`/products/${id}`, data),
+  update: (id, data) => {
+    // Check if data is FormData (has image) or regular object
+    if (data instanceof FormData) {
+      return api.patch(`/products/${id}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    }
+    return api.patch(`/products/${id}`, data);
+  },
   updateImage: (id, formData) => api.patch(`/products/${id}/image`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),

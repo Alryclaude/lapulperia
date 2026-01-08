@@ -70,6 +70,35 @@ router.get('/search', optionalAuth, async (req, res) => {
   }
 });
 
+// Get my products (pulperia owner)
+router.get('/my-products', authenticate, requirePulperia, async (req, res) => {
+  try {
+    const { search } = req.query;
+
+    const where = {
+      pulperiaId: req.user.pulperia.id,
+    };
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+        { category: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    const products = await prisma.product.findMany({
+      where,
+      orderBy: [{ createdAt: 'desc' }],
+    });
+
+    res.json({ products });
+  } catch (error) {
+    console.error('Get my products error:', error);
+    res.status(500).json({ error: { message: 'Error al obtener productos' } });
+  }
+});
+
 // Get products by pulperia
 router.get('/pulperia/:pulperiaId', optionalAuth, async (req, res) => {
   try {

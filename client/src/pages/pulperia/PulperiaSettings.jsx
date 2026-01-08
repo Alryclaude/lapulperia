@@ -337,6 +337,29 @@ const PulperiaSettings = () => {
         )}
       </button>
 
+      {/* Online Only Mode */}
+      <div className="card p-6">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
+            <Store className="w-6 h-6 text-purple-600" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-gray-900">Tienda Solo en Linea</h3>
+            <p className="text-sm text-gray-500">Sin ubicacion fisica, solo entregas</p>
+          </div>
+          <button
+            onClick={() => {
+              updateMutation.mutate({ isOnlineOnly: !pulperia?.isOnlineOnly });
+            }}
+            className={`w-12 h-7 rounded-full transition-colors ${pulperia?.isOnlineOnly ? 'bg-primary-500' : 'bg-gray-300'
+              }`}
+          >
+            <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${pulperia?.isOnlineOnly ? 'translate-x-6' : 'translate-x-1'
+              }`} />
+          </button>
+        </div>
+      </div>
+
       {/* Vacation Mode */}
       <div className="card p-6">
         <div className="flex items-center gap-4">

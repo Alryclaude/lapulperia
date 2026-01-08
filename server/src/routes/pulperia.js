@@ -125,6 +125,30 @@ router.get('/:id', optionalAuth, async (req, res) => {
   }
 });
 
+// Get my pulperia
+router.get('/me', authenticate, requirePulperia, async (req, res) => {
+  try {
+    const pulperia = await prisma.pulperia.findUnique({
+      where: { id: req.user.pulperia.id },
+      include: {
+        user: {
+          select: { name: true, avatar: true, email: true },
+        },
+        achievements: true,
+        loyaltyProgram: true,
+        _count: {
+          select: { products: true, reviews: true, orders: true },
+        },
+      },
+    });
+
+    res.json({ pulperia });
+  } catch (error) {
+    console.error('Get my pulperia error:', error);
+    res.status(500).json({ error: { message: 'Error al obtener pulpería' } });
+  }
+});
+
 // Update pulperia profile
 router.patch('/me', authenticate, requirePulperia, async (req, res) => {
   try {
@@ -141,6 +165,7 @@ router.patch('/me', authenticate, requirePulperia, async (req, res) => {
       acceptsPickup,
       foundedYear,
       story,
+      isOnlineOnly,
     } = req.body;
 
     const pulperia = await prisma.pulperia.update({
@@ -158,6 +183,7 @@ router.patch('/me', authenticate, requirePulperia, async (req, res) => {
         ...(acceptsPickup !== undefined && { acceptsPickup }),
         ...(foundedYear !== undefined && { foundedYear }),
         ...(story !== undefined && { story }),
+        ...(isOnlineOnly !== undefined && { isOnlineOnly }),
       },
     });
 

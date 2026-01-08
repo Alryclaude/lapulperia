@@ -12,12 +12,34 @@ const Settings = () => {
   const { user, logout } = useAuthStore();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState('');
-  const [settings, setSettings] = useState({
-    notifications: true,
-    sounds: true,
-    vibration: true,
-    darkMode: false,
+
+  // Load settings from localStorage with dark mode based on document class
+  const [settings, setSettings] = useState(() => {
+    const saved = localStorage.getItem('app-settings');
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    return {
+      notifications: true,
+      sounds: true,
+      vibration: true,
+      darkMode: document.documentElement.classList.contains('dark'),
+    };
   });
+
+  // Apply dark mode on mount and when changed
+  const applyDarkMode = (isDark) => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
+
+  // Apply on mount
+  useState(() => {
+    applyDarkMode(settings.darkMode);
+  }, []);
 
   const exportMutation = useMutation({
     mutationFn: () => userApi.exportData('json'),
@@ -49,7 +71,15 @@ const Settings = () => {
   };
 
   const toggleSetting = (key) => {
-    setSettings({ ...settings, [key]: !settings[key] });
+    const newSettings = { ...settings, [key]: !settings[key] };
+    setSettings(newSettings);
+    localStorage.setItem('app-settings', JSON.stringify(newSettings));
+
+    // Apply dark mode immediately
+    if (key === 'darkMode') {
+      applyDarkMode(!settings.darkMode);
+    }
+
     toast.success('Configuracion actualizada');
   };
 
@@ -73,13 +103,11 @@ const Settings = () => {
             </div>
             <button
               onClick={() => toggleSetting('notifications')}
-              className={`w-12 h-7 rounded-full transition-colors ${
-                settings.notifications ? 'bg-primary-500' : 'bg-gray-300'
-              }`}
+              className={`w-12 h-7 rounded-full transition-colors ${settings.notifications ? 'bg-primary-500' : 'bg-gray-300'
+                }`}
             >
-              <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                settings.notifications ? 'translate-x-6' : 'translate-x-1'
-              }`} />
+              <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${settings.notifications ? 'translate-x-6' : 'translate-x-1'
+                }`} />
             </button>
           </div>
 
@@ -93,13 +121,11 @@ const Settings = () => {
             </div>
             <button
               onClick={() => toggleSetting('vibration')}
-              className={`w-12 h-7 rounded-full transition-colors ${
-                settings.vibration ? 'bg-primary-500' : 'bg-gray-300'
-              }`}
+              className={`w-12 h-7 rounded-full transition-colors ${settings.vibration ? 'bg-primary-500' : 'bg-gray-300'
+                }`}
             >
-              <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                settings.vibration ? 'translate-x-6' : 'translate-x-1'
-              }`} />
+              <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${settings.vibration ? 'translate-x-6' : 'translate-x-1'
+                }`} />
             </button>
           </div>
 
@@ -113,13 +139,11 @@ const Settings = () => {
             </div>
             <button
               onClick={() => toggleSetting('sounds')}
-              className={`w-12 h-7 rounded-full transition-colors ${
-                settings.sounds ? 'bg-primary-500' : 'bg-gray-300'
-              }`}
+              className={`w-12 h-7 rounded-full transition-colors ${settings.sounds ? 'bg-primary-500' : 'bg-gray-300'
+                }`}
             >
-              <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                settings.sounds ? 'translate-x-6' : 'translate-x-1'
-              }`} />
+              <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${settings.sounds ? 'translate-x-6' : 'translate-x-1'
+                }`} />
             </button>
           </div>
         </div>
@@ -141,13 +165,11 @@ const Settings = () => {
             </div>
             <button
               onClick={() => toggleSetting('darkMode')}
-              className={`w-12 h-7 rounded-full transition-colors ${
-                settings.darkMode ? 'bg-primary-500' : 'bg-gray-300'
-              }`}
+              className={`w-12 h-7 rounded-full transition-colors ${settings.darkMode ? 'bg-primary-500' : 'bg-gray-300'
+                }`}
             >
-              <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                settings.darkMode ? 'translate-x-6' : 'translate-x-1'
-              }`} />
+              <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${settings.darkMode ? 'translate-x-6' : 'translate-x-1'
+                }`} />
             </button>
           </div>
 

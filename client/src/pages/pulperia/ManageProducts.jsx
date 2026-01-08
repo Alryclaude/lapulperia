@@ -266,9 +266,9 @@ const ManageProducts = () => {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-5 border-b flex items-center justify-between">
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl max-w-lg w-full max-h-[85vh] sm:max-h-[90vh] flex flex-col sm:m-4">
+            <div className="p-5 border-b flex items-center justify-between flex-shrink-0">
               <h2 className="text-xl font-bold text-gray-900">
                 {editProduct ? 'Editar Producto' : 'Nuevo Producto'}
               </h2>
@@ -277,7 +277,7 @@ const ManageProducts = () => {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-5 space-y-4">
+            <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto flex-1 pb-safe">
               {/* Image */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
