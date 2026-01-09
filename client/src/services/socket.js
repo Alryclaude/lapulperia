@@ -1,7 +1,9 @@
 import { io } from 'socket.io-client';
 import { queryClient } from '../lib/queryClient';
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:10000';
+// Strip /api from the URL since Socket.IO connects to root
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:10000';
+const SOCKET_URL = apiUrl.replace(/\/api\/?$/, '');
 
 /**
  * Socket.IO service singleton

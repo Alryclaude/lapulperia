@@ -120,79 +120,7 @@ const ServiceCatalog = ({ isOwner }) => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="h-32 rounded-xl bg-dark-200 animate-pulse" />
-        <div className="h-8 w-1/2 bg-dark-200 animate-pulse rounded" />
-        <div className="grid grid-cols-3 gap-2">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="aspect-square rounded-lg bg-dark-200 animate-pulse" />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  // Owner view with no service yet
-  if (isOwner && !service) {
-    return (
-      <div className="max-w-2xl mx-auto space-y-6">
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-4"
-        >
-          <div className="w-12 h-12 rounded-xl bg-primary-500/20 flex items-center justify-center">
-            <Wrench className="w-6 h-6 text-primary-400" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-white">Mis Servicios</h1>
-            <p className="text-gray-400 text-sm">Ofrece tus habilidades profesionales</p>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-12 text-center"
-        >
-          <div className="w-16 h-16 rounded-2xl bg-primary-500/20 flex items-center justify-center mx-auto mb-4">
-            <Wrench className="w-8 h-8 text-primary-400" />
-          </div>
-          <h2 className="text-xl font-semibold text-white mb-2">
-            Ofrece tus servicios
-          </h2>
-          <p className="text-gray-400 mb-6">
-            Muestra tus habilidades y encuentra clientes
-          </p>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => openModal()}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-medium transition-colors"
-          >
-            <Plus className="w-5 h-5" />
-            Crear Catalogo
-          </motion.button>
-        </motion.div>
-
-        {/* Modal */}
-        <AnimatePresence>
-          {showModal && renderModal()}
-        </AnimatePresence>
-      </div>
-    );
-  }
-
-  if (!service && !isOwner) {
-    return (
-      <div className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-12 text-center">
-        <p className="text-gray-400">Servicio no encontrado</p>
-      </div>
-    );
-  }
-
+  // Define renderModal BEFORE any returns that use it
   const renderModal = () => (
     <motion.div
       initial={{ opacity: 0 }}
@@ -330,6 +258,81 @@ const ServiceCatalog = ({ isOwner }) => {
       </motion.div>
     </motion.div>
   );
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="h-32 rounded-xl bg-dark-200 animate-pulse" />
+        <div className="h-8 w-1/2 bg-dark-200 animate-pulse rounded" />
+        <div className="grid grid-cols-3 gap-2">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="aspect-square rounded-lg bg-dark-200 animate-pulse" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Owner view with no service yet
+  if (isOwner && !service) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-6">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-4"
+        >
+          <div className="w-12 h-12 rounded-xl bg-primary-500/20 flex items-center justify-center">
+            <Wrench className="w-6 h-6 text-primary-400" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-white">Mis Servicios</h1>
+            <p className="text-gray-400 text-sm">Ofrece tus habilidades profesionales</p>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-12 text-center"
+        >
+          <div className="w-16 h-16 rounded-2xl bg-primary-500/20 flex items-center justify-center mx-auto mb-4">
+            <Wrench className="w-8 h-8 text-primary-400" />
+          </div>
+          <h2 className="text-xl font-semibold text-white mb-2">
+            Ofrece tus servicios
+          </h2>
+          <p className="text-gray-400 mb-6">
+            Muestra tus habilidades y encuentra clientes
+          </p>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => openModal()}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-medium transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            Crear Catalogo
+          </motion.button>
+        </motion.div>
+
+        {/* Modal */}
+        <AnimatePresence>
+          {showModal && renderModal()}
+        </AnimatePresence>
+      </div>
+    );
+  }
+
+  // Not found state
+  if (!service && !isOwner) {
+    return (
+      <div className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-12 text-center">
+        <p className="text-gray-400">Servicio no encontrado</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">

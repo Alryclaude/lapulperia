@@ -190,14 +190,14 @@ model Order {
 model OrderItem {
   id                  String          @id @default(cuid())
   orderId             String
-  productId           String
+  productId           String?                               // Nullable para permitir eliminación de productos
   quantity            Int
   priceAtTime         Float
   productName         String                                // Snapshot del nombre
   productImage        String                                // Snapshot de la imagen
 
   order               Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product             Product         @relation(fields: [productId], references: [id])
+  product             Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
 
   @@index([orderId])
   @@index([productId])  // Para queries de ventas por producto

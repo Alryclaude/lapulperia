@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 import { userApi } from '../services/api';
+import { requestPermission, initializeMessaging } from '../services/notifications';
 import toast from 'react-hot-toast';
 
 const Settings = () => {
@@ -71,7 +72,24 @@ const Settings = () => {
     }
   };
 
-  const toggleSetting = (key) => {
+  const toggleSetting = async (key) => {
+    // Handle notification permission request
+    if (key === 'notifications' && !settings.notifications) {
+      try {
+        await initializeMessaging();
+        const permission = await requestPermission();
+        if (permission !== 'granted') {
+          toast.error('Debes permitir notificaciones en tu navegador');
+          return;
+        }
+        toast.success('Notificaciones activadas');
+      } catch (error) {
+        console.error('Error requesting notification permission:', error);
+        toast.error('Error al activar notificaciones');
+        return;
+      }
+    }
+
     const newSettings = { ...settings, [key]: !settings[key] };
     setSettings(newSettings);
     localStorage.setItem('app-settings', JSON.stringify(newSettings));
@@ -81,7 +99,9 @@ const Settings = () => {
       applyDarkMode(!settings.darkMode);
     }
 
-    toast.success('Configuracion actualizada');
+    if (key !== 'notifications') {
+      toast.success('Configuracion actualizada');
+    }
   };
 
   const SettingToggle = ({ enabled, onChange }) => (
