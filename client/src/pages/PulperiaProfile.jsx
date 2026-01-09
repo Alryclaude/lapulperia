@@ -134,7 +134,7 @@ const PulperiaProfile = () => {
   const status = statusMap[pulperia.status] || statusMap.CLOSED;
 
   return (
-    <div className="space-y-6 pb-24">
+    <div className="space-y-6 pb-6">
       {/* Banner */}
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
@@ -234,9 +234,9 @@ const PulperiaProfile = () => {
         transition={{ delay: 0.4 }}
         className="pt-14 px-1"
       >
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <h1 className="text-2xl font-bold text-gray-900 truncate">{pulperia.name}</h1>
+            <h1 className="text-2xl font-bold text-white break-words leading-tight">{pulperia.name}</h1>
             {pulperia.rating > 0 && (
               <div className="flex items-center gap-2 mt-2">
                 <div className="flex items-center gap-1 px-2 py-1 bg-amber-50 rounded-lg">
@@ -291,7 +291,7 @@ const PulperiaProfile = () => {
           <MiniMap
             center={[pulperia.latitude, pulperia.longitude]}
             pulperias={[pulperia]}
-            className="h-40 rounded-xl border border-border"
+            className="h-48 md:h-56 rounded-xl border border-border overflow-hidden"
           />
         </motion.div>
       </motion.div>

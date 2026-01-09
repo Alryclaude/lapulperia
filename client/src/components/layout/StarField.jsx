@@ -81,7 +81,7 @@ const StarField = () => {
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-0"
       style={{
-        background: 'linear-gradient(to bottom, #0a0a1a 0%, #1a1a2e 30%, #fafafa 70%, #fafafa 100%)',
+        background: 'linear-gradient(to bottom, #0a0a1a 0%, #1a1a2e 30%, #0F0D15 70%, #0F0D15 100%)',
       }}
     />
   );

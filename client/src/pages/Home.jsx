@@ -15,10 +15,14 @@ import {
   Sparkles,
   Download,
   X,
+  Maximize2,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { pulperiaApi } from '../services/api';
 import { useAuthStore } from '../stores/authStore';
+import { usePulperiaStatusUpdates } from '../hooks/useSocket';
 import MiniMap from '../components/map/MiniMap';
+import FullscreenMap from '../components/map/FullscreenMap';
 import PulperiaCard from '../components/common/PulperiaCard';
 import { LogoLarge, LogoIcon } from '../components/Logo';
 import { Button } from '@/components/ui/button';
@@ -44,7 +48,16 @@ const Home = () => {
   const { isAuthenticated } = useAuthStore();
   const [location, setLocation] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [isMapFullscreen, setIsMapFullscreen] = useState(false);
   const { isInstallable, promptInstall, dismissPrompt } = useInstallPrompt();
+
+  // Subscribe to real-time pulperia status updates
+  usePulperiaStatusUpdates((data) => {
+    toast(data.message, {
+      icon: data.status === 'OPEN' ? '🟢' : '🔴',
+      duration: 4000,
+    });
+  });
 
   // Get user location
   useEffect(() => {
@@ -242,13 +255,23 @@ const Home = () => {
               </div>
               <h2 className="text-lg font-semibold text-white">Cerca de ti</h2>
             </div>
-            <Link
-              to="/search?view=map"
-              className="text-primary-400 text-sm font-medium hover:text-primary-300 flex items-center gap-1 transition-colors"
-            >
-              Ver mapa completo
-              <ChevronRight className="w-4 h-4" />
-            </Link>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsMapFullscreen(true)}
+                className="text-primary-400 hover:text-primary-300 hover:bg-primary-500/10"
+              >
+                <Maximize2 className="w-4 h-4" />
+              </Button>
+              <Link
+                to="/search?view=map"
+                className="text-primary-400 text-sm font-medium hover:text-primary-300 flex items-center gap-1 transition-colors"
+              >
+                Ver mapa completo
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
 
           {location && (
@@ -256,11 +279,18 @@ const Home = () => {
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
+              className="relative"
             >
               <MiniMap
                 center={[location.lat, location.lng]}
                 pulperias={pulperias}
                 className="h-48 md:h-64 rounded-2xl overflow-hidden shadow-lg border border-white/10"
+              />
+              {/* Expand overlay on click */}
+              <button
+                onClick={() => setIsMapFullscreen(true)}
+                className="absolute inset-0 bg-transparent cursor-pointer"
+                aria-label="Expandir mapa"
               />
             </motion.div>
           )}
@@ -378,6 +408,15 @@ const Home = () => {
           </section>
         </FadeInView>
       )}
+
+      {/* Fullscreen Map Modal */}
+      <FullscreenMap
+        isOpen={isMapFullscreen}
+        onClose={() => setIsMapFullscreen(false)}
+        center={location ? [location.lat, location.lng] : null}
+        pulperias={pulperias}
+        userLocation={location ? [location.lat, location.lng] : null}
+      />
     </div>
   );
 };

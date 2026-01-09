@@ -108,12 +108,23 @@
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior: none;
+    overflow-x: hidden;
   }
 
   body {
     @apply bg-background text-foreground font-sans;
     min-height: 100vh;
     min-height: 100dvh;
+    min-height: -webkit-fill-available;
+    overscroll-behavior: none;
+    overflow-x: hidden;
+  }
+
+  #root {
+    min-height: 100vh;
+    min-height: 100dvh;
+    min-height: -webkit-fill-available;
   }
 
   /* Dark mode is now default */

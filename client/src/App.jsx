@@ -41,8 +41,14 @@ import StarField from './components/layout/StarField';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import PulperiaRoute from './components/auth/PulperiaRoute';
 
+// Hooks
+import { useSocket } from './hooks/useSocket';
+
 function App() {
   const { initialize, isLoading } = useAuthStore();
+
+  // Initialize socket connection for real-time updates
+  useSocket();
 
   useEffect(() => {
     initialize();

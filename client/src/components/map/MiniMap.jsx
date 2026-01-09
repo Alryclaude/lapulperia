@@ -3,27 +3,47 @@ import { useEffect } from 'react';
 import L from 'leaflet';
 import { Link } from 'react-router-dom';
 
-// Custom marker icon
+// Status colors configuration
+const STATUS_COLORS = {
+  OPEN: {
+    border: '#22c55e',
+    glow: 'rgba(34, 197, 94, 0.4)',
+    dot: 'bg-green-500',
+    dotGlow: 'shadow-[0_0_8px_rgba(34,197,94,0.6)]',
+  },
+  CLOSED: {
+    border: '#ef4444',
+    glow: 'rgba(239, 68, 68, 0.3)',
+    dot: 'bg-red-500',
+    dotGlow: '',
+  },
+};
+
+// Custom marker icon with enhanced status indicators
 const createMarkerIcon = (pulperia) => {
   const isOpen = pulperia.status === 'OPEN';
-  const color = isOpen ? '#22c55e' : '#9ca3af';
+  const colors = isOpen ? STATUS_COLORS.OPEN : STATUS_COLORS.CLOSED;
+  const borderWidth = isOpen ? '3' : '2';
 
   return L.divIcon({
     className: 'custom-marker',
     html: `
       <div class="relative">
-        <div class="w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center overflow-hidden border-2" style="border-color: ${color}">
+        <div class="w-11 h-11 rounded-full bg-white shadow-lg flex items-center justify-center overflow-hidden"
+             style="border: ${borderWidth}px solid ${colors.border};
+                    box-shadow: 0 0 12px ${colors.glow}, 0 4px 6px rgba(0,0,0,0.1);">
           ${pulperia.logo
             ? `<img src="${pulperia.logo}" alt="${pulperia.name}" class="w-full h-full object-cover" />`
-            : `<span class="text-sm font-bold" style="color: ${color}">${pulperia.name.charAt(0)}</span>`
+            : `<span class="text-sm font-bold" style="color: ${colors.border}">${pulperia.name.charAt(0)}</span>`
           }
         </div>
-        ${isOpen ? '<div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>' : ''}
+        <div class="absolute -bottom-1 -right-1 w-4 h-4 ${colors.dot} rounded-full border-2 border-white ${colors.dotGlow}"
+             style="${!isOpen ? 'opacity: 0.8' : ''}"></div>
       </div>
     `,
-    iconSize: [40, 40],
-    iconAnchor: [20, 40],
-    popupAnchor: [0, -40],
+    iconSize: [44, 44],
+    iconAnchor: [22, 44],
+    popupAnchor: [0, -44],
   });
 };
 
@@ -112,8 +132,8 @@ const MiniMap = ({ center, pulperias = [], className = '', zoom = 14, showContro
                   <div>
                     <h3 className="font-semibold text-gray-900 text-sm">{pulperia.name}</h3>
                     <div className="flex items-center gap-1">
-                      <div className={`w-2 h-2 rounded-full ${pulperia.status === 'OPEN' ? 'bg-green-500' : 'bg-gray-400'}`} />
-                      <span className="text-xs text-gray-500">
+                      <div className={`w-2 h-2 rounded-full ${pulperia.status === 'OPEN' ? 'bg-green-500' : 'bg-red-500'}`} />
+                      <span className={`text-xs ${pulperia.status === 'OPEN' ? 'text-green-600' : 'text-red-500'}`}>
                         {pulperia.status === 'OPEN' ? 'Abierto' : 'Cerrado'}
                       </span>
                     </div>
