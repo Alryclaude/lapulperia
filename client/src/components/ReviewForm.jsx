@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Star, Send } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Star, Send, MessageSquare } from 'lucide-react';
 import { reviewApi } from '../services/api';
 import { useAuthStore } from '../stores/authStore';
 import toast from 'react-hot-toast';
@@ -53,8 +54,8 @@ const ReviewForm = ({ pulperiaId, existingReview = null, onSuccess }) => {
 
     if (!isAuthenticated) {
         return (
-            <div className="card p-5 text-center">
-                <p className="text-gray-500">Inicia sesión para dejar una reseña</p>
+            <div className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-5 text-center">
+                <p className="text-gray-400">Inicia sesión para dejar una reseña</p>
             </div>
         );
     }
@@ -64,35 +65,55 @@ const ReviewForm = ({ pulperiaId, existingReview = null, onSuccess }) => {
         return null;
     }
 
+    const ratingLabels = ['', 'Malo', 'Regular', 'Bueno', 'Muy bueno', 'Excelente'];
+
     return (
-        <div className="card p-5">
-            <h3 className="font-semibold text-gray-900 mb-4">
-                {existingReview ? 'Editar tu reseña' : 'Deja tu reseña'}
-            </h3>
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-5"
+        >
+            <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-8 rounded-lg bg-yellow-500/20 flex items-center justify-center">
+                    <MessageSquare className="w-4 h-4 text-yellow-400" />
+                </div>
+                <h3 className="font-semibold text-white">
+                    {existingReview ? 'Editar tu reseña' : 'Deja tu reseña'}
+                </h3>
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Star Rating */}
                 <div className="flex items-center gap-1">
                     {[1, 2, 3, 4, 5].map((star) => (
-                        <button
+                        <motion.button
                             key={star}
                             type="button"
+                            whileHover={{ scale: 1.15 }}
+                            whileTap={{ scale: 0.95 }}
                             onClick={() => setRating(star)}
                             onMouseEnter={() => setHoverRating(star)}
                             onMouseLeave={() => setHoverRating(0)}
-                            className="p-1 transition-transform hover:scale-110"
+                            className="p-1"
                         >
                             <Star
-                                className={`w-8 h-8 transition-colors ${star <= (hoverRating || rating)
-                                        ? 'text-amber-400 fill-amber-400'
-                                        : 'text-gray-300'
-                                    }`}
+                                className={`w-8 h-8 transition-colors ${
+                                    star <= (hoverRating || rating)
+                                        ? 'text-yellow-400 fill-yellow-400'
+                                        : 'text-gray-600'
+                                }`}
                             />
-                        </button>
+                        </motion.button>
                     ))}
-                    <span className="ml-2 text-gray-600">
-                        {rating > 0 && ['', 'Malo', 'Regular', 'Bueno', 'Muy bueno', 'Excelente'][rating]}
-                    </span>
+                    {rating > 0 && (
+                        <motion.span
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="ml-3 text-sm font-medium text-yellow-400"
+                        >
+                            {ratingLabels[rating]}
+                        </motion.span>
+                    )}
                 </div>
 
                 {/* Comment */}
@@ -100,14 +121,16 @@ const ReviewForm = ({ pulperiaId, existingReview = null, onSuccess }) => {
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     placeholder="Escribe tu experiencia... (opcional)"
-                    className="input min-h-[80px]"
+                    className="w-full px-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/20 transition-all min-h-[80px] resize-none"
                 />
 
                 {/* Submit */}
-                <button
+                <motion.button
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
                     type="submit"
                     disabled={createMutation.isPending || updateMutation.isPending || rating === 0}
-                    className="btn-primary w-full"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary-500 hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors"
                 >
                     {(createMutation.isPending || updateMutation.isPending) ? (
                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -117,9 +140,9 @@ const ReviewForm = ({ pulperiaId, existingReview = null, onSuccess }) => {
                             {existingReview ? 'Actualizar Reseña' : 'Publicar Reseña'}
                         </>
                     )}
-                </button>
+                </motion.button>
             </form>
-        </div>
+        </motion.div>
     );
 };
 

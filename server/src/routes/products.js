@@ -235,7 +235,7 @@ router.patch('/:id', authenticate, requirePulperia, async (req, res) => {
       return res.status(404).json({ error: { message: 'Producto no encontrado' } });
     }
 
-    const { name, description, price, category, isAvailable, isSeasonal, seasonalTag } = req.body;
+    const { name, description, price, category, isAvailable, isFeatured, isSeasonal, seasonalTag } = req.body;
 
     const updatedProduct = await prisma.product.update({
       where: { id: req.params.id },
@@ -245,6 +245,7 @@ router.patch('/:id', authenticate, requirePulperia, async (req, res) => {
         ...(price && { price: parseFloat(price) }),
         ...(category !== undefined && { category }),
         ...(isAvailable !== undefined && { isAvailable }),
+        ...(isFeatured !== undefined && { isFeatured }),
         ...(isSeasonal !== undefined && { isSeasonal }),
         ...(seasonalTag !== undefined && { seasonalTag }),
       },

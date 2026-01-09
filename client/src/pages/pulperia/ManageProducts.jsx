@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus, Search, Edit2, Trash2, Package, Star, Eye, EyeOff,
-  Image as ImageIcon, X, Check, AlertCircle
+  Image as ImageIcon, X, Check, AlertCircle, Tag, Sparkles, Calendar
 } from 'lucide-react';
 import { productApi } from '../../services/api';
 import toast from 'react-hot-toast';
@@ -44,11 +45,17 @@ const ManageProducts = () => {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => productApi.update(id, data),
     onSuccess: () => {
-      toast.success('Producto actualizado');
       queryClient.invalidateQueries(['my-products']);
-      closeModal();
     },
     onError: (error) => toast.error(error.response?.data?.error?.message || 'Error al actualizar'),
+  });
+
+  const updateImageMutation = useMutation({
+    mutationFn: ({ id, data }) => productApi.updateImage(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['my-products']);
+    },
+    onError: (error) => toast.error(error.response?.data?.error?.message || 'Error al actualizar imagen'),
   });
 
   const deleteMutation = useMutation({
@@ -131,21 +138,46 @@ const ManageProducts = () => {
       return;
     }
 
-    const data = new FormData();
-    data.append('name', formData.name);
-    data.append('description', formData.description);
-    data.append('price', formData.price);
-    data.append('category', formData.category);
-    data.append('isFeatured', formData.isFeatured);
-    data.append('isSeasonal', formData.isSeasonal);
-    data.append('seasonalTag', formData.seasonalTag);
-    if (imageFile) {
-      data.append('image', imageFile);
-    }
-
     if (editProduct) {
-      updateMutation.mutate({ id: editProduct.id, data });
+      // For updates: Send JSON data (not FormData)
+      const jsonData = {
+        name: formData.name,
+        description: formData.description,
+        price: formData.price,
+        category: formData.category,
+        isFeatured: formData.isFeatured,
+        isSeasonal: formData.isSeasonal,
+        seasonalTag: formData.seasonalTag,
+      };
+
+      try {
+        // Update product data
+        await updateMutation.mutateAsync({ id: editProduct.id, data: jsonData });
+
+        // If there's a new image, update it separately
+        if (imageFile) {
+          const imageData = new FormData();
+          imageData.append('image', imageFile);
+          await updateImageMutation.mutateAsync({ id: editProduct.id, data: imageData });
+        }
+
+        toast.success('Producto actualizado');
+        closeModal();
+      } catch {
+        // Error already handled by mutation onError
+      }
     } else {
+      // For create: Send FormData with image
+      const data = new FormData();
+      data.append('name', formData.name);
+      data.append('description', formData.description);
+      data.append('price', formData.price);
+      data.append('category', formData.category);
+      data.append('isFeatured', formData.isFeatured);
+      data.append('isSeasonal', formData.isSeasonal);
+      data.append('seasonalTag', formData.seasonalTag);
+      data.append('image', imageFile);
+
       createMutation.mutate(data);
     }
   };
@@ -159,286 +191,411 @@ const ManageProducts = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Mis Productos</h1>
-          <p className="text-gray-500">{products.length} productos</p>
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between"
+      >
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-primary-500/20 flex items-center justify-center">
+            <Package className="w-6 h-6 text-primary-400" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-white">Mis Productos</h1>
+            <p className="text-gray-400 text-sm">{products.length} productos en tu inventario</p>
+          </div>
         </div>
-        <button onClick={() => openModal()} className="btn-primary">
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => openModal()}
+          className="flex items-center gap-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-medium transition-colors"
+        >
           <Plus className="w-5 h-5" />
-          Agregar
-        </button>
-      </div>
+          <span className="hidden sm:inline">Agregar</span>
+        </motion.button>
+      </motion.div>
 
       {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="relative"
+      >
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar productos..."
-          className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl"
+          className="w-full pl-12 pr-4 py-3 bg-dark-100/60 backdrop-blur-sm border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/20 transition-all"
         />
-      </div>
+      </motion.div>
 
       {/* Products Grid */}
       {isLoading ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="card p-3">
-              <div className="skeleton aspect-square rounded-xl mb-3" />
-              <div className="skeleton h-4 w-3/4 mb-2" />
-              <div className="skeleton h-4 w-1/2" />
+            <div key={i} className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-3">
+              <div className="aspect-square rounded-xl bg-dark-200 animate-pulse mb-3" />
+              <div className="h-4 w-3/4 bg-dark-200 animate-pulse rounded mb-2" />
+              <div className="h-4 w-1/2 bg-dark-200 animate-pulse rounded" />
             </div>
           ))}
         </div>
       ) : products.length > 0 ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {products.map((product) => (
-            <div key={product.id} className="card overflow-hidden group">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+        >
+          {products.map((product, index) => (
+            <motion.div
+              key={product.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+              className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 overflow-hidden group hover:border-white/10 transition-all"
+            >
               <div className="relative aspect-square">
                 <img
                   src={product.imageUrl}
                   alt={product.name}
-                  className={`w-full h-full object-cover ${product.outOfStock ? 'opacity-50' : ''}`}
+                  className={`w-full h-full object-cover ${product.outOfStock ? 'opacity-40 grayscale' : ''}`}
                 />
 
                 {/* Badges */}
-                <div className="absolute top-2 left-2 flex flex-col gap-1">
+                <div className="absolute top-2 left-2 flex flex-col gap-1.5">
                   {product.isFeatured && (
-                    <span className="badge-accent text-xs">Destacado</span>
+                    <span className="flex items-center gap-1 px-2 py-1 bg-yellow-500/20 backdrop-blur-sm text-yellow-400 text-xs font-medium rounded-lg border border-yellow-500/30">
+                      <Star className="w-3 h-3" />
+                      Destacado
+                    </span>
                   )}
                   {product.isSeasonal && (
-                    <span className="badge bg-blue-100 text-blue-700 text-xs">
+                    <span className="flex items-center gap-1 px-2 py-1 bg-blue-500/20 backdrop-blur-sm text-blue-400 text-xs font-medium rounded-lg border border-blue-500/30">
+                      <Calendar className="w-3 h-3" />
                       {product.seasonalTag || 'Temporada'}
                     </span>
                   )}
                   {product.outOfStock && (
-                    <span className="badge-error text-xs">Agotado</span>
+                    <span className="flex items-center gap-1 px-2 py-1 bg-red-500/20 backdrop-blur-sm text-red-400 text-xs font-medium rounded-lg border border-red-500/30">
+                      <AlertCircle className="w-3 h-3" />
+                      Agotado
+                    </span>
                   )}
                 </div>
 
-                {/* Actions */}
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                  <button
+                {/* Actions Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center gap-2 pb-4">
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                     onClick={() => openModal(product)}
-                    className="p-2 rounded-lg bg-white text-gray-700 hover:bg-gray-100"
+                    className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 border border-white/10 transition-colors"
                   >
-                    <Edit2 className="w-5 h-5" />
-                  </button>
-                  <button
+                    <Edit2 className="w-4 h-4" />
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                     onClick={() => toggleStockMutation.mutate({ id: product.id, outOfStock: !product.outOfStock })}
-                    className="p-2 rounded-lg bg-white text-gray-700 hover:bg-gray-100"
+                    className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 border border-white/10 transition-colors"
                   >
-                    {product.outOfStock ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
-                  </button>
-                  <button
+                    {product.outOfStock ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                     onClick={() => handleDelete(product)}
-                    className="p-2 rounded-lg bg-red-500 text-white hover:bg-red-600"
+                    className="p-2.5 rounded-xl bg-red-500/20 backdrop-blur-sm text-red-400 hover:bg-red-500/30 border border-red-500/30 transition-colors"
                   >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+                    <Trash2 className="w-4 h-4" />
+                  </motion.button>
                 </div>
               </div>
 
               <div className="p-3">
-                <h3 className="font-medium text-gray-900 truncate">{product.name}</h3>
-                <p className="text-primary-600 font-semibold">L. {product.price.toFixed(2)}</p>
+                <h3 className="font-medium text-white truncate">{product.name}</h3>
+                <p className="text-primary-400 font-semibold">L. {product.price.toFixed(2)}</p>
                 {product.category && (
-                  <span className="text-xs text-gray-500">{product.category}</span>
+                  <span className="flex items-center gap-1 text-xs text-gray-500 mt-1">
+                    <Tag className="w-3 h-3" />
+                    {product.category}
+                  </span>
                 )}
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       ) : (
-        <div className="text-center py-12">
-          <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Sin productos</h2>
-          <p className="text-gray-500 mb-6">Agrega tu primer producto</p>
-          <button onClick={() => openModal()} className="btn-primary">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-12 text-center"
+        >
+          <div className="w-16 h-16 rounded-2xl bg-primary-500/20 flex items-center justify-center mx-auto mb-4">
+            <Package className="w-8 h-8 text-primary-400" />
+          </div>
+          <h2 className="text-xl font-semibold text-white mb-2">Sin productos</h2>
+          <p className="text-gray-400 mb-6">Agrega tu primer producto para comenzar</p>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => openModal()}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-medium transition-colors"
+          >
             <Plus className="w-5 h-5" />
             Agregar Producto
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
       )}
 
       {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-[100]">
-          <div className="bg-white rounded-t-2xl sm:rounded-2xl max-w-lg w-full max-h-[85vh] sm:max-h-[85vh] flex flex-col sm:m-4">
-            <div className="p-4 border-b flex items-center justify-between flex-shrink-0">
-              <h2 className="text-xl font-bold text-gray-900">
-                {editProduct ? 'Editar Producto' : 'Nuevo Producto'}
-              </h2>
-              <button onClick={closeModal} className="p-2 hover:bg-gray-100 rounded-lg">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      <AnimatePresence>
+        {showModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center z-[100]"
+            onClick={(e) => e.target === e.currentTarget && closeModal()}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 100, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 100, scale: 0.95 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="bg-dark-100 rounded-t-3xl sm:rounded-2xl max-w-lg w-full max-h-[90vh] sm:max-h-[85vh] flex flex-col sm:m-4 border border-white/10"
+            >
+              {/* Modal Header */}
+              <div className="p-5 border-b border-white/5 flex items-center justify-between flex-shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary-500/20 flex items-center justify-center">
+                    {editProduct ? <Edit2 className="w-5 h-5 text-primary-400" /> : <Sparkles className="w-5 h-5 text-primary-400" />}
+                  </div>
+                  <h2 className="text-xl font-bold text-white">
+                    {editProduct ? 'Editar Producto' : 'Nuevo Producto'}
+                  </h2>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={closeModal}
+                  className="p-2 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </motion.button>
+              </div>
 
-            <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
-              {/* Scrollable Content */}
-              <div className="p-4 space-y-4 overflow-y-auto flex-1">
-                {/* Image */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Imagen del producto
-                  </label>
-                  <div className="relative">
-                    {imagePreview ? (
-                      <div className="relative aspect-square rounded-xl overflow-hidden max-w-[200px]">
-                        <img src={imagePreview} alt="" className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setImageFile(null);
-                            setImagePreview(editProduct?.imageUrl || null);
-                          }}
-                          className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
+              <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+                {/* Scrollable Content */}
+                <div className="p-5 space-y-5 overflow-y-auto flex-1">
+                  {/* Image */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Imagen del producto
+                    </label>
+                    <div className="relative">
+                      {imagePreview ? (
+                        <div className="relative aspect-square rounded-xl overflow-hidden max-w-[200px] border border-white/10">
+                          <img src={imagePreview} alt="" className="w-full h-full object-cover" />
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            type="button"
+                            onClick={() => {
+                              setImageFile(null);
+                              setImagePreview(editProduct?.imageUrl || null);
+                            }}
+                            className="absolute top-2 right-2 p-1.5 bg-red-500/80 backdrop-blur-sm text-white rounded-lg hover:bg-red-500 transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                          </motion.button>
+                        </div>
+                      ) : (
+                        <label className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-primary-500/50 hover:bg-primary-500/5 transition-colors">
+                          <div className="w-10 h-10 rounded-xl bg-primary-500/20 flex items-center justify-center mb-2">
+                            <ImageIcon className="w-5 h-5 text-primary-400" />
+                          </div>
+                          <span className="text-sm text-gray-400">Click para subir imagen</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="hidden"
+                          />
+                        </label>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Name */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Nombre *
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="w-full px-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/20 transition-all"
+                      placeholder="Nombre del producto"
+                      required
+                    />
+                  </div>
+
+                  {/* Price */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Precio (Lempiras) *
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={formData.price}
+                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                      className="w-full px-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/20 transition-all"
+                      placeholder="0.00"
+                      required
+                    />
+                  </div>
+
+                  {/* Category */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Categoría
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.category}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                      placeholder="Ej: Bebidas, Abarrotes..."
+                      className="w-full px-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/20 transition-all"
+                    />
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Descripción
+                    </label>
+                    <textarea
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      className="w-full px-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/20 transition-all min-h-[80px] resize-none"
+                      placeholder="Descripción opcional..."
+                    />
+                  </div>
+
+                  {/* Badges */}
+                  <div className="space-y-3">
+                    <label className="flex items-center gap-3 p-3 bg-dark-200/50 rounded-xl cursor-pointer border border-white/5 hover:border-yellow-500/30 transition-colors group">
+                      <div className="w-8 h-8 rounded-lg bg-yellow-500/20 flex items-center justify-center">
+                        <Star className="w-4 h-4 text-yellow-400" />
                       </div>
-                    ) : (
-                      <label className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-primary-500 hover:bg-primary-50/50 transition-colors">
-                        <ImageIcon className="w-8 h-8 text-gray-400 mb-2" />
-                        <span className="text-sm text-gray-500">Click para subir imagen</span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageChange}
-                          className="hidden"
+                      <div className="flex-1">
+                        <p className="font-medium text-white text-sm">Producto Destacado</p>
+                        <p className="text-xs text-gray-500">Aparece primero en tu tienda</p>
+                      </div>
+                      <div className={`w-10 h-6 rounded-full transition-colors ${formData.isFeatured ? 'bg-yellow-500' : 'bg-dark-300'}`}>
+                        <motion.div
+                          animate={{ x: formData.isFeatured ? 16 : 2 }}
+                          className="w-5 h-5 bg-white rounded-full mt-0.5"
                         />
-                      </label>
-                    )}
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={formData.isFeatured}
+                        onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
+                        className="hidden"
+                      />
+                    </label>
+
+                    <label className="flex items-center gap-3 p-3 bg-dark-200/50 rounded-xl cursor-pointer border border-white/5 hover:border-blue-500/30 transition-colors group">
+                      <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                        <Calendar className="w-4 h-4 text-blue-400" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-white text-sm">Producto de Temporada</p>
+                        <p className="text-xs text-gray-500">Muestra etiqueta especial</p>
+                      </div>
+                      <div className={`w-10 h-6 rounded-full transition-colors ${formData.isSeasonal ? 'bg-blue-500' : 'bg-dark-300'}`}>
+                        <motion.div
+                          animate={{ x: formData.isSeasonal ? 16 : 2 }}
+                          className="w-5 h-5 bg-white rounded-full mt-0.5"
+                        />
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={formData.isSeasonal}
+                        onChange={(e) => setFormData({ ...formData, isSeasonal: e.target.checked })}
+                        className="hidden"
+                      />
+                    </label>
+
+                    <AnimatePresence>
+                      {formData.isSeasonal && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="overflow-hidden"
+                        >
+                          <input
+                            type="text"
+                            value={formData.seasonalTag}
+                            onChange={(e) => setFormData({ ...formData, seasonalTag: e.target.value })}
+                            placeholder="Etiqueta: Verano, Navidad..."
+                            className="w-full px-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/20 transition-all"
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
 
-                {/* Name */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nombre *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="input"
-                    required
-                  />
+                {/* Fixed Action Buttons */}
+                <div
+                  className="p-5 border-t border-white/5 bg-dark-100 flex-shrink-0"
+                  style={{ paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))' }}
+                >
+                  <div className="flex gap-3">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      type="button"
+                      onClick={closeModal}
+                      className="flex-1 px-4 py-3 bg-dark-200/50 hover:bg-dark-200 border border-white/5 text-white rounded-xl font-medium transition-colors"
+                    >
+                      Cancelar
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      type="submit"
+                      disabled={createMutation.isPending || updateMutation.isPending || updateImageMutation.isPending}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-primary-500 hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors"
+                    >
+                      {(createMutation.isPending || updateMutation.isPending || updateImageMutation.isPending) ? (
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          <Check className="w-5 h-5" />
+                          {editProduct ? 'Guardar' : 'Crear'}
+                        </>
+                      )}
+                    </motion.button>
+                  </div>
                 </div>
-
-                {/* Price */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Precio (Lempiras) *
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    className="input"
-                    required
-                  />
-                </div>
-
-                {/* Category */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Categoria
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    placeholder="Ej: Bebidas, Abarrotes..."
-                    className="input"
-                  />
-                </div>
-
-                {/* Description */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Descripcion
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="input min-h-[60px]"
-                    placeholder="Opcional..."
-                  />
-                </div>
-
-                {/* Badges */}
-                <div className="space-y-2">
-                  <label className="flex items-center gap-3 p-2 bg-gray-50 rounded-xl cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.isFeatured}
-                      onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
-                      className="w-5 h-5 rounded text-primary-600"
-                    />
-                    <div>
-                      <p className="font-medium text-gray-900 text-sm">Producto Destacado</p>
-                    </div>
-                  </label>
-
-                  <label className="flex items-center gap-3 p-2 bg-gray-50 rounded-xl cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.isSeasonal}
-                      onChange={(e) => setFormData({ ...formData, isSeasonal: e.target.checked })}
-                      className="w-5 h-5 rounded text-primary-600"
-                    />
-                    <div>
-                      <p className="font-medium text-gray-900 text-sm">Producto de Temporada</p>
-                    </div>
-                  </label>
-
-                  {formData.isSeasonal && (
-                    <input
-                      type="text"
-                      value={formData.seasonalTag}
-                      onChange={(e) => setFormData({ ...formData, seasonalTag: e.target.value })}
-                      placeholder="Etiqueta: Verano, Navidad..."
-                      className="input"
-                    />
-                  )}
-                </div>
-              </div>
-
-              {/* Fixed Action Buttons */}
-              <div
-                className="p-4 border-t bg-white flex-shrink-0"
-                style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}
-              >
-                <div className="flex gap-3">
-                  <button type="button" onClick={closeModal} className="btn-secondary flex-1">
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={createMutation.isPending || updateMutation.isPending}
-                    className="btn-primary flex-1"
-                  >
-                    {(createMutation.isPending || updateMutation.isPending) ? (
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <>
-                        <Check className="w-5 h-5" />
-                        {editProduct ? 'Guardar' : 'Crear'}
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -4,20 +4,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   MapPin, Phone, Star, Heart, Share2, Clock, MessageCircle,
-  ChevronRight, Package, ExternalLink, MessageSquare, X,
-  Store, Calendar, Info, ShoppingBag, Navigation,
+  Package, MessageSquare, Store, Calendar, Info, ShoppingBag, Navigation, Maximize2, Minimize2,
 } from 'lucide-react';
-import { pulperiaApi, productApi, reviewApi } from '../services/api';
+import { pulperiaApi, productApi } from '../services/api';
 import { useAuthStore } from '../stores/authStore';
 import ProductCard from '../components/products/ProductCard';
 import MiniMap from '../components/map/MiniMap';
 import ReviewForm from '../components/ReviewForm';
 import ShareButtons from '../components/ShareButtons';
 import toast from 'react-hot-toast';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Badge, StatusBadge } from '@/components/ui/badge';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   Sheet,
   SheetContent,
@@ -25,12 +20,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { Skeleton, SkeletonProductCard, SkeletonText } from '@/components/ui/skeleton';
-import {
-  AnimatedList,
-  AnimatedListItem,
-  FadeInView,
-} from '@/components/ui';
 
 const PulperiaProfile = () => {
   const { id } = useParams();
@@ -38,6 +27,7 @@ const PulperiaProfile = () => {
   const queryClient = useQueryClient();
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [activeTab, setActiveTab] = useState('products');
+  const [isMapExpanded, setIsMapExpanded] = useState(false);
 
   // Fetch pulperia
   const { data: pulperiaData, isLoading } = useQuery({
@@ -89,15 +79,15 @@ const PulperiaProfile = () => {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <Skeleton className="h-48 md:h-64 rounded-2xl" />
-        <div className="pt-12 px-1 space-y-4">
-          <Skeleton className="h-8 w-2/3" />
-          <Skeleton className="h-5 w-1/3" />
-          <SkeletonText lines={2} />
+        <div className="h-56 rounded-2xl bg-dark-100/60 animate-pulse" />
+        <div className="space-y-4">
+          <div className="h-8 w-2/3 rounded-lg bg-dark-100/60 animate-pulse" />
+          <div className="h-5 w-1/3 rounded-lg bg-dark-100/60 animate-pulse" />
+          <div className="h-20 rounded-xl bg-dark-100/60 animate-pulse" />
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
-            <SkeletonProductCard key={i} />
+            <div key={i} className="aspect-square rounded-xl bg-dark-100/60 animate-pulse" />
           ))}
         </div>
       </div>
@@ -112,26 +102,29 @@ const PulperiaProfile = () => {
         animate={{ opacity: 1, y: 0 }}
         className="text-center py-16"
       >
-        <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <Store className="w-8 h-8 text-muted-foreground" />
+        <div className="w-16 h-16 bg-dark-100/60 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <Store className="w-8 h-8 text-gray-400" />
         </div>
-        <h2 className="text-xl font-semibold text-foreground mb-2">Pulperia no encontrada</h2>
-        <p className="text-muted-foreground mb-6">No pudimos encontrar esta pulperia</p>
-        <Button asChild variant="outline">
-          <Link to="/">Volver al inicio</Link>
-        </Button>
+        <h2 className="text-xl font-semibold text-white mb-2">Pulperia no encontrada</h2>
+        <p className="text-gray-400 mb-6">No pudimos encontrar esta pulperia</p>
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-dark-100/60 border border-white/10 rounded-xl text-white hover:bg-dark-100/80 transition-colors"
+        >
+          Volver al inicio
+        </Link>
       </motion.div>
     );
   }
 
-  const statusMap = {
-    OPEN: { label: 'Abierto', variant: 'open' },
-    CLOSING_SOON: { label: 'Por cerrar', variant: 'closing' },
-    CLOSED: { label: 'Cerrado', variant: 'closed' },
-    VACATION: { label: 'Vacaciones', variant: 'vacation' },
+  const statusConfig = {
+    OPEN: { label: 'Abierto', bg: 'bg-green-500/20', text: 'text-green-400', dot: 'bg-green-500' },
+    CLOSING_SOON: { label: 'Por cerrar', bg: 'bg-orange-500/20', text: 'text-orange-400', dot: 'bg-orange-500' },
+    CLOSED: { label: 'Cerrado', bg: 'bg-red-500/20', text: 'text-red-400', dot: 'bg-red-500' },
+    VACATION: { label: 'Vacaciones', bg: 'bg-blue-500/20', text: 'text-blue-400', dot: 'bg-blue-500' },
   };
 
-  const status = statusMap[pulperia.status] || statusMap.CLOSED;
+  const status = statusConfig[pulperia.status] || statusConfig.CLOSED;
 
   return (
     <div className="space-y-6 pb-6">
@@ -139,12 +132,14 @@ const PulperiaProfile = () => {
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="relative h-48 md:h-64 rounded-2xl overflow-hidden bg-gradient-to-br from-primary-600 to-primary-800"
+        className="relative h-56 md:h-72 rounded-2xl overflow-hidden"
       >
-        {pulperia.banner && (
+        {pulperia.banner ? (
           <img src={pulperia.banner} alt="" className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-primary-600 to-primary-800" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
         {/* Status Badge */}
         <motion.div
@@ -153,9 +148,10 @@ const PulperiaProfile = () => {
           transition={{ delay: 0.2 }}
           className="absolute top-4 left-4"
         >
-          <StatusBadge status={status.variant} className="shadow-lg">
-            {status.label}
-          </StatusBadge>
+          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${status.bg} backdrop-blur-md border border-white/10`}>
+            <div className={`w-2 h-2 rounded-full ${status.dot} animate-pulse`} />
+            <span className={`text-sm font-medium ${status.text}`}>{status.label}</span>
+          </div>
         </motion.div>
 
         {/* Actions */}
@@ -169,10 +165,10 @@ const PulperiaProfile = () => {
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => favoriteMutation.mutate()}
-              className={`p-2.5 rounded-xl backdrop-blur-md shadow-lg transition-all ${
+              className={`p-2.5 rounded-xl backdrop-blur-md shadow-lg transition-all border border-white/10 ${
                 isFavorite
-                  ? 'bg-red-500 text-white'
-                  : 'bg-white/20 text-white hover:bg-white/30'
+                  ? 'bg-red-500/80 text-white'
+                  : 'bg-dark-100/60 text-white hover:bg-dark-100/80'
               }`}
             >
               <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
@@ -184,14 +180,14 @@ const PulperiaProfile = () => {
             <SheetTrigger asChild>
               <motion.button
                 whileTap={{ scale: 0.9 }}
-                className="p-2.5 rounded-xl bg-white/20 text-white hover:bg-white/30 backdrop-blur-md shadow-lg transition-colors"
+                className="p-2.5 rounded-xl bg-dark-100/60 text-white hover:bg-dark-100/80 backdrop-blur-md shadow-lg transition-colors border border-white/10"
               >
                 <Share2 className="w-5 h-5" />
               </motion.button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="h-auto">
+            <SheetContent side="bottom" className="h-auto bg-dark-100 border-white/10">
               <SheetHeader>
-                <SheetTitle>Compartir {pulperia.name}</SheetTitle>
+                <SheetTitle className="text-white">Compartir {pulperia.name}</SheetTitle>
               </SheetHeader>
               <div className="py-6">
                 <ShareButtons
@@ -204,7 +200,7 @@ const PulperiaProfile = () => {
           </Sheet>
         </motion.div>
 
-        {/* Logo */}
+        {/* Logo - Bottom positioned */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -215,11 +211,11 @@ const PulperiaProfile = () => {
             <img
               src={pulperia.logo}
               alt={pulperia.name}
-              className="w-24 h-24 rounded-2xl border-4 border-background shadow-xl object-cover"
+              className="w-24 h-24 rounded-2xl border-4 border-dark-50 shadow-xl object-cover"
             />
           ) : (
-            <div className="w-24 h-24 rounded-2xl border-4 border-background shadow-xl bg-primary-100 flex items-center justify-center">
-              <span className="text-4xl font-bold text-primary-600">
+            <div className="w-24 h-24 rounded-2xl border-4 border-dark-50 shadow-xl bg-primary-500/20 flex items-center justify-center">
+              <span className="text-4xl font-bold text-primary-400">
                 {pulperia.name.charAt(0)}
               </span>
             </div>
@@ -232,202 +228,285 @@ const PulperiaProfile = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="pt-14 px-1"
+        className="pt-14 space-y-4"
       >
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <h1 className="text-2xl font-bold text-foreground break-words leading-tight line-clamp-2">{pulperia.name}</h1>
-            {pulperia.rating > 0 && (
-              <div className="flex items-center gap-2 mt-2">
-                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-accent-500/30 rounded-lg border border-accent-500/40">
-                  <Star className="w-4 h-4 text-accent-400 fill-accent-400" />
-                  <span className="font-semibold text-accent-300">
-                    {pulperia.rating.toFixed(1)}
-                  </span>
-                </div>
-                <span className="text-sm text-muted-foreground">
-                  ({pulperia.reviewCount} reseñas)
-                </span>
+        {/* Name & Rating */}
+        <div className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-5">
+          <h1 className="text-2xl font-bold text-white break-words leading-tight">{pulperia.name}</h1>
+
+          {pulperia.rating > 0 && (
+            <div className="flex items-center gap-3 mt-3">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-yellow-500/20 rounded-xl border border-yellow-500/30">
+                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                <span className="font-bold text-yellow-400">{pulperia.rating.toFixed(1)}</span>
               </div>
-            )}
-          </div>
-
-          {/* Quick Actions */}
-          <div className="flex gap-2 shrink-0">
-            {pulperia.latitude && pulperia.longitude && (
-              <Button variant="outline" size="icon" onClick={handleDirections}>
-                <Navigation className="w-4 h-4" />
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {pulperia.description && (
-          <p className="text-muted-foreground mt-3 leading-relaxed">
-            {pulperia.description}
-          </p>
-        )}
-
-        {/* Location */}
-        <div className="flex items-start gap-3 mt-4 p-3 bg-card rounded-xl border border-border">
-          <div className="p-2 bg-primary-500/20 rounded-lg shrink-0">
-            <MapPin className="w-4 h-4 text-primary-400" />
-          </div>
-          <div>
-            <p className="text-foreground font-medium">{pulperia.address}</p>
-            {pulperia.reference && (
-              <p className="text-sm text-muted-foreground mt-0.5">{pulperia.reference}</p>
-            )}
-          </div>
-        </div>
-
-        {/* Mini Map */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.5 }}
-          className="mt-4"
-        >
-          <MiniMap
-            center={[pulperia.latitude, pulperia.longitude]}
-            pulperias={[pulperia]}
-            className="h-48 md:h-56 rounded-xl border border-border overflow-hidden"
-          />
-        </motion.div>
-      </motion.div>
-
-      {/* Story Card */}
-      <AnimatePresence>
-        {pulperia.story && (
-          <FadeInView>
-            <Card>
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 bg-accent-500/20 rounded-lg">
-                    <Info className="w-4 h-4 text-accent-400" />
-                  </div>
-                  <h3 className="font-semibold text-foreground">
-                    Nuestra Historia
-                  </h3>
-                  {pulperia.foundedYear && (
-                    <Badge variant="outline" className="ml-auto">
-                      <Calendar className="w-3 h-3 mr-1" />
-                      Desde {pulperia.foundedYear}
-                    </Badge>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground leading-relaxed">{pulperia.story}</p>
-              </CardContent>
-            </Card>
-          </FadeInView>
-        )}
-      </AnimatePresence>
-
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="w-full justify-start border-b rounded-none bg-transparent p-0 h-auto">
-          <TabsTrigger
-            value="products"
-            className="flex-1 sm:flex-none gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-          >
-            <ShoppingBag className="w-4 h-4" />
-            Productos
-            {products.length > 0 && (
-              <Badge variant="secondary" size="sm">
-                {products.length}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger
-            value="reviews"
-            className="flex-1 sm:flex-none gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-          >
-            <MessageSquare className="w-4 h-4" />
-            Reseñas
-            {pulperia.reviewCount > 0 && (
-              <Badge variant="secondary" size="sm">
-                {pulperia.reviewCount}
-              </Badge>
-            )}
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Products Tab */}
-        <TabsContent value="products" className="mt-6">
-          {/* Categories Filter */}
-          {categories.length > 0 && (
-            <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 mb-4">
-              <motion.button
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setSelectedCategory(null)}
-                className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${
-                  !selectedCategory
-                    ? 'bg-primary-500 text-white shadow-primary'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                }`}
-              >
-                Todos
-              </motion.button>
-              {categories.map((cat) => (
-                <motion.button
-                  key={cat}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${
-                    selectedCategory === cat
-                      ? 'bg-primary-500 text-white shadow-primary'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                  }`}
-                >
-                  {cat}
-                </motion.button>
-              ))}
+              <span className="text-sm text-gray-400">({pulperia.reviewCount} resenas)</span>
             </div>
           )}
 
-          {/* Products Grid */}
-          {loadingProducts ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {[...Array(4)].map((_, i) => (
-                <SkeletonProductCard key={i} />
-              ))}
+          {pulperia.description && (
+            <p className="text-gray-400 mt-4 leading-relaxed">{pulperia.description}</p>
+          )}
+        </div>
+
+        {/* Quick Action Cards */}
+        <div className="grid grid-cols-2 gap-4">
+          {/* Location Card */}
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleDirections}
+            disabled={!pulperia.latitude || !pulperia.longitude}
+            className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-4 text-left hover:border-primary-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center mb-3">
+              <MapPin className="w-5 h-5 text-blue-400" />
             </div>
-          ) : products.length > 0 ? (
-            <AnimatedList className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {products.map((product) => (
-                <AnimatedListItem key={product.id}>
-                  <ProductCard product={product} pulperia={pulperia} />
-                </AnimatedListItem>
-              ))}
-            </AnimatedList>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-16"
+            <h3 className="font-semibold text-white text-sm">Ubicacion</h3>
+            <p className="text-xs text-gray-400 mt-1 line-clamp-2">{pulperia.address || 'Ver en mapa'}</p>
+          </motion.button>
+
+          {/* Contact Card */}
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleWhatsApp}
+            disabled={!pulperia.whatsapp && !pulperia.phone}
+            className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-4 text-left hover:border-green-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center mb-3">
+              <MessageCircle className="w-5 h-5 text-green-400" />
+            </div>
+            <h3 className="font-semibold text-white text-sm">Contacto</h3>
+            <p className="text-xs text-gray-400 mt-1">WhatsApp disponible</p>
+          </motion.button>
+        </div>
+
+        {/* Mini Map - Expandable */}
+        {pulperia.latitude && pulperia.longitude && (
+          <motion.div
+            animate={{ height: isMapExpanded ? 350 : 180 }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            className="relative rounded-2xl overflow-hidden border border-white/5"
+          >
+            <MiniMap
+              center={[pulperia.latitude, pulperia.longitude]}
+              pulperias={[pulperia]}
+              className="w-full h-full"
+              showControls={isMapExpanded}
+              dragging={true}
+              touchZoom={true}
+            />
+            <button
+              onClick={() => setIsMapExpanded(!isMapExpanded)}
+              className="absolute top-3 right-3 p-2 bg-dark-100/80 backdrop-blur-md rounded-lg border border-white/10 text-white hover:bg-dark-100 transition-colors"
             >
-              <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Package className="w-8 h-8 text-muted-foreground" />
+              {isMapExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            </button>
+            {pulperia.reference && (
+              <div className="absolute bottom-3 left-3 right-3 px-3 py-2 bg-dark-100/80 backdrop-blur-md rounded-lg border border-white/10">
+                <p className="text-xs text-gray-300 truncate">{pulperia.reference}</p>
               </div>
-              <p className="text-muted-foreground">No hay productos disponibles</p>
+            )}
+          </motion.div>
+        )}
+
+        {/* Story Card */}
+        <AnimatePresence>
+          {pulperia.story && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-5"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                  <Info className="w-5 h-5 text-purple-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-white">Nuestra Historia</h3>
+                </div>
+                {pulperia.foundedYear && (
+                  <span className="px-3 py-1 text-xs font-medium bg-purple-500/20 text-purple-400 rounded-full border border-purple-500/30">
+                    Desde {pulperia.foundedYear}
+                  </span>
+                )}
+              </div>
+              <p className="text-gray-400 leading-relaxed text-sm">{pulperia.story}</p>
             </motion.div>
           )}
-        </TabsContent>
+        </AnimatePresence>
+      </motion.div>
 
-        {/* Reviews Tab */}
-        <TabsContent value="reviews" className="mt-6 space-y-6">
-          {/* Review Form */}
-          <ReviewForm pulperiaId={id} />
+      {/* Tabs - Glass Morphism Style */}
+      <div className="space-y-4">
+        {/* Tab Buttons */}
+        <div className="flex gap-2 p-1.5 bg-dark-100/60 backdrop-blur-sm rounded-xl border border-white/5">
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setActiveTab('products')}
+            className={`relative flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
+              activeTab === 'products' ? 'text-white' : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            {activeTab === 'products' && (
+              <motion.div
+                layoutId="activeTabBg"
+                className="absolute inset-0 bg-primary-500/20 rounded-lg border border-primary-500/30"
+                transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
+              />
+            )}
+            <ShoppingBag className="w-4 h-4 relative z-10" />
+            <span className="relative z-10">Productos</span>
+            {products.length > 0 && (
+              <motion.span
+                animate={{ scale: activeTab === 'products' ? [1, 1.1, 1] : 1 }}
+                transition={{ duration: 0.3 }}
+                className={`relative z-10 px-2 py-0.5 text-xs rounded-full ${
+                  activeTab === 'products' ? 'bg-primary-500 text-white' : 'bg-white/10 text-gray-400'
+                }`}
+              >
+                {products.length}
+              </motion.span>
+            )}
+          </motion.button>
 
-          {/* Existing Reviews */}
-          {pulperia.reviews && pulperia.reviews.length > 0 ? (
-            <AnimatedList className="space-y-4">
-              {pulperia.reviews.map((review) => (
-                <AnimatedListItem key={review.id}>
-                  <Card>
-                    <CardContent className="p-4">
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setActiveTab('reviews')}
+            className={`relative flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
+              activeTab === 'reviews' ? 'text-white' : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            {activeTab === 'reviews' && (
+              <motion.div
+                layoutId="activeTabBg"
+                className="absolute inset-0 bg-primary-500/20 rounded-lg border border-primary-500/30"
+                transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
+              />
+            )}
+            <MessageSquare className="w-4 h-4 relative z-10" />
+            <span className="relative z-10">Resenas</span>
+            {pulperia.reviewCount > 0 && (
+              <motion.span
+                animate={{ scale: activeTab === 'reviews' ? [1, 1.1, 1] : 1 }}
+                transition={{ duration: 0.3 }}
+                className={`relative z-10 px-2 py-0.5 text-xs rounded-full ${
+                  activeTab === 'reviews' ? 'bg-primary-500 text-white' : 'bg-white/10 text-gray-400'
+                }`}
+              >
+                {pulperia.reviewCount}
+              </motion.span>
+            )}
+          </motion.button>
+        </div>
+
+        {/* Tab Content */}
+        <AnimatePresence mode="wait">
+          {activeTab === 'products' && (
+            <motion.div
+              key="products"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              {/* Categories Filter */}
+              {categories.length > 0 && (
+                <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4">
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setSelectedCategory(null)}
+                    className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${
+                      !selectedCategory
+                        ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/20'
+                        : 'bg-dark-100/60 text-gray-400 hover:text-white border border-white/5'
+                    }`}
+                  >
+                    Todos
+                  </motion.button>
+                  {categories.map((cat) => (
+                    <motion.button
+                      key={cat}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${
+                        selectedCategory === cat
+                          ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/20'
+                          : 'bg-dark-100/60 text-gray-400 hover:text-white border border-white/5'
+                      }`}
+                    >
+                      {cat}
+                    </motion.button>
+                  ))}
+                </div>
+              )}
+
+              {/* Products Grid */}
+              {loadingProducts ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="bg-dark-100/60 rounded-xl overflow-hidden">
+                      <div className="aspect-square bg-dark-100 animate-pulse" />
+                      <div className="p-3 space-y-2">
+                        <div className="h-4 bg-dark-100 rounded animate-pulse" />
+                        <div className="h-4 w-1/2 bg-dark-100 rounded animate-pulse" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : products.length > 0 ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {products.map((product, index) => (
+                    <motion.div
+                      key={product.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <ProductCard product={product} pulperia={pulperia} />
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-16"
+                >
+                  <div className="w-16 h-16 bg-dark-100/60 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Package className="w-8 h-8 text-gray-500" />
+                  </div>
+                  <p className="text-gray-400">No hay productos disponibles</p>
+                </motion.div>
+              )}
+            </motion.div>
+          )}
+
+          {activeTab === 'reviews' && (
+            <motion.div
+              key="reviews"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-4"
+            >
+              {/* Review Form */}
+              <ReviewForm pulperiaId={id} />
+
+              {/* Existing Reviews */}
+              {pulperia.reviews && pulperia.reviews.length > 0 ? (
+                <div className="space-y-4">
+                  {pulperia.reviews.map((review, index) => (
+                    <motion.div
+                      key={review.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-4"
+                    >
                       <div className="flex items-start gap-3">
                         {review.user.avatar ? (
                           <img
@@ -436,15 +515,15 @@ const PulperiaProfile = () => {
                             className="w-10 h-10 rounded-full object-cover"
                           />
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-                            <span className="text-primary-600 font-semibold">
+                          <div className="w-10 h-10 rounded-full bg-primary-500/20 flex items-center justify-center">
+                            <span className="text-primary-400 font-semibold">
                               {review.user.name.charAt(0)}
                             </span>
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
-                            <span className="font-medium text-foreground truncate">
+                            <span className="font-medium text-white truncate">
                               {review.user.name}
                             </span>
                             <div className="flex items-center gap-0.5 shrink-0">
@@ -453,19 +532,19 @@ const PulperiaProfile = () => {
                                   key={i}
                                   className={`w-3.5 h-3.5 ${
                                     i < review.rating
-                                      ? 'text-accent-400 fill-accent-400'
-                                      : 'text-muted-foreground/30'
+                                      ? 'text-yellow-400 fill-yellow-400'
+                                      : 'text-gray-600'
                                   }`}
                                 />
                               ))}
                             </div>
                           </div>
                           {review.comment && (
-                            <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                            <p className="text-gray-400 mt-2 text-sm leading-relaxed">
                               {review.comment}
                             </p>
                           )}
-                          <span className="text-xs text-muted-foreground mt-2 block">
+                          <span className="text-xs text-gray-500 mt-2 block">
                             {new Date(review.createdAt).toLocaleDateString('es-HN', {
                               year: 'numeric',
                               month: 'long',
@@ -474,44 +553,41 @@ const PulperiaProfile = () => {
                           </span>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                </AnimatedListItem>
-              ))}
-            </AnimatedList>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-16"
-            >
-              <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <MessageSquare className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <p className="font-medium text-foreground mb-1">Aun no hay reseñas</p>
-              <p className="text-sm text-muted-foreground">Se el primero en dejar una reseña</p>
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-16"
+                >
+                  <div className="w-16 h-16 bg-dark-100/60 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <MessageSquare className="w-8 h-8 text-gray-500" />
+                  </div>
+                  <p className="font-medium text-white mb-1">Aun no hay resenas</p>
+                  <p className="text-sm text-gray-400">Se el primero en dejar una resena</p>
+                </motion.div>
+              )}
             </motion.div>
           )}
-        </TabsContent>
-      </Tabs>
+        </AnimatePresence>
+      </div>
 
       {/* Floating WhatsApp Button */}
       {(pulperia.whatsapp || pulperia.phone) && (
-        <motion.div
+        <motion.button
           initial={{ opacity: 0, scale: 0.8, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 z-40"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleWhatsApp}
+          className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 z-40 flex items-center gap-2 px-5 py-3 bg-green-500 hover:bg-green-600 text-white font-medium rounded-full shadow-lg shadow-green-500/30 transition-colors"
         >
-          <Button
-            onClick={handleWhatsApp}
-            size="lg"
-            className="rounded-full shadow-lg gap-2 px-6 bg-green-500 hover:bg-green-600"
-          >
-            <MessageCircle className="w-5 h-5" />
-            <span className="hidden sm:inline">WhatsApp</span>
-          </Button>
-        </motion.div>
+          <MessageCircle className="w-5 h-5" />
+          <span className="hidden sm:inline">WhatsApp</span>
+        </motion.button>
       )}
     </div>
   );

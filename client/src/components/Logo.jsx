@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 
-// Logo de La Pulpería - Pulpería hondureña típica con estrellas
+// Logo de La Pulpería - Estilo 3D casita hondureña
 export const Logo = ({ size = 'md', showText = true, className = '' }) => {
   const sizes = {
     sm: { icon: 32, text: 'text-lg' },
@@ -24,7 +24,7 @@ export const Logo = ({ size = 'md', showText = true, className = '' }) => {
   );
 };
 
-// Icono SVG de pulpería hondureña típica - Versión mejorada
+// Icono SVG de pulpería estilo 3D - Casita hondureña
 export const LogoIcon = ({ size = 48, className = '' }) => {
   return (
     <div className={`relative ${className}`} style={{ width: size, height: size }}>
@@ -34,194 +34,179 @@ export const LogoIcon = ({ size = 48, className = '' }) => {
         xmlns="http://www.w3.org/2000/svg"
         className="w-full h-full"
       >
-        {/* Fondo circular oscuro para mejor contraste */}
-        <circle cx="50" cy="50" r="48" fill="#0D0B11" />
-        <circle cx="50" cy="50" r="48" fill="url(#bgGradient)" />
+        {/* Fondo circular oscuro */}
+        <circle cx="50" cy="50" r="48" fill="#1a1625" />
 
-        {/* Silueta de montañas hondureñas al fondo */}
+        {/* Sombra de la casa */}
+        <ellipse cx="50" cy="88" rx="28" ry="5" fill="#0d0a12" opacity="0.5" />
+
+        {/* Pared principal - crema/beige con efecto 3D */}
         <path
-          d="M5 65 L20 50 L35 58 L50 42 L65 55 L80 48 L95 60 L95 90 L5 90 Z"
-          fill="#1a1722"
-          opacity="0.6"
+          d="M24 45 L24 82 L76 82 L76 45 L50 28 Z"
+          fill="url(#wallGradient3D)"
         />
 
-        {/* Base/Piso */}
-        <rect x="18" y="84" width="64" height="4" rx="1" fill="#4B5563" />
-
-        {/* Paredes de la pulpería */}
-        <rect x="22" y="48" width="56" height="38" rx="2" fill="#FEF3C7" />
-        <rect x="22" y="48" width="56" height="38" rx="2" fill="url(#wallGradientHN)" />
-
-        {/* Techo de lámina/zinc corrugado - más limpio */}
+        {/* Lado derecho de la pared (sombra 3D) */}
         <path
-          d="M14 50 L50 28 L86 50 L86 54 L50 34 L14 54 Z"
-          fill="url(#zincGradient)"
+          d="M76 45 L76 82 L82 78 L82 42 Z"
+          fill="#C4A574"
         />
 
-        {/* Líneas del zinc - simplificadas */}
-        <line x1="28" y1="48" x2="40" y2="38" stroke="#52525B" strokeWidth="1" />
-        <line x1="50" y1="48" x2="50" y2="34" stroke="#52525B" strokeWidth="1" />
-        <line x1="72" y1="48" x2="60" y2="38" stroke="#52525B" strokeWidth="1" />
+        {/* Techo rojo/terracota con efecto 3D */}
+        <path
+          d="M18 48 L50 22 L82 48 L76 48 L50 28 L24 48 Z"
+          fill="url(#roofGradient3D)"
+        />
 
-        {/* Borde inferior del techo */}
-        <line x1="14" y1="54" x2="86" y2="54" stroke="#3F3F46" strokeWidth="2" />
+        {/* Borde superior del techo */}
+        <path
+          d="M16 50 L50 20 L84 50 L82 48 L50 22 L18 48 Z"
+          fill="#8B2323"
+        />
 
-        {/* Letrero "PULPERIA" - más grande y legible */}
-        <rect x="30" y="56" width="40" height="12" rx="2" fill="url(#signGradient)" />
-        <rect x="30" y="56" width="40" height="12" rx="2" stroke="#B91C1C" strokeWidth="0.5" />
-        <text
-          x="50"
-          y="65"
-          textAnchor="middle"
-          fill="white"
-          fontSize="7"
-          fontWeight="bold"
-          fontFamily="Arial, sans-serif"
-          letterSpacing="0.5"
-        >
-          PULPERIA
-        </text>
+        {/* Lado derecho del techo (sombra) */}
+        <path
+          d="M82 48 L84 50 L88 47 L85 44 Z"
+          fill="#6B1A1A"
+        />
 
-        {/* Ventana izquierda (azul hondureño) - simplificada */}
-        <rect x="26" y="70" width="12" height="10" rx="1" fill="#1E40AF" />
-        <line x1="32" y1="70" x2="32" y2="80" stroke="#3B82F6" strokeWidth="1.5" />
-        <line x1="26" y1="75" x2="38" y2="75" stroke="#3B82F6" strokeWidth="1.5" />
-        <rect x="27" y="71" width="4" height="3" fill="#60A5FA" opacity="0.5" />
+        {/* Ventana izquierda - azul */}
+        <rect x="30" y="52" width="14" height="12" rx="1" fill="#1E3A5F" />
+        <rect x="31" y="53" width="12" height="10" rx="1" fill="url(#windowGradient)" />
+        {/* Marco de ventana */}
+        <line x1="37" y1="53" x2="37" y2="63" stroke="#87CEEB" strokeWidth="1.5" />
+        <line x1="31" y1="58" x2="43" y2="58" stroke="#87CEEB" strokeWidth="1.5" />
+        {/* Reflejo de ventana */}
+        <rect x="32" y="54" width="4" height="3" fill="white" opacity="0.3" rx="0.5" />
 
-        {/* Ventana derecha */}
-        <rect x="62" y="70" width="12" height="10" rx="1" fill="#1E40AF" />
-        <line x1="68" y1="70" x2="68" y2="80" stroke="#3B82F6" strokeWidth="1.5" />
-        <line x1="62" y1="75" x2="74" y2="75" stroke="#3B82F6" strokeWidth="1.5" />
-        <rect x="63" y="71" width="4" height="3" fill="#60A5FA" opacity="0.5" />
+        {/* Ventana derecha - azul */}
+        <rect x="56" y="52" width="14" height="12" rx="1" fill="#1E3A5F" />
+        <rect x="57" y="53" width="12" height="10" rx="1" fill="url(#windowGradient)" />
+        {/* Marco de ventana */}
+        <line x1="63" y1="53" x2="63" y2="63" stroke="#87CEEB" strokeWidth="1.5" />
+        <line x1="57" y1="58" x2="69" y2="58" stroke="#87CEEB" strokeWidth="1.5" />
+        {/* Reflejo de ventana */}
+        <rect x="58" y="54" width="4" height="3" fill="white" opacity="0.3" rx="0.5" />
 
-        {/* Puerta con textura de madera */}
-        <rect x="42" y="72" width="16" height="14" fill="url(#doorGradientHN)" rx="1" />
+        {/* Puerta - marrón con efecto madera */}
+        <rect x="40" y="58" width="20" height="24" rx="2" fill="url(#doorGradient3D)" />
 
-        {/* Textura de madera en puerta */}
-        <line x1="45" y1="72" x2="45" y2="86" stroke="#78350F" strokeWidth="0.5" opacity="0.5" />
-        <line x1="50" y1="72" x2="50" y2="86" stroke="#78350F" strokeWidth="0.5" opacity="0.5" />
-        <line x1="55" y1="72" x2="55" y2="86" stroke="#78350F" strokeWidth="0.5" opacity="0.5" />
+        {/* Detalles de puerta (paneles) */}
+        <rect x="43" y="61" width="6" height="8" rx="1" fill="#5D3A1A" opacity="0.5" />
+        <rect x="51" y="61" width="6" height="8" rx="1" fill="#5D3A1A" opacity="0.5" />
+        <rect x="43" y="71" width="6" height="8" rx="1" fill="#5D3A1A" opacity="0.5" />
+        <rect x="51" y="71" width="6" height="8" rx="1" fill="#5D3A1A" opacity="0.5" />
 
-        {/* Marco de puerta */}
-        <rect x="41" y="71" width="18" height="1" fill="#5C3D2E" />
-        <rect x="41" y="72" width="1" height="14" fill="#5C3D2E" />
-        <rect x="58" y="72" width="1" height="14" fill="#5C3D2E" />
+        {/* Perilla de puerta */}
+        <circle cx="56" cy="70" r="2" fill="url(#knobGradient3D)" />
+        <circle cx="55.5" cy="69.5" r="0.5" fill="#FFF8DC" opacity="0.8" />
 
-        {/* Perilla dorada brillante */}
-        <circle cx="55" cy="79" r="2" fill="url(#knobGradient)" />
-        <circle cx="54.5" cy="78.5" r="0.5" fill="#FEF3C7" opacity="0.8" />
+        {/* Línea de base/piso */}
+        <rect x="22" y="82" width="60" height="3" rx="1" fill="#2D2D2D" />
 
-        {/* Estrellas integradas en SVG */}
-        <path d="M82 22 L83 25 L86 26 L83 27 L82 30 L81 27 L78 26 L81 25 Z" fill="#FFD700" />
-        <path d="M75 16 L76 18 L78 18 L76 19 L75 21 L74 19 L72 18 L74 18 Z" fill="#FFD700" opacity="0.7" />
-        <path d="M88 32 L88.5 34 L90.5 34.5 L88.5 35 L88 37 L87.5 35 L85.5 34.5 L87.5 34 Z" fill="#FFD700" opacity="0.5" />
-
-        {/* Gradientes mejorados */}
+        {/* Gradientes */}
         <defs>
-          <radialGradient id="bgGradient" cx="50%" cy="30%" r="60%">
-            <stop offset="0%" stopColor="#1a1722" />
-            <stop offset="100%" stopColor="#0D0B11" />
-          </radialGradient>
-          <linearGradient id="wallGradientHN" x1="50" y1="48" x2="50" y2="86" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="white" stopOpacity="0.15" />
-            <stop offset="100%" stopColor="#92400E" stopOpacity="0.2" />
+          <linearGradient id="wallGradient3D" x1="24" y1="28" x2="24" y2="82" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#F5E6C8" />
+            <stop offset="50%" stopColor="#E8D4B0" />
+            <stop offset="100%" stopColor="#D4C4A0" />
           </linearGradient>
-          <linearGradient id="zincGradient" x1="50" y1="28" x2="50" y2="54" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#A1A1AA" />
-            <stop offset="40%" stopColor="#71717A" />
-            <stop offset="100%" stopColor="#52525B" />
+
+          <linearGradient id="roofGradient3D" x1="50" y1="22" x2="50" y2="48" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#CD5C5C" />
+            <stop offset="30%" stopColor="#B94545" />
+            <stop offset="70%" stopColor="#A33030" />
+            <stop offset="100%" stopColor="#8B2323" />
           </linearGradient>
-          <linearGradient id="signGradient" x1="50" y1="56" x2="50" y2="68" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#EF4444" />
-            <stop offset="100%" stopColor="#B91C1C" />
+
+          <linearGradient id="windowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#4A90B8" />
+            <stop offset="50%" stopColor="#3A7CA5" />
+            <stop offset="100%" stopColor="#2E6B94" />
           </linearGradient>
-          <linearGradient id="doorGradientHN" x1="50" y1="72" x2="50" y2="86" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#B45309" />
-            <stop offset="50%" stopColor="#92400E" />
-            <stop offset="100%" stopColor="#78350F" />
+
+          <linearGradient id="doorGradient3D" x1="40" y1="58" x2="60" y2="82" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#8B6914" />
+            <stop offset="30%" stopColor="#7A5C12" />
+            <stop offset="70%" stopColor="#6B4F10" />
+            <stop offset="100%" stopColor="#5C420E" />
           </linearGradient>
-          <radialGradient id="knobGradient" cx="40%" cy="40%">
-            <stop offset="0%" stopColor="#FCD34D" />
-            <stop offset="100%" stopColor="#D97706" />
+
+          <radialGradient id="knobGradient3D" cx="40%" cy="40%">
+            <stop offset="0%" stopColor="#FFD700" />
+            <stop offset="100%" stopColor="#B8860B" />
           </radialGradient>
         </defs>
       </svg>
 
-      {/* Estrellas animadas externas (más brillantes) */}
+      {/* Estrellas animadas */}
       <Stars />
     </div>
   );
 };
 
-// Estrellas con animación twinkle - más brillantes
+// Estrellas con animación twinkle
 const Stars = () => {
   return (
     <>
-      {/* Estrella grande - brillante */}
+      {/* Estrella grande */}
       <motion.div
         className="absolute -top-1 -right-1"
         animate={{
-          opacity: [0.6, 1, 0.6],
-          scale: [0.9, 1.3, 0.9],
+          opacity: [0.7, 1, 0.7],
+          scale: [0.95, 1.15, 0.95],
+          rotate: [0, 5, 0],
         }}
         transition={{
-          duration: 1.8,
+          duration: 2,
           repeat: Infinity,
           ease: 'easeInOut',
         }}
       >
-        <StarShape size={18} glow />
-      </motion.div>
-
-      {/* Estrella mediana */}
-      <motion.div
-        className="absolute top-1 right-4"
-        animate={{
-          opacity: [0.5, 1, 0.5],
-          scale: [0.8, 1.2, 0.8],
-        }}
-        transition={{
-          duration: 2.2,
-          repeat: Infinity,
-          ease: 'easeInOut',
-          delay: 0.6,
-        }}
-      >
-        <StarShape size={12} />
+        <StarShape size={16} glow />
       </motion.div>
 
       {/* Estrella pequeña */}
       <motion.div
-        className="absolute -top-0.5 right-8"
+        className="absolute top-2 right-4"
         animate={{
-          opacity: [0.4, 0.9, 0.4],
-          scale: [0.85, 1.15, 0.85],
+          opacity: [0.5, 1, 0.5],
+          scale: [0.9, 1.1, 0.9],
+          rotate: [0, -5, 0],
         }}
         transition={{
           duration: 2.5,
           repeat: Infinity,
           ease: 'easeInOut',
-          delay: 1.2,
+          delay: 0.5,
         }}
       >
-        <StarShape size={8} />
+        <StarShape size={10} />
       </motion.div>
     </>
   );
 };
 
-// Forma de estrella de 4 puntas dorada - mejorada
+// Forma de estrella de 4 puntas dorada con sparkle
 const StarShape = ({ size = 12, glow = false }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={glow ? 'drop-shadow-[0_0_4px_rgba(255,215,0,0.8)]' : ''}>
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    className={glow ? 'drop-shadow-[0_0_6px_rgba(255,215,0,0.8)]' : 'drop-shadow-[0_0_3px_rgba(255,215,0,0.5)]'}
+  >
     <path
       d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5L12 0Z"
-      fill="url(#starGradient)"
+      fill="url(#starGradientNew)"
     />
+    {/* Sparkle central */}
+    <circle cx="12" cy="12" r="2" fill="#FFFACD" opacity="0.9" />
     <defs>
-      <linearGradient id="starGradient" x1="12" y1="0" x2="12" y2="24" gradientUnits="userSpaceOnUse">
-        <stop offset="0%" stopColor="#FFEA00" />
+      <linearGradient id="starGradientNew" x1="12" y1="0" x2="12" y2="24" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#FFE55C" />
         <stop offset="50%" stopColor="#FFD700" />
-        <stop offset="100%" stopColor="#FFC107" />
+        <stop offset="100%" stopColor="#FFA500" />
       </linearGradient>
     </defs>
   </svg>
@@ -242,7 +227,7 @@ export const LogoLarge = ({ className = '' }) => {
           <span className="text-white">La </span>
           <span className="text-primary-500">Pulpería</span>
         </h1>
-        <p className="text-gray-400 mt-2 text-lg">¿Qué deseaba?</p>
+        <p className="text-gray-400 mt-2 text-lg">Tu tienda de barrio, digital</p>
       </div>
     </motion.div>
   );
