@@ -33,6 +33,13 @@ const Dashboard = () => {
 
   const [isOpen, setIsOpen] = useState(pulperia?.status === 'OPEN');
 
+  // Sync isOpen state when pulperia data changes
+  useEffect(() => {
+    if (pulperia?.status) {
+      setIsOpen(pulperia.status === 'OPEN');
+    }
+  }, [pulperia?.status]);
+
   // Fetch stats
   const { data: statsData, isLoading } = useQuery({
     queryKey: ['dashboard-stats'],
