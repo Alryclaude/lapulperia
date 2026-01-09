@@ -2,9 +2,105 @@
 @tailwind components;
 @tailwind utilities;
 
+/* CSS Variables for shadcn/ui theming */
+@layer base {
+  :root {
+    /* Background and foreground */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 3.9%;
+
+    /* Card */
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+
+    /* Popover */
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+
+    /* Primary - La Pulperia Red */
+    --primary: 0 84.2% 60.2%;
+    --primary-foreground: 0 0% 98%;
+
+    /* Secondary */
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+
+    /* Muted */
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+
+    /* Accent - Amber */
+    --accent: 38 92% 50%;
+    --accent-foreground: 0 0% 9%;
+
+    /* Destructive */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* Border and input */
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+
+    /* Ring (focus) */
+    --ring: 0 84.2% 60.2%;
+
+    /* Border radius */
+    --radius: 0.75rem;
+
+    /* Chart colors */
+    --chart-1: 0 84.2% 60.2%;
+    --chart-2: 38 92% 50%;
+    --chart-3: 142 71% 45%;
+    --chart-4: 217 91% 60%;
+    --chart-5: 262 83% 58%;
+  }
+
+  .dark {
+    /* Background and foreground */
+    --background: 0 0% 7%;
+    --foreground: 0 0% 98%;
+
+    /* Card */
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 98%;
+
+    /* Popover */
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 98%;
+
+    /* Primary - La Pulperia Red */
+    --primary: 0 84.2% 60.2%;
+    --primary-foreground: 0 0% 98%;
+
+    /* Secondary */
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+
+    /* Muted */
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+
+    /* Accent */
+    --accent: 38 92% 50%;
+    --accent-foreground: 0 0% 98%;
+
+    /* Destructive */
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* Border and input */
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+
+    /* Ring */
+    --ring: 0 84.2% 60.2%;
+  }
+}
+
 /* Base styles */
 @layer base {
   * {
+    @apply border-border;
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -15,7 +111,7 @@
   }
 
   body {
-    @apply bg-gray-50 text-gray-900 font-sans;
+    @apply bg-background text-foreground font-sans;
     min-height: 100vh;
     min-height: 100dvh;
   }
@@ -23,7 +119,7 @@
   /* Dark mode base styles */
   .dark body,
   .dark {
-    @apply bg-gray-900 text-gray-100;
+    @apply bg-background text-foreground;
   }
 
   .dark .card {

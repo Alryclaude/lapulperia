@@ -1,9 +1,11 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   MapPin, Phone, Star, Heart, Share2, Clock, MessageCircle,
-  ChevronRight, Package, ExternalLink, MessageSquare, X
+  ChevronRight, Package, ExternalLink, MessageSquare, X,
+  Store, Calendar, Info, ShoppingBag, Navigation,
 } from 'lucide-react';
 import { pulperiaApi, productApi, reviewApi } from '../services/api';
 import { useAuthStore } from '../stores/authStore';
@@ -12,27 +14,30 @@ import MiniMap from '../components/map/MiniMap';
 import ReviewForm from '../components/ReviewForm';
 import ShareButtons from '../components/ShareButtons';
 import toast from 'react-hot-toast';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Badge, StatusBadge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import { Skeleton, SkeletonProductCard, SkeletonText } from '@/components/ui/skeleton';
+import {
+  AnimatedList,
+  AnimatedListItem,
+  FadeInView,
+} from '@/components/ui';
 
 const PulperiaProfile = () => {
   const { id } = useParams();
   const { isAuthenticated } = useAuthStore();
   const queryClient = useQueryClient();
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [showShareMenu, setShowShareMenu] = useState(false);
-  const shareMenuRef = useRef(null);
-
-  // Close share menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (shareMenuRef.current && !shareMenuRef.current.contains(e.target)) {
-        setShowShareMenu(false);
-      }
-    };
-    if (showShareMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [showShareMenu]);
+  const [activeTab, setActiveTab] = useState('products');
 
   // Fetch pulperia
   const { data: pulperiaData, isLoading } = useQuery({
@@ -44,7 +49,7 @@ const PulperiaProfile = () => {
   const isFavorite = pulperiaData?.data?.isFavorite;
 
   // Fetch products
-  const { data: productsData } = useQuery({
+  const { data: productsData, isLoading: loadingProducts } = useQuery({
     queryKey: ['pulperia-products', id, selectedCategory],
     queryFn: () => productApi.getByPulperia(id, { category: selectedCategory }),
     enabled: !!id,
@@ -58,7 +63,6 @@ const PulperiaProfile = () => {
     mutationFn: () => pulperiaApi.toggleFavorite(id, { notifyOnOpen: true }),
     onSuccess: (response) => {
       queryClient.invalidateQueries(['pulperia', id]);
-      // Usar response.data.isFavorite en vez del valor del closure (que está desactualizado)
       toast.success(response.data.isFavorite ? 'Agregado a favoritos' : 'Eliminado de favoritos');
     },
   });
@@ -71,276 +75,444 @@ const PulperiaProfile = () => {
     }
   };
 
+  // Open Google Maps
+  const handleDirections = () => {
+    if (pulperia.latitude && pulperia.longitude) {
+      window.open(
+        `https://www.google.com/maps/dir/?api=1&destination=${pulperia.latitude},${pulperia.longitude}`,
+        '_blank'
+      );
+    }
+  };
+
+  // Loading state
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="skeleton h-48 rounded-2xl" />
-        <div className="skeleton h-8 w-1/2" />
-        <div className="skeleton h-4 w-1/3" />
+        <Skeleton className="h-48 md:h-64 rounded-2xl" />
+        <div className="pt-12 px-1 space-y-4">
+          <Skeleton className="h-8 w-2/3" />
+          <Skeleton className="h-5 w-1/3" />
+          <SkeletonText lines={2} />
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <SkeletonProductCard key={i} />
+          ))}
+        </div>
       </div>
     );
   }
 
+  // Not found state
   if (!pulperia) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-500">Pulperia no encontrada</p>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center py-16"
+      >
+        <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <Store className="w-8 h-8 text-gray-400" />
+        </div>
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">Pulperia no encontrada</h2>
+        <p className="text-muted-foreground mb-6">No pudimos encontrar esta pulperia</p>
+        <Button asChild variant="outline">
+          <Link to="/">Volver al inicio</Link>
+        </Button>
+      </motion.div>
     );
   }
 
-  const statusColors = {
-    OPEN: 'bg-green-500',
-    CLOSING_SOON: 'bg-yellow-500',
-    CLOSED: 'bg-gray-400',
-    VACATION: 'bg-blue-500',
+  const statusMap = {
+    OPEN: { label: 'Abierto', variant: 'open' },
+    CLOSING_SOON: { label: 'Por cerrar', variant: 'closing' },
+    CLOSED: { label: 'Cerrado', variant: 'closed' },
+    VACATION: { label: 'Vacaciones', variant: 'vacation' },
   };
 
+  const status = statusMap[pulperia.status] || statusMap.CLOSED;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24">
       {/* Banner */}
-      <div className="relative h-48 md:h-64 rounded-2xl overflow-hidden bg-gradient-to-br from-primary-600 to-primary-800">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="relative h-48 md:h-64 rounded-2xl overflow-hidden bg-gradient-to-br from-primary-600 to-primary-800"
+      >
         {pulperia.banner && (
           <img src={pulperia.banner} alt="" className="w-full h-full object-cover" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
 
-        {/* Status */}
-        <div className="absolute top-4 left-4">
-          <span className={`badge text-white ${statusColors[pulperia.status]}`}>
-            {pulperia.status === 'OPEN' ? 'Abierto' :
-              pulperia.status === 'CLOSING_SOON' ? 'Por cerrar' :
-                pulperia.status === 'VACATION' ? 'Vacaciones' : 'Cerrado'}
-          </span>
-        </div>
+        {/* Status Badge */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+          className="absolute top-4 left-4"
+        >
+          <StatusBadge status={status.variant} className="shadow-lg">
+            {status.label}
+          </StatusBadge>
+        </motion.div>
 
         {/* Actions */}
-        <div className="absolute top-4 right-4 flex gap-2">
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+          className="absolute top-4 right-4 flex gap-2"
+        >
           {isAuthenticated && (
-            <button
+            <motion.button
+              whileTap={{ scale: 0.9 }}
               onClick={() => favoriteMutation.mutate()}
-              className={`p-2.5 rounded-xl backdrop-blur-sm transition-colors ${isFavorite ? 'bg-red-500 text-white' : 'bg-white/20 text-white hover:bg-white/30'
-                }`}
+              className={`p-2.5 rounded-xl backdrop-blur-md shadow-lg transition-all ${
+                isFavorite
+                  ? 'bg-red-500 text-white'
+                  : 'bg-white/20 text-white hover:bg-white/30'
+              }`}
             >
               <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
-            </button>
+            </motion.button>
           )}
-          <div className="relative" ref={shareMenuRef}>
-            <button
-              onClick={() => setShowShareMenu(!showShareMenu)}
-              className="p-2.5 rounded-xl bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm"
-            >
-              <Share2 className="w-5 h-5" />
-            </button>
 
-            {/* Share dropdown menu */}
-            {showShareMenu && (
-              <div className="absolute right-0 mt-2 p-3 bg-white rounded-xl shadow-lg z-50 min-w-[200px]">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700">Compartir</span>
-                  <button
-                    onClick={() => setShowShareMenu(false)}
-                    className="p-1 hover:bg-gray-100 rounded-lg"
-                  >
-                    <X className="w-4 h-4 text-gray-500" />
-                  </button>
-                </div>
+          {/* Share Sheet */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                className="p-2.5 rounded-xl bg-white/20 text-white hover:bg-white/30 backdrop-blur-md shadow-lg transition-colors"
+              >
+                <Share2 className="w-5 h-5" />
+              </motion.button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="h-auto">
+              <SheetHeader>
+                <SheetTitle>Compartir {pulperia.name}</SheetTitle>
+              </SheetHeader>
+              <div className="py-6">
                 <ShareButtons
                   title={pulperia.name}
                   text={`Mira ${pulperia.name} en La Pulperia`}
                   variant="icons"
                 />
               </div>
-            )}
-          </div>
-        </div>
+            </SheetContent>
+          </Sheet>
+        </motion.div>
 
         {/* Logo */}
-        <div className="absolute -bottom-10 left-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="absolute -bottom-12 left-6"
+        >
           {pulperia.logo ? (
             <img
               src={pulperia.logo}
               alt={pulperia.name}
-              className="w-24 h-24 rounded-2xl border-4 border-white shadow-lg object-cover"
+              className="w-24 h-24 rounded-2xl border-4 border-background shadow-xl object-cover"
             />
           ) : (
-            <div className="w-24 h-24 rounded-2xl border-4 border-white shadow-lg bg-primary-100 flex items-center justify-center">
-              <span className="text-4xl font-bold text-primary-600">{pulperia.name.charAt(0)}</span>
+            <div className="w-24 h-24 rounded-2xl border-4 border-background shadow-xl bg-primary-100 flex items-center justify-center">
+              <span className="text-4xl font-bold text-primary-600">
+                {pulperia.name.charAt(0)}
+              </span>
             </div>
           )}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      {/* Info */}
-      <div className="pt-16 px-1">
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{pulperia.name}</h1>
+      {/* Info Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="pt-14 px-1"
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl font-bold text-gray-900 truncate">{pulperia.name}</h1>
             {pulperia.rating > 0 && (
-              <div className="flex items-center gap-2 mt-1">
-                <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
-                <span className="font-medium">{pulperia.rating.toFixed(1)}</span>
-                <span className="text-gray-500">({pulperia.reviewCount} reseñas)</span>
+              <div className="flex items-center gap-2 mt-2">
+                <div className="flex items-center gap-1 px-2 py-1 bg-amber-50 rounded-lg">
+                  <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                  <span className="font-semibold text-amber-700">
+                    {pulperia.rating.toFixed(1)}
+                  </span>
+                </div>
+                <span className="text-sm text-muted-foreground">
+                  ({pulperia.reviewCount} reseñas)
+                </span>
               </div>
             )}
           </div>
 
-          {(pulperia.whatsapp || pulperia.phone) && (
-            <button onClick={handleWhatsApp} className="btn-primary">
-              <MessageCircle className="w-5 h-5" />
-              WhatsApp
-            </button>
-          )}
+          {/* Quick Actions */}
+          <div className="flex gap-2 shrink-0">
+            {pulperia.latitude && pulperia.longitude && (
+              <Button variant="outline" size="icon" onClick={handleDirections}>
+                <Navigation className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
         </div>
 
         {pulperia.description && (
-          <p className="text-gray-600 mt-3">{pulperia.description}</p>
+          <p className="text-muted-foreground mt-3 leading-relaxed">
+            {pulperia.description}
+          </p>
         )}
 
         {/* Location */}
-        <div className="flex items-start gap-2 mt-4 text-gray-600">
-          <MapPin className="w-5 h-5 flex-shrink-0 mt-0.5" />
+        <div className="flex items-start gap-3 mt-4">
+          <div className="p-2 bg-primary-50 rounded-lg shrink-0">
+            <MapPin className="w-4 h-4 text-primary-600" />
+          </div>
           <div>
-            <p>{pulperia.address}</p>
+            <p className="text-gray-900">{pulperia.address}</p>
             {pulperia.reference && (
-              <p className="text-sm text-gray-500">{pulperia.reference}</p>
+              <p className="text-sm text-muted-foreground mt-0.5">{pulperia.reference}</p>
             )}
           </div>
         </div>
 
         {/* Mini Map */}
-        <div className="mt-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mt-4"
+        >
           <MiniMap
             center={[pulperia.latitude, pulperia.longitude]}
             pulperias={[pulperia]}
-            className="h-40 rounded-xl"
+            className="h-40 rounded-xl border border-border"
           />
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      {/* Story */}
-      {pulperia.story && (
-        <div className="card p-5">
-          <h3 className="font-semibold text-gray-900 mb-2">
-            Nuestra Historia {pulperia.foundedYear && `(Desde ${pulperia.foundedYear})`}
-          </h3>
-          <p className="text-gray-600">{pulperia.story}</p>
-        </div>
-      )}
-
-      {/* Products */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Productos</h2>
-          <span className="text-gray-500">{products.length} disponibles</span>
-        </div>
-
-        {/* Categories */}
-        {categories.length > 0 && (
-          <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-hide mb-4">
-            <button
-              onClick={() => setSelectedCategory(null)}
-              className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap ${!selectedCategory ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-600'
-                }`}
-            >
-              Todos
-            </button>
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap ${selectedCategory === cat ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-600'
-                  }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Products Grid */}
-        {products.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} pulperia={pulperia} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12 text-gray-500">
-            <Package className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-            <p>No hay productos disponibles</p>
-          </div>
-        )}
-      </div>
-
-      {/* Reviews Section */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-            <MessageSquare className="w-5 h-5" />
-            Reseñas
-          </h2>
-          {pulperia.reviewCount > 0 && (
-            <span className="text-gray-500">{pulperia.reviewCount} reseñas</span>
-          )}
-        </div>
-
-        {/* Review Form */}
-        <ReviewForm pulperiaId={id} />
-
-        {/* Existing Reviews */}
-        {pulperia.reviews && pulperia.reviews.length > 0 ? (
-          <div className="space-y-3">
-            {pulperia.reviews.map((review) => (
-              <div key={review.id} className="card p-4">
-                <div className="flex items-start gap-3">
-                  {review.user.avatar ? (
-                    <img
-                      src={review.user.avatar}
-                      alt={review.user.name}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                      <span className="text-gray-600 font-medium">
-                        {review.user.name.charAt(0)}
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-gray-900">{review.user.name}</span>
-                      <div className="flex items-center gap-1">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-4 h-4 ${i < review.rating
-                              ? 'text-amber-400 fill-amber-400'
-                              : 'text-gray-300'
-                              }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    {review.comment && (
-                      <p className="text-gray-600 mt-1">{review.comment}</p>
-                    )}
-                    <span className="text-xs text-gray-400 mt-1 block">
-                      {new Date(review.createdAt).toLocaleDateString('es-HN')}
-                    </span>
+      {/* Story Card */}
+      <AnimatePresence>
+        {pulperia.story && (
+          <FadeInView>
+            <Card>
+              <CardHeader className="pb-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-amber-50 rounded-lg">
+                    <Info className="w-4 h-4 text-amber-600" />
                   </div>
+                  <h3 className="font-semibold text-gray-900">
+                    Nuestra Historia
+                  </h3>
+                  {pulperia.foundedYear && (
+                    <Badge variant="outline" className="ml-auto">
+                      <Calendar className="w-3 h-3 mr-1" />
+                      Desde {pulperia.foundedYear}
+                    </Badge>
+                  )}
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8 text-gray-500">
-            <MessageSquare className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-            <p>Aún no hay reseñas</p>
-            <p className="text-sm">Sé el primero en dejar una reseña</p>
-          </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground leading-relaxed">{pulperia.story}</p>
+              </CardContent>
+            </Card>
+          </FadeInView>
         )}
-      </div>
+      </AnimatePresence>
+
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="w-full justify-start border-b rounded-none bg-transparent p-0 h-auto">
+          <TabsTrigger
+            value="products"
+            className="flex-1 sm:flex-none gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
+          >
+            <ShoppingBag className="w-4 h-4" />
+            Productos
+            {products.length > 0 && (
+              <Badge variant="secondary" size="sm">
+                {products.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger
+            value="reviews"
+            className="flex-1 sm:flex-none gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
+          >
+            <MessageSquare className="w-4 h-4" />
+            Reseñas
+            {pulperia.reviewCount > 0 && (
+              <Badge variant="secondary" size="sm">
+                {pulperia.reviewCount}
+              </Badge>
+            )}
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Products Tab */}
+        <TabsContent value="products" className="mt-6">
+          {/* Categories Filter */}
+          {categories.length > 0 && (
+            <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 mb-4">
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setSelectedCategory(null)}
+                className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${
+                  !selectedCategory
+                    ? 'bg-primary-500 text-white shadow-primary'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                }`}
+              >
+                Todos
+              </motion.button>
+              {categories.map((cat) => (
+                <motion.button
+                  key={cat}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${
+                    selectedCategory === cat
+                      ? 'bg-primary-500 text-white shadow-primary'
+                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  }`}
+                >
+                  {cat}
+                </motion.button>
+              ))}
+            </div>
+          )}
+
+          {/* Products Grid */}
+          {loadingProducts ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {[...Array(4)].map((_, i) => (
+                <SkeletonProductCard key={i} />
+              ))}
+            </div>
+          ) : products.length > 0 ? (
+            <AnimatedList className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {products.map((product) => (
+                <AnimatedListItem key={product.id}>
+                  <ProductCard product={product} pulperia={pulperia} />
+                </AnimatedListItem>
+              ))}
+            </AnimatedList>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-16"
+            >
+              <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Package className="w-8 h-8 text-gray-400" />
+              </div>
+              <p className="text-muted-foreground">No hay productos disponibles</p>
+            </motion.div>
+          )}
+        </TabsContent>
+
+        {/* Reviews Tab */}
+        <TabsContent value="reviews" className="mt-6 space-y-6">
+          {/* Review Form */}
+          <ReviewForm pulperiaId={id} />
+
+          {/* Existing Reviews */}
+          {pulperia.reviews && pulperia.reviews.length > 0 ? (
+            <AnimatedList className="space-y-4">
+              {pulperia.reviews.map((review) => (
+                <AnimatedListItem key={review.id}>
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-3">
+                        {review.user.avatar ? (
+                          <img
+                            src={review.user.avatar}
+                            alt={review.user.name}
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
+                            <span className="text-primary-600 font-semibold">
+                              {review.user.name.charAt(0)}
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-medium text-gray-900 truncate">
+                              {review.user.name}
+                            </span>
+                            <div className="flex items-center gap-0.5 shrink-0">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`w-3.5 h-3.5 ${
+                                    i < review.rating
+                                      ? 'text-amber-400 fill-amber-400'
+                                      : 'text-gray-200'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          {review.comment && (
+                            <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                              {review.comment}
+                            </p>
+                          )}
+                          <span className="text-xs text-muted-foreground mt-2 block">
+                            {new Date(review.createdAt).toLocaleDateString('es-HN', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                            })}
+                          </span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </AnimatedListItem>
+              ))}
+            </AnimatedList>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-16"
+            >
+              <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <MessageSquare className="w-8 h-8 text-gray-400" />
+              </div>
+              <p className="font-medium text-gray-900 mb-1">Aun no hay reseñas</p>
+              <p className="text-sm text-muted-foreground">Se el primero en dejar una reseña</p>
+            </motion.div>
+          )}
+        </TabsContent>
+      </Tabs>
+
+      {/* Floating WhatsApp Button */}
+      {(pulperia.whatsapp || pulperia.phone) && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="fixed bottom-20 right-4 z-40"
+        >
+          <Button
+            onClick={handleWhatsApp}
+            size="lg"
+            className="rounded-full shadow-lg gap-2 px-6 bg-green-500 hover:bg-green-600"
+          >
+            <MessageCircle className="w-5 h-5" />
+            <span className="hidden sm:inline">WhatsApp</span>
+          </Button>
+        </motion.div>
+      )}
     </div>
   );
 };
