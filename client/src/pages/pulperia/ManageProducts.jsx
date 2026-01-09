@@ -288,8 +288,8 @@ const ManageProducts = () => {
                   )}
                 </div>
 
-                {/* Actions Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center gap-2 pb-4">
+                {/* Desktop: Actions Overlay (hover only) */}
+                <div className="hidden md:flex absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 items-end justify-center gap-2 pb-4">
                   <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
@@ -314,6 +314,34 @@ const ManageProducts = () => {
                   >
                     <Trash2 className="w-4 h-4" />
                   </motion.button>
+                </div>
+
+                {/* Mobile: Always visible action bar at bottom of image */}
+                <div className="flex md:hidden absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent pt-8 pb-2 px-2">
+                  <div className="flex items-center justify-center gap-2 w-full">
+                    <motion.button
+                      whileTap={{ scale: 0.9 }}
+                      onClick={(e) => { e.stopPropagation(); openModal(product); }}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/10 backdrop-blur-sm text-white border border-white/10"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                      <span className="text-xs font-medium">Editar</span>
+                    </motion.button>
+                    <motion.button
+                      whileTap={{ scale: 0.9 }}
+                      onClick={(e) => { e.stopPropagation(); toggleStockMutation.mutate({ id: product.id, outOfStock: !product.outOfStock }); }}
+                      className="p-2 rounded-lg bg-white/10 backdrop-blur-sm text-white border border-white/10"
+                    >
+                      {product.outOfStock ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                    </motion.button>
+                    <motion.button
+                      whileTap={{ scale: 0.9 }}
+                      onClick={(e) => { e.stopPropagation(); handleDelete(product); }}
+                      className="p-2 rounded-lg bg-red-500/20 backdrop-blur-sm text-red-400 border border-red-500/30"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </motion.button>
+                  </div>
                 </div>
               </div>
 

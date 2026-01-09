@@ -21,6 +21,16 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 
+// Format phone number for display (e.g., "9999-9999")
+const formatPhoneNumber = (phone) => {
+  if (!phone) return '';
+  const cleaned = phone.replace(/\D/g, '');
+  if (cleaned.length === 8) {
+    return `${cleaned.slice(0, 4)}-${cleaned.slice(4)}`;
+  }
+  return phone;
+};
+
 const PulperiaProfile = () => {
   const { id } = useParams();
   const { isAuthenticated } = useAuthStore();
@@ -249,37 +259,77 @@ const PulperiaProfile = () => {
           )}
         </div>
 
-        {/* Quick Action Cards */}
-        <div className="grid grid-cols-2 gap-4">
-          {/* Location Card */}
+        {/* Contact Section - Enhanced */}
+        <div className="space-y-3">
+          {/* Location Card - Full Width */}
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
             onClick={handleDirections}
             disabled={!pulperia.latitude || !pulperia.longitude}
-            className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-4 text-left hover:border-primary-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-4 text-left hover:border-blue-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center mb-3">
-              <MapPin className="w-5 h-5 text-blue-400" />
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                <MapPin className="w-6 h-6 text-blue-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-white">Direccion</h3>
+                <p className="text-sm text-gray-400 mt-1">{pulperia.address || 'Direccion no disponible'}</p>
+                {pulperia.reference && (
+                  <p className="text-xs text-gray-500 mt-1">Ref: {pulperia.reference}</p>
+                )}
+              </div>
+              <Navigation className="w-5 h-5 text-blue-400 flex-shrink-0 mt-1" />
             </div>
-            <h3 className="font-semibold text-white text-sm">Ubicacion</h3>
-            <p className="text-xs text-gray-400 mt-1 line-clamp-2">{pulperia.address || 'Ver en mapa'}</p>
           </motion.button>
 
-          {/* Contact Card */}
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={handleWhatsApp}
-            disabled={!pulperia.whatsapp && !pulperia.phone}
-            className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-4 text-left hover:border-green-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center mb-3">
-              <MessageCircle className="w-5 h-5 text-green-400" />
-            </div>
-            <h3 className="font-semibold text-white text-sm">Contacto</h3>
-            <p className="text-xs text-gray-400 mt-1">WhatsApp disponible</p>
-          </motion.button>
+          {/* Contact Cards Grid */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* WhatsApp Card */}
+            {(pulperia.whatsapp || pulperia.phone) && (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleWhatsApp}
+                className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-4 text-left hover:border-green-500/30 transition-all"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                    <MessageCircle className="w-5 h-5 text-green-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-white text-sm">WhatsApp</h3>
+                    <p className="text-sm text-green-400 font-medium truncate">
+                      {formatPhoneNumber(pulperia.whatsapp || pulperia.phone)}
+                    </p>
+                  </div>
+                </div>
+              </motion.button>
+            )}
+
+            {/* Phone Call Card */}
+            {pulperia.phone && (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => window.open(`tel:+504${pulperia.phone.replace(/\D/g, '')}`, '_self')}
+                className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-4 text-left hover:border-primary-500/30 transition-all"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary-500/20 flex items-center justify-center flex-shrink-0">
+                    <Phone className="w-5 h-5 text-primary-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-white text-sm">Llamar</h3>
+                    <p className="text-sm text-primary-400 font-medium truncate">
+                      {formatPhoneNumber(pulperia.phone)}
+                    </p>
+                  </div>
+                </div>
+              </motion.button>
+            )}
+          </div>
         </div>
 
         {/* Mini Map - Expandable */}
