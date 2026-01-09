@@ -22,29 +22,63 @@ dotenv.config();
 const app = express();
 const httpServer = createServer(app);
 
-// Socket.IO para notificaciones en tiempo real
+/* =========================
+   CORS CONFIGURATION (FIX)
+========================= */
+
+const allowedOrigins = [
+  'https://lapulperiastore.net',
+  'https://lapulperiahn.shop',
+  'http://localhost:5173'
+];
+
+/* =========================
+   SOCKET.IO
+========================= */
+
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ['GET', 'POST'],
     credentials: true
   }
 });
 
-// Middleware
+/* =========================
+   MIDDLEWARES
+========================= */
+
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' }
 }));
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
+
 app.use(morgan('dev'));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Make io available in routes
 app.set('io', io);
+
+/* =========================
+   ROUTES
+========================= */
 
 // Health check
 app.get('/health', (req, res) => {
@@ -62,11 +96,13 @@ app.use('/api/stats', statsRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/upload', uploadRoutes);
 
-// Socket.IO connection handling
+/* =========================
+   SOCKET EVENTS
+========================= */
+
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
 
-  // Join room based on user/pulperia ID
   socket.on('join', (roomId) => {
     socket.join(roomId);
     console.log(`Socket ${socket.id} joined room ${roomId}`);
@@ -77,7 +113,10 @@ io.on('connection', (socket) => {
   });
 });
 
-// Error handling middleware
+/* =========================
+   ERROR HANDLING
+========================= */
+
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(err.status || 500).json({
@@ -93,14 +132,18 @@ app.use((req, res) => {
   res.status(404).json({ error: { message: 'Ruta no encontrada' } });
 });
 
+/* =========================
+   SERVER START
+========================= */
+
 const PORT = process.env.PORT || 3001;
 
 httpServer.listen(PORT, () => {
   console.log(`
   ╔═══════════════════════════════════════════╗
   ║                                           ║
-  ║   🏪 La Pulpería Server                   ║
-  ║   Running on http://localhost:${PORT}        ║
+  ║   La Pulpería Server                      ║
+  ║   Running on http://localhost:${PORT}     ║
   ║                                           ║
   ╚═══════════════════════════════════════════╝
   `);
