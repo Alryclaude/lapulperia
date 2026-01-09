@@ -4,6 +4,26 @@ import { authenticate, optionalAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
+// Get user's own reviews
+router.get('/my-reviews', authenticate, async (req, res) => {
+  try {
+    const reviews = await prisma.review.findMany({
+      where: { userId: req.user.id },
+      include: {
+        pulperia: {
+          select: { id: true, name: true, logo: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    res.json({ reviews });
+  } catch (error) {
+    console.error('Get my reviews error:', error);
+    res.status(500).json({ error: { message: 'Error al obtener reseñas' } });
+  }
+});
+
 // Get reviews for a pulperia
 router.get('/pulperia/:pulperiaId', optionalAuth, async (req, res) => {
   try {
@@ -84,7 +104,7 @@ router.post('/', authenticate, async (req, res) => {
     });
 
     if (existingReview) {
-      return res.status(400).json({ error: { message: 'Ya dejaste una reseña' } });
+      return res.status(409).json({ error: { message: 'Ya dejaste una reseña' } });
     }
 
     const review = await prisma.review.create({

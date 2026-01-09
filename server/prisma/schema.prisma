@@ -200,6 +200,7 @@ model OrderItem {
   product             Product         @relation(fields: [productId], references: [id])
 
   @@index([orderId])
+  @@index([productId])  // Para queries de ventas por producto
 }
 
 // Empleos
@@ -281,6 +282,7 @@ model Review {
 
   @@unique([userId, pulperiaId])
   @@index([pulperiaId])
+  @@index([userId])  // Para queries de reseñas por usuario
 }
 
 // Favoritos
@@ -384,6 +386,7 @@ model LoyaltyPoint {
   user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([loyaltyProgramId, userId])
+  @@index([userId])  // Para queries de puntos por usuario
 }
 
 // Estadisticas diarias

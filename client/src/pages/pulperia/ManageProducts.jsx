@@ -38,7 +38,7 @@ const ManageProducts = () => {
       queryClient.invalidateQueries(['my-products']);
       closeModal();
     },
-    onError: () => toast.error('Error al crear producto'),
+    onError: (error) => toast.error(error.response?.data?.error?.message || 'Error al crear producto'),
   });
 
   const updateMutation = useMutation({
@@ -48,7 +48,7 @@ const ManageProducts = () => {
       queryClient.invalidateQueries(['my-products']);
       closeModal();
     },
-    onError: () => toast.error('Error al actualizar'),
+    onError: (error) => toast.error(error.response?.data?.error?.message || 'Error al actualizar'),
   });
 
   const deleteMutation = useMutation({
@@ -57,7 +57,7 @@ const ManageProducts = () => {
       toast.success('Producto eliminado');
       queryClient.invalidateQueries(['my-products']);
     },
-    onError: () => toast.error('Error al eliminar'),
+    onError: (error) => toast.error(error.response?.data?.error?.message || 'Error al eliminar'),
   });
 
   const toggleStockMutation = useMutation({

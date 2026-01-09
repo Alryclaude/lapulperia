@@ -4,6 +4,21 @@ import { authenticate, requirePulperia } from '../middleware/auth.js';
 
 const router = express.Router();
 
+// Función para escapar valores CSV y prevenir inyección de fórmulas
+function escapeCSV(value) {
+  if (value == null) return '';
+  const str = String(value);
+  // Prevenir formula injection (=, +, -, @, tab, carriage return)
+  if (/^[=+\-@\t\r]/.test(str)) {
+    return `"'${str.replace(/"/g, '""')}"`;
+  }
+  // Escapar si contiene comma, quote, o newline
+  if (/[",\n\r]/.test(str)) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
 // Get dashboard stats for pulperia
 router.get('/dashboard', authenticate, requirePulperia, async (req, res) => {
   try {
@@ -113,7 +128,7 @@ router.get('/dashboard', authenticate, requirePulperia, async (req, res) => {
       .slice(0, 3)
       .map(([hour, count]) => ({ hour: parseInt(hour), count }));
 
-    // Frequent customers
+    // Frequent customers (optimizado: batch query en vez de N+1)
     const frequentCustomers = await prisma.order.groupBy({
       by: ['userId'],
       where: {
@@ -125,15 +140,18 @@ router.get('/dashboard', authenticate, requirePulperia, async (req, res) => {
       take: 5,
     });
 
-    const customersWithDetails = await Promise.all(
-      frequentCustomers.map(async (c) => {
-        const user = await prisma.user.findUnique({
-          where: { id: c.userId },
-          select: { id: true, name: true, avatar: true },
-        });
-        return { ...user, orderCount: c._count };
-      })
-    );
+    // Batch fetch: 1 query en vez de 5 queries individuales
+    const userIds = frequentCustomers.map(c => c.userId);
+    const users = await prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, name: true, avatar: true },
+    });
+    const userMap = new Map(users.map(u => [u.id, u]));
+
+    const customersWithDetails = frequentCustomers.map(c => ({
+      ...userMap.get(c.userId),
+      orderCount: c._count,
+    }));
 
     // Low stock products
     const lowStockProducts = await prisma.product.findMany({
@@ -169,32 +187,43 @@ router.get('/dashboard', authenticate, requirePulperia, async (req, res) => {
       take: 10,
     });
 
-    // Daily revenue for chart (last 7 days)
+    // Daily revenue for chart (last 7 days) - optimizado: 1 query en vez de 7
     const sevenDaysAgo = new Date(now);
-    sevenDaysAgo.setDate(now.getDate() - 7);
+    sevenDaysAgo.setDate(now.getDate() - 6);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
 
-    const dailyRevenue = [];
+    // Una sola query para todos los últimos 7 días
+    const ordersLast7Days = await prisma.order.findMany({
+      where: {
+        pulperiaId,
+        createdAt: { gte: sevenDaysAgo },
+        status: 'DELIVERED',
+      },
+      select: { createdAt: true, total: true },
+    });
+
+    // Agrupar por día en JavaScript
+    const dailyMap = new Map();
     for (let i = 6; i >= 0; i--) {
       const date = new Date(now);
       date.setDate(now.getDate() - i);
-      date.setHours(0, 0, 0, 0);
-      const nextDate = new Date(date);
-      nextDate.setDate(date.getDate() + 1);
-
-      const dayOrders = await prisma.order.findMany({
-        where: {
-          pulperiaId,
-          createdAt: { gte: date, lt: nextDate },
-          status: 'DELIVERED',
-        },
-      });
-
-      dailyRevenue.push({
-        date: date.toISOString().split('T')[0],
-        revenue: dayOrders.reduce((sum, o) => sum + o.total, 0),
-        orders: dayOrders.length,
-      });
+      dailyMap.set(date.toISOString().split('T')[0], { revenue: 0, orders: 0 });
     }
+
+    ordersLast7Days.forEach(order => {
+      const dateKey = order.createdAt.toISOString().split('T')[0];
+      if (dailyMap.has(dateKey)) {
+        const entry = dailyMap.get(dateKey);
+        entry.revenue += order.total;
+        entry.orders += 1;
+      }
+    });
+
+    const dailyRevenue = Array.from(dailyMap, ([date, data]) => ({
+      date,
+      revenue: data.revenue,
+      orders: data.orders,
+    }));
 
     // Achievements
     const achievements = await prisma.achievement.findMany({
@@ -326,15 +355,21 @@ router.get('/export', authenticate, requirePulperia, async (req, res) => {
     };
 
     if (format === 'csv') {
-      // Generate CSV for orders
+      // Generate CSV for orders con escape de caracteres especiales
       const csvHeader = 'Orden,Fecha,Cliente,Total,Estado\n';
       const csvRows = orders
         .map((o) =>
-          `${o.orderNumber},${o.createdAt.toISOString()},${o.user.name},L.${o.total},${o.status}`
+          [
+            escapeCSV(o.orderNumber),
+            escapeCSV(o.createdAt.toISOString()),
+            escapeCSV(o.user.name),
+            escapeCSV(`L.${o.total}`),
+            escapeCSV(o.status)
+          ].join(',')
         )
         .join('\n');
 
-      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
       res.setHeader('Content-Disposition', 'attachment; filename=ventas.csv');
       return res.send(csvHeader + csvRows);
     }

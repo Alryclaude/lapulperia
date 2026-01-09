@@ -278,7 +278,7 @@ router.post('/:id/apply', authenticate, uploadCV.single('cv'), async (req, res) 
     });
 
     if (existingApplication) {
-      return res.status(400).json({ error: { message: 'Ya aplicaste a este empleo' } });
+      return res.status(409).json({ error: { message: 'Ya aplicaste a este empleo' } });
     }
 
     const application = await prisma.jobApplication.create({

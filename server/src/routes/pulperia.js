@@ -34,6 +34,9 @@ router.get('/', optionalAuth, async (req, res) => {
       ];
     }
 
+    // Si hay coordenadas, no aplicar limit/offset en query (aplicar después del filtro)
+    const hasCoordinates = lat && lng;
+
     let pulperias = await prisma.pulperia.findMany({
       where,
       include: {
@@ -44,13 +47,13 @@ router.get('/', optionalAuth, async (req, res) => {
           select: { products: true, reviews: true },
         },
       },
-      take: parseInt(limit),
-      skip: parseInt(offset),
+      // Solo aplicar limit/offset si NO hay filtro de distancia
+      ...(!hasCoordinates && { take: parseInt(limit), skip: parseInt(offset) }),
       orderBy: { rating: 'desc' },
     });
 
     // Filter by distance if coordinates provided
-    if (lat && lng) {
+    if (hasCoordinates) {
       const userLat = parseFloat(lat);
       const userLng = parseFloat(lng);
       const maxRadius = parseFloat(radius);
@@ -63,6 +66,11 @@ router.get('/', optionalAuth, async (req, res) => {
 
       // Sort by distance
       pulperias.sort((a, b) => a.distance - b.distance);
+
+      // Aplicar paginación DESPUÉS del filtro de distancia
+      const start = parseInt(offset);
+      const end = start + parseInt(limit);
+      pulperias = pulperias.slice(start, end);
     }
 
     res.json({ pulperias });
@@ -209,11 +217,25 @@ router.patch('/me/status', authenticate, requirePulperia, async (req, res) => {
       },
     });
 
-    // Emit socket event for real-time update
+    // Emit socket event solo a usuarios interesados (que tienen notifyOnOpen)
     const io = req.app.get('io');
-    io.emit('pulperia-status-changed', {
-      pulperiaId: pulperia.id,
-      status: pulperia.status,
+    const interestedUsers = await prisma.favorite.findMany({
+      where: {
+        pulperiaId: pulperia.id,
+        notifyOnOpen: true,
+      },
+      select: { userId: true },
+    });
+
+    interestedUsers.forEach(fav => {
+      io.to(fav.userId).emit('pulperia-status-changed', {
+        pulperiaId: pulperia.id,
+        pulperiaName: pulperia.name,
+        status: pulperia.status,
+        message: status === 'OPEN'
+          ? `¡${pulperia.name} ya está abierta!`
+          : `${pulperia.name} cambió su estado a ${status}`,
+      });
     });
 
     res.json({ pulperia });

@@ -62,7 +62,7 @@ const PulperiaSettings = () => {
       toast.success('Cambios guardados');
       queryClient.invalidateQueries(['my-pulperia']);
     },
-    onError: () => toast.error('Error al guardar'),
+    onError: (error) => toast.error(error.response?.data?.error?.message || 'Error al guardar'),
   });
 
   const uploadLogoMutation = useMutation({
@@ -75,7 +75,7 @@ const PulperiaSettings = () => {
       toast.success('Logo actualizado');
       queryClient.invalidateQueries(['my-pulperia']);
     },
-    onError: () => toast.error('Error al subir logo'),
+    onError: (error) => toast.error(error.response?.data?.error?.message || 'Error al subir logo'),
   });
 
   const uploadBannerMutation = useMutation({
@@ -88,7 +88,16 @@ const PulperiaSettings = () => {
       toast.success('Banner actualizado');
       queryClient.invalidateQueries(['my-pulperia']);
     },
-    onError: () => toast.error('Error al subir banner'),
+    onError: (error) => toast.error(error.response?.data?.error?.message || 'Error al subir banner'),
+  });
+
+  const statusMutation = useMutation({
+    mutationFn: (data) => pulperiaApi.updateStatus(data),
+    onSuccess: () => {
+      toast.success('Estado actualizado');
+      queryClient.invalidateQueries(['my-pulperia']);
+    },
+    onError: (error) => toast.error(error.response?.data?.error?.message || 'Error al actualizar estado'),
   });
 
   const vacationMutation = useMutation({
@@ -98,7 +107,7 @@ const PulperiaSettings = () => {
       queryClient.invalidateQueries(['my-pulperia']);
       setShowVacationModal(false);
     },
-    onError: () => toast.error('Error al activar vacaciones'),
+    onError: (error) => toast.error(error.response?.data?.error?.message || 'Error al activar vacaciones'),
   });
 
   const exportMutation = useMutation({
@@ -120,7 +129,7 @@ const PulperiaSettings = () => {
       toast.success('Cuenta eliminada');
       window.location.href = '/';
     },
-    onError: () => toast.error('Error al eliminar cuenta'),
+    onError: (error) => toast.error(error.response?.data?.error?.message || 'Error al eliminar cuenta'),
   });
 
   const handleLogoChange = (e) => {
@@ -339,6 +348,42 @@ const PulperiaSettings = () => {
           </>
         )}
       </button>
+
+      {/* Store Status (Open/Closed) */}
+      <div className="card p-6">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
+            <Clock className="w-6 h-6 text-green-600" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-gray-900">Estado de la Tienda</h3>
+            <p className="text-sm text-gray-500">
+              {pulperia?.status === 'OPEN' ? 'Tu tienda está abierta' : 'Tu tienda está cerrada'}
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              const newStatus = pulperia?.status === 'OPEN' ? 'CLOSED' : 'OPEN';
+              // Use the update status mutation logic but through the dedicated status endpoint via prop or new mutation
+              // Since there isn't a dedicated status mutation here, I will use updateMutation if it handles it or add one.
+              // Wait, updateMutation calls pulperiaApi.update, which handles general info.
+              // pulperiaApi.updateStatus is better.
+              // I need a new mutation or reuse one?
+              // The component has updateMutation (general) and vacationMutation (status=VACATION).
+              // I will create a quick inline mutation call or add a statusMutation.
+              // For now, I'll assume I can use a new mutation or just use the API directly if I had access, but hooks are better.
+              // I will add 'statusMutation' to the component logic first.
+              statusMutation.mutate({ status: newStatus });
+            }}
+            disabled={statusMutation.isPending}
+            className={`w-12 h-7 rounded-full transition-colors ${pulperia?.status === 'OPEN' ? 'bg-green-500' : 'bg-gray-300'
+              }`}
+          >
+            <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${pulperia?.status === 'OPEN' ? 'translate-x-6' : 'translate-x-1'
+              }`} />
+          </button>
+        </div>
+      </div>
 
       {/* Online Only Mode */}
       <div className="card p-6">

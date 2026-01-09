@@ -30,6 +30,9 @@ router.get('/search', optionalAuth, async (req, res) => {
       where.outOfStock = false;
     }
 
+    // Si hay coordenadas, no aplicar limit en query (aplicar después del filtro de distancia)
+    const hasCoordinates = lat && lng;
+
     let products = await prisma.product.findMany({
       where,
       include: {
@@ -45,11 +48,12 @@ router.get('/search', optionalAuth, async (req, res) => {
           },
         },
       },
-      take: parseInt(limit),
+      // Solo aplicar limit si NO hay filtro de distancia
+      ...(!hasCoordinates && { take: parseInt(limit) }),
     });
 
     // Filter and sort by distance if coordinates provided
-    if (lat && lng) {
+    if (hasCoordinates) {
       const userLat = parseFloat(lat);
       const userLng = parseFloat(lng);
       const maxRadius = parseFloat(radius);
@@ -61,6 +65,9 @@ router.get('/search', optionalAuth, async (req, res) => {
       });
 
       products.sort((a, b) => a.distance - b.distance);
+
+      // Aplicar limit DESPUÉS del filtro de distancia
+      products = products.slice(0, parseInt(limit));
     }
 
     res.json({ products });
@@ -182,6 +189,16 @@ router.post('/', authenticate, requirePulperia, uploadProduct.single('image'), a
   try {
     const { name, description, price, category, isSeasonal, seasonalTag } = req.body;
 
+    // Validación de inputs
+    if (!name || name.trim().length === 0) {
+      return res.status(400).json({ error: { message: 'El nombre del producto es requerido' } });
+    }
+
+    const parsedPrice = parseFloat(price);
+    if (isNaN(parsedPrice) || parsedPrice <= 0) {
+      return res.status(400).json({ error: { message: 'El precio debe ser mayor a 0' } });
+    }
+
     if (!req.file) {
       return res.status(400).json({ error: { message: 'Se requiere imagen del producto' } });
     }
@@ -300,7 +317,25 @@ router.patch('/:id/stock', authenticate, requirePulperia, async (req, res) => {
         include: { user: true },
       });
 
-      // TODO: Send notifications to users
+      // Enviar notificaciones via Socket.IO
+      if (alerts.length > 0) {
+        const io = req.app.get('io');
+        const pulperia = await prisma.pulperia.findUnique({
+          where: { id: req.user.pulperia.id },
+          select: { name: true },
+        });
+
+        alerts.forEach(alert => {
+          io.to(alert.userId).emit('product-back-in-stock', {
+            productId: updatedProduct.id,
+            productName: updatedProduct.name,
+            productImage: updatedProduct.image,
+            pulperiaId: req.user.pulperia.id,
+            pulperiaName: pulperia?.name,
+            message: `¡${updatedProduct.name} ya está disponible en ${pulperia?.name}!`,
+          });
+        });
+      }
 
       await prisma.productAlert.updateMany({
         where: { productId: req.params.id },

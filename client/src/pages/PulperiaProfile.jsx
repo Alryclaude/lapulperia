@@ -40,9 +40,10 @@ const PulperiaProfile = () => {
   // Toggle favorite
   const favoriteMutation = useMutation({
     mutationFn: () => pulperiaApi.toggleFavorite(id, { notifyOnOpen: true }),
-    onSuccess: () => {
+    onSuccess: (response) => {
       queryClient.invalidateQueries(['pulperia', id]);
-      toast.success(isFavorite ? 'Eliminado de favoritos' : 'Agregado a favoritos');
+      // Usar response.data.isFavorite en vez del valor del closure (que está desactualizado)
+      toast.success(response.data.isFavorite ? 'Agregado a favoritos' : 'Eliminado de favoritos');
     },
   });
 
@@ -148,7 +149,7 @@ const PulperiaProfile = () => {
       </div>
 
       {/* Info */}
-      <div className="pt-8 px-1">
+      <div className="pt-16 px-1">
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{pulperia.name}</h1>
@@ -291,8 +292,8 @@ const PulperiaProfile = () => {
                           <Star
                             key={i}
                             className={`w-4 h-4 ${i < review.rating
-                                ? 'text-amber-400 fill-amber-400'
-                                : 'text-gray-300'
+                              ? 'text-amber-400 fill-amber-400'
+                              : 'text-gray-300'
                               }`}
                           />
                         ))}

@@ -66,7 +66,27 @@ router.get('/my-catalogs', authenticate, async (req, res) => {
   }
 });
 
-// Get single catalog
+// Get catalogs by user (DEBE estar antes de /:id para que Express lo matchee correctamente)
+router.get('/user/:userId', optionalAuth, async (req, res) => {
+  try {
+    const catalogs = await prisma.serviceCatalog.findMany({
+      where: { userId: req.params.userId },
+      include: {
+        user: {
+          select: { id: true, name: true, avatar: true, phone: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    res.json({ catalogs });
+  } catch (error) {
+    console.error('Get user catalogs error:', error);
+    res.status(500).json({ error: { message: 'Error al obtener catálogos' } });
+  }
+});
+
+// Get single catalog (wildcard - debe ir después de rutas específicas)
 router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const catalog = await prisma.serviceCatalog.findUnique({
@@ -89,26 +109,6 @@ router.get('/:id', optionalAuth, async (req, res) => {
   }
 });
 
-// Get catalogs by user
-router.get('/user/:userId', optionalAuth, async (req, res) => {
-  try {
-    const catalogs = await prisma.serviceCatalog.findMany({
-      where: { userId: req.params.userId },
-      include: {
-        user: {
-          select: { id: true, name: true, avatar: true, phone: true },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    res.json({ catalogs });
-  } catch (error) {
-    console.error('Get user catalogs error:', error);
-    res.status(500).json({ error: { message: 'Error al obtener catálogos' } });
-  }
-});
-
 // Create service catalog
 router.post('/', authenticate, uploadService.array('images', 6), async (req, res) => {
   try {
@@ -127,7 +127,7 @@ router.post('/', authenticate, uploadService.array('images', 6), async (req, res
     });
 
     if (existing) {
-      return res.status(400).json({ error: { message: 'Ya tienes un catálogo para esta profesión' } });
+      return res.status(409).json({ error: { message: 'Ya tienes un catálogo para esta profesión' } });
     }
 
     const catalog = await prisma.serviceCatalog.create({

@@ -23,6 +23,11 @@ import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import Search from './pages/Search';
 import Favorites from './pages/Favorites';
+import MyReviews from './pages/MyReviews';
+import MyApplications from './pages/MyApplications';
+import NotificationSettings from './pages/NotificationSettings';
+import PrivacySettings from './pages/PrivacySettings';
+import Help from './pages/Help';
 
 // Pulperia Pages
 import Dashboard from './pages/pulperia/Dashboard';
@@ -85,6 +90,13 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/my-services" element={<ServiceCatalog isOwner />} />
+          {/* Nuevas rutas para enlaces de Profile */}
+          <Route path="/reviews" element={<MyReviews />} />
+          <Route path="/applications" element={<MyApplications />} />
+          <Route path="/profile/services" element={<Navigate to="/my-services" replace />} />
+          <Route path="/settings/notifications" element={<NotificationSettings />} />
+          <Route path="/settings/privacy" element={<PrivacySettings />} />
+          <Route path="/help" element={<Help />} />
         </Route>
 
         {/* Pulperia Routes */}

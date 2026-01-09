@@ -129,7 +129,7 @@ router.patch('/me', authenticate, async (req, res) => {
 router.post('/create-pulperia', authenticate, async (req, res) => {
   try {
     if (req.user.pulperia) {
-      return res.status(400).json({ error: { message: 'Ya tienes una pulpería' } });
+      return res.status(409).json({ error: { message: 'Ya tienes una pulpería' } });
     }
 
     const { name, latitude, longitude, address, reference, phone, whatsapp } = req.body;
@@ -163,6 +163,48 @@ router.post('/create-pulperia', authenticate, async (req, res) => {
   } catch (error) {
     console.error('Create pulperia error:', error);
     res.status(500).json({ error: { message: 'Error al crear pulpería' } });
+  }
+});
+
+// Export user data
+router.get('/export', authenticate, async (req, res) => {
+  try {
+    const userData = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      include: {
+        pulperia: {
+          include: {
+            products: true,
+            orders: {
+              include: { items: true },
+            },
+            reviews: true,
+            jobs: true,
+            dailyStats: true,
+          },
+        },
+        orders: {
+          include: { items: true },
+        },
+        reviews: true,
+        serviceCatalogs: true,
+        favorites: {
+          include: {
+            pulperia: {
+              select: { id: true, name: true },
+            },
+          },
+        },
+      },
+    });
+
+    res.json({
+      exportDate: new Date().toISOString(),
+      user: userData,
+    });
+  } catch (error) {
+    console.error('Export data error:', error);
+    res.status(500).json({ error: { message: 'Error al exportar datos' } });
   }
 });
 

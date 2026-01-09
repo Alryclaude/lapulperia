@@ -90,13 +90,26 @@ router.post('/', authenticate, async (req, res) => {
       return res.status(400).json({ error: { message: 'Se requieren productos' } });
     }
 
+    // Validar que todas las cantidades sean números enteros positivos
+    const invalidItems = items.filter(item =>
+      !item.quantity ||
+      !Number.isInteger(item.quantity) ||
+      item.quantity <= 0
+    );
+    if (invalidItems.length > 0) {
+      return res.status(400).json({ error: { message: 'Las cantidades deben ser números enteros positivos' } });
+    }
+
     // Verify pulperia exists and is open
     const pulperia = await prisma.pulperia.findUnique({
       where: { id: pulperiaId },
     });
 
-    if (!pulperia || pulperia.isPermanentlyClosed) {
-      return res.status(400).json({ error: { message: 'Pulpería no disponible' } });
+    if (!pulperia) {
+      return res.status(404).json({ error: { message: 'Pulpería no encontrada' } });
+    }
+    if (pulperia.isPermanentlyClosed) {
+      return res.status(410).json({ error: { message: 'Pulpería cerrada permanentemente' } });
     }
 
     // Get product details and calculate total
@@ -161,6 +174,22 @@ router.post('/', authenticate, async (req, res) => {
 router.post('/batch', authenticate, async (req, res) => {
   try {
     const { orders } = req.body;
+
+    if (!orders || !Array.isArray(orders) || orders.length === 0) {
+      return res.status(400).json({ error: { message: 'Se requiere al menos un pedido' } });
+    }
+
+    // Validar todas las cantidades en todos los pedidos
+    for (const orderData of orders) {
+      const invalidItems = (orderData.items || []).filter(item =>
+        !item.quantity ||
+        !Number.isInteger(item.quantity) ||
+        item.quantity <= 0
+      );
+      if (invalidItems.length > 0) {
+        return res.status(400).json({ error: { message: 'Las cantidades deben ser números enteros positivos' } });
+      }
+    }
 
     const createdOrders = [];
 
@@ -383,8 +412,51 @@ async function checkAchievements(pulperiaId) {
       });
     }
 
-    // Check streak (7 days)
-    // TODO: Implement streak tracking
+    // Check streak (7 days of consecutive deliveries)
+    if (!existingTypes.includes('STREAK_7')) {
+      const now = new Date();
+      const sevenDaysAgo = new Date(now);
+      sevenDaysAgo.setDate(now.getDate() - 6); // Incluye hoy
+      sevenDaysAgo.setHours(0, 0, 0, 0);
+
+      // Obtener entregas de los últimos 7 días
+      const recentDeliveries = await prisma.order.findMany({
+        where: {
+          pulperiaId,
+          status: 'DELIVERED',
+          deliveredAt: { gte: sevenDaysAgo },
+        },
+        select: { deliveredAt: true },
+      });
+
+      // Crear set de fechas con entregas (formato YYYY-MM-DD)
+      const deliveryDates = new Set(
+        recentDeliveries
+          .filter(o => o.deliveredAt)
+          .map(o => o.deliveredAt.toISOString().split('T')[0])
+      );
+
+      // Verificar si hay entregas en los 7 días consecutivos
+      let consecutiveDays = 0;
+      for (let i = 0; i < 7; i++) {
+        const checkDate = new Date(now);
+        checkDate.setDate(now.getDate() - i);
+        const dateStr = checkDate.toISOString().split('T')[0];
+
+        if (deliveryDates.has(dateStr)) {
+          consecutiveDays++;
+        } else {
+          break; // Streak roto
+        }
+      }
+
+      // Desbloquear achievement si tiene 7 días consecutivos
+      if (consecutiveDays >= 7) {
+        await prisma.achievement.create({
+          data: { pulperiaId, type: 'STREAK_7' },
+        });
+      }
+    }
   } catch (error) {
     console.error('Check achievements error:', error);
   }

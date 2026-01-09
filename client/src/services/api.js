@@ -108,6 +108,7 @@ export const jobApi = {
 
 export const reviewApi = {
   getByPulperia: (pulperiaId, params) => api.get(`/reviews/pulperia/${pulperiaId}`, { params }),
+  getMyReviews: () => api.get('/reviews/my-reviews'),
   create: (data) => api.post('/reviews', data),
   update: (id, data) => api.patch(`/reviews/${id}`, data),
   delete: (id) => api.delete(`/reviews/${id}`),
@@ -139,4 +140,6 @@ export const userApi = {
   getStats: () => api.get('/auth/me'),
   getProfile: () => api.get('/auth/me'),
   updateProfile: (data) => api.patch('/auth/me', data),
+  exportData: () => api.get('/auth/export'),
+  deleteAccount: () => api.delete('/auth/me'),
 };
