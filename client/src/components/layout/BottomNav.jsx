@@ -31,24 +31,32 @@ const BottomNav = ({ isPulperia = false }) => {
   const links = isPulperia ? pulperiaLinks : clientLinks;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-gray-200/50 pb-safe">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-white/10 pb-safe">
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
         {links.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
+            end={to === '/' || to === '/dashboard'}
             className={({ isActive }) =>
-              `flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-colors ${
+              `flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 ${
                 isActive
-                  ? 'text-primary-600'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'text-primary-500'
+                  : 'text-gray-500 hover:text-gray-300'
               }`
             }
           >
             {({ isActive }) => (
               <>
-                <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : ''}`} />
-                <span className="text-xs font-medium">{label}</span>
+                <div className={`relative ${isActive ? 'scale-110' : ''} transition-transform duration-200`}>
+                  <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : ''}`} />
+                  {isActive && (
+                    <div className="absolute inset-0 bg-primary-500/20 blur-lg rounded-full" />
+                  )}
+                </div>
+                <span className={`text-xs font-medium ${isActive ? 'text-primary-400' : ''}`}>
+                  {label}
+                </span>
               </>
             )}
           </NavLink>

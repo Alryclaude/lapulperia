@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   TrendingUp,
   Package,
@@ -11,14 +11,9 @@ import {
   Zap,
   Trophy,
   Target,
-  ArrowUp,
-  ArrowDown,
-  Clock,
   DollarSign,
-  Eye,
   Award,
   Flame,
-  ChevronRight,
   Download,
   ToggleLeft,
   ToggleRight,
@@ -44,7 +39,7 @@ const Dashboard = () => {
   const { data: statsData, isLoading } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: () => statsApi.getDashboard(),
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 30000,
   });
 
   const stats = statsData?.data || {};
@@ -97,11 +92,11 @@ const Dashboard = () => {
 
   // Achievement icons
   const achievementIcons = {
-    FIRST_SALE: { icon: Star, color: 'text-yellow-500', bg: 'bg-yellow-100' },
-    STREAK_7: { icon: Flame, color: 'text-orange-500', bg: 'bg-orange-100' },
-    HUNDRED_CUSTOMERS: { icon: Users, color: 'text-blue-500', bg: 'bg-blue-100' },
-    FIVE_STARS: { icon: Trophy, color: 'text-purple-500', bg: 'bg-purple-100' },
-    TOP_SELLER: { icon: Award, color: 'text-green-500', bg: 'bg-green-100' },
+    FIRST_SALE: { icon: Star, color: 'text-yellow-400', bg: 'bg-yellow-500/20' },
+    STREAK_7: { icon: Flame, color: 'text-orange-400', bg: 'bg-orange-500/20' },
+    HUNDRED_CUSTOMERS: { icon: Users, color: 'text-blue-400', bg: 'bg-blue-500/20' },
+    FIVE_STARS: { icon: Trophy, color: 'text-purple-400', bg: 'bg-purple-500/20' },
+    TOP_SELLER: { icon: Award, color: 'text-green-400', bg: 'bg-green-500/20' },
   };
 
   return (
@@ -109,8 +104,8 @@ const Dashboard = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Centro de Comando</h1>
-          <p className="text-gray-500">Bienvenido, {user?.name}</p>
+          <h1 className="text-2xl font-bold text-white">Centro de Comando</h1>
+          <p className="text-gray-400">Bienvenido, {user?.name}</p>
         </div>
 
         {/* Status Toggle */}
@@ -118,8 +113,8 @@ const Dashboard = () => {
           onClick={handleToggleStatus}
           className={`flex items-center gap-3 px-5 py-3 rounded-2xl font-medium transition-all ${
             isOpen
-              ? 'bg-green-500 text-white hover:bg-green-600'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              ? 'bg-green-500 text-white shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:bg-green-600'
+              : 'bg-dark-100 text-gray-300 border border-white/10 hover:bg-dark-50'
           }`}
         >
           {isOpen ? (
@@ -142,20 +137,23 @@ const Dashboard = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="card p-5"
+          className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-5 relative overflow-hidden"
         >
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
-              <DollarSign className="w-5 h-5 text-green-600" />
+          <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent" />
+          <div className="relative">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center">
+                <DollarSign className="w-5 h-5 text-green-400" />
+              </div>
+              <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400">Hoy</span>
             </div>
-            <span className="badge-success">Hoy</span>
+            <p className="text-2xl font-bold text-white">
+              L. {(stats.today?.revenue || 0).toFixed(2)}
+            </p>
+            <p className="text-sm text-gray-400 mt-1">
+              {stats.today?.orders || 0} ordenes
+            </p>
           </div>
-          <p className="text-2xl font-bold text-gray-900">
-            L. {(stats.today?.revenue || 0).toFixed(2)}
-          </p>
-          <p className="text-sm text-gray-500 mt-1">
-            {stats.today?.orders || 0} ordenes
-          </p>
         </motion.div>
 
         {/* This Week */}
@@ -163,20 +161,23 @@ const Dashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="card p-5"
+          className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-5 relative overflow-hidden"
         >
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-blue-600" />
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent" />
+          <div className="relative">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-blue-400" />
+              </div>
+              <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400">Semana</span>
             </div>
-            <span className="badge bg-blue-100 text-blue-700">Semana</span>
+            <p className="text-2xl font-bold text-white">
+              L. {(stats.week?.revenue || 0).toFixed(2)}
+            </p>
+            <p className="text-sm text-gray-400 mt-1">
+              {stats.week?.orders || 0} ordenes
+            </p>
           </div>
-          <p className="text-2xl font-bold text-gray-900">
-            L. {(stats.week?.revenue || 0).toFixed(2)}
-          </p>
-          <p className="text-sm text-gray-500 mt-1">
-            {stats.week?.orders || 0} ordenes
-          </p>
         </motion.div>
 
         {/* Pending Orders */}
@@ -184,30 +185,33 @@ const Dashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="card p-5"
+          className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-5 relative overflow-hidden"
         >
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
-              <ShoppingBag className="w-5 h-5 text-orange-600" />
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent" />
+          <div className="relative">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center">
+                <ShoppingBag className="w-5 h-5 text-orange-400" />
+              </div>
+              {stats.today?.pending > 0 && (
+                <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-500/20 text-orange-400 animate-pulse">
+                  {stats.today.pending} nuevas
+                </span>
+              )}
             </div>
+            <p className="text-2xl font-bold text-white">
+              {stats.today?.pending || 0}
+            </p>
+            <p className="text-sm text-gray-400 mt-1">Ordenes pendientes</p>
             {stats.today?.pending > 0 && (
-              <span className="badge-warning animate-pulse">
-                {stats.today.pending} nuevas
-              </span>
+              <Link
+                to="/manage/orders"
+                className="text-primary-400 text-sm font-medium hover:text-primary-300 mt-2 inline-block transition-colors"
+              >
+                Ver ordenes →
+              </Link>
             )}
           </div>
-          <p className="text-2xl font-bold text-gray-900">
-            {stats.today?.pending || 0}
-          </p>
-          <p className="text-sm text-gray-500 mt-1">Ordenes pendientes</p>
-          {stats.today?.pending > 0 && (
-            <Link
-              to="/manage/orders"
-              className="text-primary-600 text-sm font-medium hover:underline mt-2 inline-block"
-            >
-              Ver ordenes →
-            </Link>
-          )}
         </motion.div>
 
         {/* Rating */}
@@ -215,19 +219,22 @@ const Dashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="card p-5"
+          className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-5 relative overflow-hidden"
         >
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-xl bg-yellow-100 flex items-center justify-center">
-              <Star className="w-5 h-5 text-yellow-600" />
+          <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-transparent" />
+          <div className="relative">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 rounded-xl bg-yellow-500/20 flex items-center justify-center">
+                <Star className="w-5 h-5 text-yellow-400" />
+              </div>
             </div>
+            <p className="text-2xl font-bold text-white">
+              {pulperia?.rating?.toFixed(1) || '0.0'}
+            </p>
+            <p className="text-sm text-gray-400 mt-1">
+              {pulperia?.reviewCount || 0} reseñas
+            </p>
           </div>
-          <p className="text-2xl font-bold text-gray-900">
-            {pulperia?.rating?.toFixed(1) || '0.0'}
-          </p>
-          <p className="text-sm text-gray-500 mt-1">
-            {pulperia?.reviewCount || 0} reseñas
-          </p>
         </motion.div>
       </div>
 
@@ -236,27 +243,27 @@ const Dashboard = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="card p-5"
+          className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-5"
         >
-          <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-yellow-500" />
+          <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-yellow-400" />
             Tus Logros
           </h3>
           <div className="flex flex-wrap gap-3">
             {stats.achievements.map((achievement) => {
               const config = achievementIcons[achievement.type] || {
                 icon: Award,
-                color: 'text-gray-500',
-                bg: 'bg-gray-100',
+                color: 'text-gray-400',
+                bg: 'bg-gray-500/20',
               };
               const Icon = config.icon;
               return (
                 <div
                   key={achievement.id}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl ${config.bg}`}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl ${config.bg} border border-white/5`}
                 >
                   <Icon className={`w-5 h-5 ${config.color}`} />
-                  <span className="font-medium text-gray-700">
+                  <span className="font-medium text-gray-300">
                     {achievement.type.replace(/_/g, ' ')}
                   </span>
                 </div>
@@ -270,64 +277,64 @@ const Dashboard = () => {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Link
           to="/manage/orders"
-          className="card p-5 hover:shadow-md transition-shadow group"
+          className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-5 hover:border-primary-500/30 transition-all group"
         >
-          <ShoppingBag className="w-8 h-8 text-primary-500 mb-3 group-hover:scale-110 transition-transform" />
-          <h3 className="font-semibold text-gray-900">Ordenes</h3>
-          <p className="text-sm text-gray-500">Gestiona tus pedidos</p>
+          <ShoppingBag className="w-8 h-8 text-primary-400 mb-3 group-hover:scale-110 transition-transform" />
+          <h3 className="font-semibold text-white">Ordenes</h3>
+          <p className="text-sm text-gray-400">Gestiona tus pedidos</p>
         </Link>
 
         <Link
           to="/manage/products"
-          className="card p-5 hover:shadow-md transition-shadow group"
+          className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-5 hover:border-blue-500/30 transition-all group"
         >
-          <Package className="w-8 h-8 text-blue-500 mb-3 group-hover:scale-110 transition-transform" />
-          <h3 className="font-semibold text-gray-900">Productos</h3>
-          <p className="text-sm text-gray-500">Agrega y edita</p>
+          <Package className="w-8 h-8 text-blue-400 mb-3 group-hover:scale-110 transition-transform" />
+          <h3 className="font-semibold text-white">Productos</h3>
+          <p className="text-sm text-gray-400">Agrega y edita</p>
         </Link>
 
         <Link
           to="/manage/jobs"
-          className="card p-5 hover:shadow-md transition-shadow group"
+          className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-5 hover:border-purple-500/30 transition-all group"
         >
-          <Users className="w-8 h-8 text-purple-500 mb-3 group-hover:scale-110 transition-transform" />
-          <h3 className="font-semibold text-gray-900">Empleos</h3>
-          <p className="text-sm text-gray-500">Publica vacantes</p>
+          <Users className="w-8 h-8 text-purple-400 mb-3 group-hover:scale-110 transition-transform" />
+          <h3 className="font-semibold text-white">Empleos</h3>
+          <p className="text-sm text-gray-400">Publica vacantes</p>
         </Link>
 
         <Link
           to="/pulperia/settings"
-          className="card p-5 hover:shadow-md transition-shadow group"
+          className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-5 hover:border-green-500/30 transition-all group"
         >
-          <Target className="w-8 h-8 text-green-500 mb-3 group-hover:scale-110 transition-transform" />
-          <h3 className="font-semibold text-gray-900">Perfil</h3>
-          <p className="text-sm text-gray-500">Configura tu negocio</p>
+          <Target className="w-8 h-8 text-green-400 mb-3 group-hover:scale-110 transition-transform" />
+          <h3 className="font-semibold text-white">Perfil</h3>
+          <p className="text-sm text-gray-400">Configura tu negocio</p>
         </Link>
       </div>
 
       {/* Top Products & Insights */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Top Products */}
-        <div className="card p-5">
-          <h3 className="font-semibold text-gray-900 mb-4">Productos Top</h3>
+        <div className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-5">
+          <h3 className="font-semibold text-white mb-4">Productos Top</h3>
           {stats.topProducts?.length > 0 ? (
             <div className="space-y-3">
               {stats.topProducts.map((product, index) => (
                 <div
                   key={product.productId}
-                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50"
+                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors"
                 >
                   <span className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${
-                    index === 0 ? 'bg-yellow-100 text-yellow-700' :
-                    index === 1 ? 'bg-gray-200 text-gray-600' :
-                    index === 2 ? 'bg-orange-100 text-orange-700' :
-                    'bg-gray-100 text-gray-500'
+                    index === 0 ? 'bg-yellow-500/20 text-yellow-400' :
+                    index === 1 ? 'bg-gray-500/20 text-gray-400' :
+                    index === 2 ? 'bg-orange-500/20 text-orange-400' :
+                    'bg-dark-50 text-gray-500'
                   }`}>
                     {index + 1}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 truncate">{product.name}</p>
-                    <p className="text-sm text-gray-500">{product.quantity} vendidos</p>
+                    <p className="font-medium text-white truncate">{product.name}</p>
+                    <p className="text-sm text-gray-400">{product.quantity} vendidos</p>
                   </div>
                 </div>
               ))}
@@ -338,9 +345,9 @@ const Dashboard = () => {
         </div>
 
         {/* Insights */}
-        <div className="card p-5">
-          <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <Zap className="w-5 h-5 text-yellow-500" />
+        <div className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-5">
+          <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
+            <Zap className="w-5 h-5 text-yellow-400" />
             Radar de Ventas
           </h3>
           {insights.length > 0 ? (
@@ -348,9 +355,9 @@ const Dashboard = () => {
               {insights.map((insight, index) => (
                 <div
                   key={index}
-                  className="p-3 rounded-xl bg-gradient-to-r from-primary-50 to-blue-50 border border-primary-100"
+                  className="p-3 rounded-xl bg-gradient-to-r from-primary-500/10 to-blue-500/10 border border-primary-500/20"
                 >
-                  <p className="text-gray-700">{insight.message}</p>
+                  <p className="text-gray-300">{insight.message}</p>
                 </div>
               ))}
             </div>
@@ -363,19 +370,19 @@ const Dashboard = () => {
       </div>
 
       {/* Export Section */}
-      <div className="card p-5">
-        <h3 className="font-semibold text-gray-900 mb-4">Exportar Datos</h3>
+      <div className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-5">
+        <h3 className="font-semibold text-white mb-4">Exportar Datos</h3>
         <div className="flex flex-wrap gap-3">
           <button
             onClick={() => handleExport('csv')}
-            className="btn-secondary"
+            className="flex items-center gap-2 px-4 py-2.5 bg-dark-50 text-gray-300 border border-white/10 rounded-xl hover:bg-dark-200 transition-colors"
           >
             <Download className="w-4 h-4" />
             Descargar CSV
           </button>
           <button
             onClick={() => handleExport('json')}
-            className="btn-secondary"
+            className="flex items-center gap-2 px-4 py-2.5 bg-dark-50 text-gray-300 border border-white/10 rounded-xl hover:bg-dark-200 transition-colors"
           >
             <Download className="w-4 h-4" />
             Descargar JSON

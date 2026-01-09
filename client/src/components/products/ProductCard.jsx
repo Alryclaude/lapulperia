@@ -6,7 +6,6 @@ import { useAuthStore } from '../../stores/authStore';
 import toast from 'react-hot-toast';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { cardHover } from '@/lib/animations';
 
 const ProductCard = ({ product, pulperia, showPulperia = false }) => {
@@ -59,15 +58,18 @@ const ProductCard = ({ product, pulperia, showPulperia = false }) => {
         whileHover="hover"
         whileTap="tap"
       >
-        <Card className="overflow-hidden group h-full">
+        <Card className="overflow-hidden group h-full bg-dark-100/60 backdrop-blur-sm border-white/5 hover:border-white/10 transition-all duration-300">
           {/* Image */}
-          <div className="relative aspect-square bg-muted">
+          <div className="relative aspect-square bg-dark-200">
             <img
               src={product.imageUrl}
               alt={product.name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               loading="lazy"
             />
+
+            {/* Gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-dark-400/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
             {/* Badges */}
             <div className="absolute top-2 left-2 flex flex-col gap-1.5">
@@ -78,7 +80,7 @@ const ProductCard = ({ product, pulperia, showPulperia = false }) => {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -10 }}
                   >
-                    <Badge variant="accent" className="gap-1 shadow-sm">
+                    <Badge className="gap-1 bg-accent-500/90 text-white border-accent-400/50 shadow-gold">
                       <Sparkles className="w-3 h-3" />
                       Destacado
                     </Badge>
@@ -90,7 +92,7 @@ const ProductCard = ({ product, pulperia, showPulperia = false }) => {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -10 }}
                   >
-                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 gap-1 shadow-sm">
+                    <Badge className="bg-blue-500/20 text-blue-300 border-blue-400/30 gap-1">
                       <Calendar className="w-3 h-3" />
                       {product.seasonalTag || 'Temporada'}
                     </Badge>
@@ -102,7 +104,7 @@ const ProductCard = ({ product, pulperia, showPulperia = false }) => {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -10 }}
                   >
-                    <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200 gap-1 shadow-sm">
+                    <Badge className="bg-orange-500/20 text-orange-300 border-orange-400/30 gap-1">
                       <Zap className="w-3 h-3" />
                       Se agota rapido
                     </Badge>
@@ -118,9 +120,9 @@ const ProductCard = ({ product, pulperia, showPulperia = false }) => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="absolute inset-0 bg-background/80 backdrop-blur-[2px] flex items-center justify-center"
+                  className="absolute inset-0 bg-dark-400/90 backdrop-blur-[2px] flex items-center justify-center"
                 >
-                  <Badge variant="destructive" className="gap-1.5 shadow-lg">
+                  <Badge className="gap-1.5 bg-red-500/90 text-white shadow-lg">
                     <AlertTriangle className="w-4 h-4" />
                     Agotado
                   </Badge>
@@ -131,7 +133,7 @@ const ProductCard = ({ product, pulperia, showPulperia = false }) => {
             {/* Views count for featured */}
             {product.isFeatured && product.viewsToday > 0 && (
               <div className="absolute bottom-2 right-2">
-                <Badge variant="secondary" className="bg-black/60 text-white border-none gap-1">
+                <Badge className="bg-dark-400/80 text-white border-white/10 gap-1">
                   <Eye className="w-3 h-3" />
                   {product.viewsToday}
                 </Badge>
@@ -147,7 +149,7 @@ const ProductCard = ({ product, pulperia, showPulperia = false }) => {
                   exit={{ opacity: 0, scale: 0.8 }}
                   className="absolute top-2 right-2"
                 >
-                  <Badge className="bg-primary-500 text-white shadow-lg">
+                  <Badge className="bg-primary-500 text-white shadow-primary border-none">
                     {quantity}
                   </Badge>
                 </motion.div>
@@ -159,24 +161,24 @@ const ProductCard = ({ product, pulperia, showPulperia = false }) => {
           <div className="p-3">
             {/* Pulperia name */}
             {showPulperia && pulperia && (
-              <p className="text-xs text-muted-foreground mb-1 truncate">
+              <p className="text-xs text-gray-500 mb-1 truncate">
                 {pulperia.name}
               </p>
             )}
 
             {/* Product name */}
-            <h3 className="font-medium text-foreground line-clamp-2 text-sm group-hover:text-primary-600 transition-colors">
+            <h3 className="font-medium text-white line-clamp-2 text-sm group-hover:text-primary-400 transition-colors">
               {product.name}
             </h3>
 
             {/* Category */}
             {product.category && (
-              <p className="text-xs text-muted-foreground mt-0.5">{product.category}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{product.category}</p>
             )}
 
             {/* Price and cart button */}
             <div className="flex items-center justify-between mt-3">
-              <span className="font-bold text-foreground">
+              <span className="font-bold text-white">
                 L. {product.price.toFixed(2)}
               </span>
 
@@ -186,7 +188,7 @@ const ProductCard = ({ product, pulperia, showPulperia = false }) => {
                     <motion.button
                       whileTap={{ scale: 0.9 }}
                       onClick={handleDecrement}
-                      className="w-8 h-8 rounded-lg bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors"
+                      className="w-8 h-8 rounded-lg bg-dark-50 hover:bg-dark-200 flex items-center justify-center transition-colors text-gray-300"
                     >
                       <Minus className="w-4 h-4" />
                     </motion.button>
@@ -194,7 +196,7 @@ const ProductCard = ({ product, pulperia, showPulperia = false }) => {
                       key={quantity}
                       initial={{ scale: 1.2 }}
                       animate={{ scale: 1 }}
-                      className="w-8 text-center font-semibold text-sm tabular-nums"
+                      className="w-8 text-center font-semibold text-sm tabular-nums text-white"
                     >
                       {quantity}
                     </motion.span>
@@ -210,7 +212,7 @@ const ProductCard = ({ product, pulperia, showPulperia = false }) => {
                   <motion.button
                     whileTap={{ scale: 0.9 }}
                     onClick={handleAddToCart}
-                    className="w-9 h-9 rounded-xl bg-primary-500 hover:bg-primary-600 text-white flex items-center justify-center transition-colors shadow-sm"
+                    className="w-9 h-9 rounded-xl bg-primary-500 hover:bg-primary-600 text-white flex items-center justify-center transition-colors shadow-primary"
                   >
                     <Plus className="w-5 h-5" />
                   </motion.button>

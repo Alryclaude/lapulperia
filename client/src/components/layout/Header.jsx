@@ -3,8 +3,6 @@ import { useState } from 'react';
 import {
   Search,
   ShoppingCart,
-  Menu,
-  X,
   User,
   LogOut,
   Settings,
@@ -15,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { useCartStore } from '../../stores/cartStore';
+import { Logo } from '../Logo';
 
 const Header = ({ isPulperia = false }) => {
   const navigate = useNavigate();
@@ -40,28 +39,25 @@ const Header = ({ isPulperia = false }) => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-200/50">
+    <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to={isPulperia ? '/dashboard' : '/'} className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-sm">
-              <Store className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-semibold text-gray-900 hidden sm:block">La Pulperia</span>
+            <Logo size="sm" showText={true} />
           </Link>
 
           {/* Search - Desktop */}
           {!isPulperia && (
             <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md mx-8">
               <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
                 <input
                   type="text"
                   placeholder="Buscar productos, pulperias..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-gray-100/80 border-0 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 bg-dark-100/80 border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-500 focus:bg-dark-100 focus:border-primary-500/50 focus:ring-2 focus:ring-primary-500/20 transition-all"
                 />
               </div>
             </form>
@@ -73,7 +69,7 @@ const Header = ({ isPulperia = false }) => {
             {!isPulperia && (
               <Link
                 to="/search"
-                className="md:hidden p-2.5 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                className="md:hidden p-2.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
               >
                 <Search className="w-5 h-5" />
               </Link>
@@ -83,11 +79,11 @@ const Header = ({ isPulperia = false }) => {
             {isAuthenticated && !isPulperia && (
               <Link
                 to="/cart"
-                className="relative p-2.5 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                className="relative p-2.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
               >
                 <ShoppingCart className="w-5 h-5" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary-500 text-white text-xs font-medium rounded-full flex items-center justify-center">
+                  <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary-500 text-white text-xs font-medium rounded-full flex items-center justify-center shadow-glow-red">
                     {cartCount > 9 ? '9+' : cartCount}
                   </span>
                 )}
@@ -99,17 +95,17 @@ const Header = ({ isPulperia = false }) => {
               <div className="relative">
                 <button
                   onClick={() => setMenuOpen(!menuOpen)}
-                  className="flex items-center gap-2 p-1.5 hover:bg-gray-100 rounded-xl transition-colors"
+                  className="flex items-center gap-2 p-1.5 hover:bg-white/10 rounded-xl transition-colors"
                 >
                   {user?.avatar ? (
                     <img
                       src={user.avatar}
                       alt={user.name}
-                      className="w-8 h-8 rounded-full object-cover"
+                      className="w-8 h-8 rounded-full object-cover ring-2 ring-primary-500/50"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
-                      <User className="w-4 h-4 text-primary-600" />
+                    <div className="w-8 h-8 rounded-full bg-primary-500/20 flex items-center justify-center ring-2 ring-primary-500/50">
+                      <User className="w-4 h-4 text-primary-400" />
                     </div>
                   )}
                 </button>
@@ -121,17 +117,17 @@ const Header = ({ isPulperia = false }) => {
                       className="fixed inset-0 z-40"
                       onClick={() => setMenuOpen(false)}
                     />
-                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 animate-scale-in">
-                      <div className="px-4 py-3 border-b border-gray-100">
-                        <p className="font-medium text-gray-900 truncate">{user.name}</p>
-                        <p className="text-sm text-gray-500 truncate">{user.email}</p>
+                    <div className="absolute right-0 mt-2 w-56 bg-dark-100 rounded-2xl shadow-xl border border-white/10 py-2 z-50 animate-scale-in">
+                      <div className="px-4 py-3 border-b border-white/10">
+                        <p className="font-medium text-white truncate">{user.name}</p>
+                        <p className="text-sm text-gray-400 truncate">{user.email}</p>
                       </div>
 
                       {user.role === 'PULPERIA' && !isPulperia && (
                         <Link
                           to="/dashboard"
                           onClick={() => setMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
                         >
                           <LayoutDashboard className="w-5 h-5" />
                           Centro de Comando
@@ -142,7 +138,7 @@ const Header = ({ isPulperia = false }) => {
                         <Link
                           to="/"
                           onClick={() => setMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
                         >
                           <Store className="w-5 h-5" />
                           Ver Marketplace
@@ -152,7 +148,7 @@ const Header = ({ isPulperia = false }) => {
                       <Link
                         to="/orders"
                         onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
                       >
                         <Package className="w-5 h-5" />
                         Mis Pedidos
@@ -161,7 +157,7 @@ const Header = ({ isPulperia = false }) => {
                       <Link
                         to="/favorites"
                         onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
                       >
                         <Heart className="w-5 h-5" />
                         Favoritos
@@ -170,16 +166,16 @@ const Header = ({ isPulperia = false }) => {
                       <Link
                         to="/settings"
                         onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
                       >
                         <Settings className="w-5 h-5" />
                         Configuracion
                       </Link>
 
-                      <div className="border-t border-gray-100 mt-2 pt-2">
+                      <div className="border-t border-white/10 mt-2 pt-2">
                         <button
                           onClick={handleLogout}
-                          className="flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 transition-colors w-full"
+                          className="flex items-center gap-3 px-4 py-2.5 text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors w-full"
                         >
                           <LogOut className="w-5 h-5" />
                           Cerrar Sesion

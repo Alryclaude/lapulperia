@@ -20,6 +20,7 @@ import { pulperiaApi } from '../services/api';
 import { useAuthStore } from '../stores/authStore';
 import MiniMap from '../components/map/MiniMap';
 import PulperiaCard from '../components/common/PulperiaCard';
+import { LogoLarge, LogoIcon } from '../components/Logo';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -29,11 +30,6 @@ import {
   FadeInView,
 } from '@/components/ui';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
-import {
-  staggerContainer,
-  staggerItem,
-  fadeInOnScroll,
-} from '@/lib/animations';
 
 // Quick category filters
 const categories = [
@@ -79,8 +75,8 @@ const Home = () => {
         limit: 12,
       }),
     enabled: !!location,
-    refetchInterval: 30000, // Refresh every 30 seconds to show updated status
-    staleTime: 15000, // Consider data stale after 15 seconds
+    refetchInterval: 30000,
+    staleTime: 15000,
   });
 
   const pulperias = pulperiasData?.data?.pulperias || [];
@@ -127,79 +123,90 @@ const Home = () => {
         )}
       </AnimatePresence>
 
-      {/* Hero Section */}
+      {/* Hero Section - Dark theme with logo */}
       <motion.section
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 text-white p-8 md:p-12"
+        className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-dark-100 via-dark-200 to-dark-100 border border-white/5 text-white p-8 md:p-12"
       >
-        <div className="relative z-10 max-w-2xl">
+        <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+          {/* Logo */}
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="flex-shrink-0"
           >
-            <Badge variant="accent" className="mb-4">
-              <Sparkles className="w-3 h-3" />
-              Nuevo en tu zona
-            </Badge>
+            <LogoIcon size={120} />
           </motion.div>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight"
-          >
-            Tu pulperia de confianza,{' '}
-            <span className="text-primary-200">ahora digital</span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="text-primary-100 text-lg mb-8 max-w-lg"
-          >
-            Encuentra productos, compara precios y apoya a los negocios de tu comunidad
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="flex flex-wrap gap-3"
-          >
-            <Button asChild variant="secondary" size="lg" className="shadow-lg">
-              <Link to="/search">
-                <Search className="w-5 h-5" />
-                Buscar Productos
-              </Link>
-            </Button>
-            <Button
-              asChild
-              variant="ghost"
-              size="lg"
-              className="text-white hover:bg-white/10"
+          {/* Content */}
+          <div className="flex-1 text-center md:text-left">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
             >
-              <Link to="/jobs">
-                <Briefcase className="w-5 h-5" />
-                Ver Empleos
-              </Link>
-            </Button>
-          </motion.div>
+              <Badge className="mb-4 bg-accent-500/20 text-accent-300 border-accent-500/30">
+                <Sparkles className="w-3 h-3" />
+                Tu tienda de barrio
+              </Badge>
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight"
+            >
+              <span className="text-white">La </span>
+              <span className="text-primary-500">Pulpería</span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="text-gray-400 text-lg mb-6 max-w-lg"
+            >
+              ¿Qué deseaba? Encuentra productos, compara precios y apoya a los negocios de tu comunidad
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="flex flex-wrap gap-3 justify-center md:justify-start"
+            >
+              <Button asChild size="lg" className="shadow-primary">
+                <Link to="/search">
+                  <Search className="w-5 h-5" />
+                  Buscar Productos
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="secondary"
+                size="lg"
+              >
+                <Link to="/jobs">
+                  <Briefcase className="w-5 h-5" />
+                  Ver Empleos
+                </Link>
+              </Button>
+            </motion.div>
+          </div>
         </div>
 
         {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-72 h-72 bg-primary-500/30 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-20 w-48 h-48 bg-primary-400/20 rounded-full blur-2xl" />
-        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-accent-500/20 rounded-full blur-2xl" />
+        <div className="absolute top-0 right-0 w-72 h-72 bg-primary-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent-500/10 rounded-full blur-2xl" />
       </motion.section>
 
       {/* Category Quick Filters */}
       <section className="space-y-3">
-        <h2 className="text-sm font-medium text-muted-foreground px-1">
+        <h2 className="text-sm font-medium text-gray-400 px-1">
           Categorias populares
         </h2>
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
@@ -214,7 +221,7 @@ const Home = () => {
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl whitespace-nowrap transition-all ${
                   isSelected
                     ? 'bg-primary-500 text-white shadow-primary'
-                    : 'bg-card border border-border hover:border-primary-200 hover:bg-primary-50'
+                    : 'bg-dark-100 border border-white/5 text-gray-300 hover:border-primary-500/30 hover:bg-dark-50'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -230,14 +237,14 @@ const Home = () => {
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="p-2 bg-primary-100 rounded-lg">
-                <MapPin className="w-4 h-4 text-primary-600" />
+              <div className="p-2 bg-primary-500/20 rounded-lg">
+                <MapPin className="w-4 h-4 text-primary-400" />
               </div>
-              <h2 className="text-lg font-semibold">Cerca de ti</h2>
+              <h2 className="text-lg font-semibold text-white">Cerca de ti</h2>
             </div>
             <Link
               to="/search?view=map"
-              className="text-primary-600 text-sm font-medium hover:underline flex items-center gap-1"
+              className="text-primary-400 text-sm font-medium hover:text-primary-300 flex items-center gap-1 transition-colors"
             >
               Ver mapa completo
               <ChevronRight className="w-4 h-4" />
@@ -253,7 +260,7 @@ const Home = () => {
               <MiniMap
                 center={[location.lat, location.lng]}
                 pulperias={pulperias}
-                className="h-48 md:h-64 rounded-2xl overflow-hidden shadow-sm border border-border"
+                className="h-48 md:h-64 rounded-2xl overflow-hidden shadow-lg border border-white/10"
               />
             </motion.div>
           )}
@@ -272,11 +279,11 @@ const Home = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="relative">
-                  <div className="w-3 h-3 bg-success-500 rounded-full" />
-                  <div className="absolute inset-0 w-3 h-3 bg-success-500 rounded-full animate-ping opacity-75" />
+                  <div className="w-3 h-3 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+                  <div className="absolute inset-0 w-3 h-3 bg-green-500 rounded-full animate-ping opacity-75" />
                 </div>
-                <h2 className="text-lg font-semibold">Abiertas ahora</h2>
-                <Badge variant="success" size="sm">
+                <h2 className="text-lg font-semibold text-white">Abiertas ahora</h2>
+                <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
                   {openPulperias.length}
                 </Badge>
               </div>
@@ -297,14 +304,14 @@ const Home = () => {
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="p-2 bg-gray-100 rounded-lg">
-              <Store className="w-4 h-4 text-gray-600" />
+            <div className="p-2 bg-dark-50 rounded-lg">
+              <Store className="w-4 h-4 text-gray-400" />
             </div>
-            <h2 className="text-lg font-semibold">Pulperias cerca</h2>
+            <h2 className="text-lg font-semibold text-white">Pulperias cerca</h2>
           </div>
           <Link
             to="/search"
-            className="text-primary-600 text-sm font-medium hover:underline flex items-center gap-1"
+            className="text-primary-400 text-sm font-medium hover:text-primary-300 flex items-center gap-1 transition-colors"
           >
             Ver todas
             <ChevronRight className="w-4 h-4" />
@@ -331,13 +338,13 @@ const Home = () => {
             animate={{ opacity: 1 }}
             className="text-center py-12"
           >
-            <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Store className="w-8 h-8 text-gray-400" />
+            <div className="w-16 h-16 bg-dark-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Store className="w-8 h-8 text-gray-500" />
             </div>
-            <p className="text-muted-foreground">
+            <p className="text-gray-400">
               No hay pulperias cerca de tu ubicacion
             </p>
-            <Button asChild variant="outline" className="mt-4">
+            <Button asChild variant="secondary" className="mt-4">
               <Link to="/search">Buscar en otra zona</Link>
             </Button>
           </motion.div>
@@ -347,16 +354,17 @@ const Home = () => {
       {/* CTA for non-authenticated users */}
       {!isAuthenticated && (
         <FadeInView>
-          <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white p-8 md:p-12">
+          <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-900/50 via-dark-100 to-dark-200 border border-primary-500/20 text-white p-8 md:p-12">
             <div className="relative z-10 text-center max-w-xl mx-auto">
+              <LogoIcon size={64} className="mx-auto mb-4" />
               <h3 className="text-2xl md:text-3xl font-bold mb-4">
-                Tienes una pulperia?
+                ¿Tienes una pulperia?
               </h3>
-              <p className="text-gray-300 mb-8">
+              <p className="text-gray-400 mb-8">
                 Digitaliza tu negocio, recibe pedidos en tiempo real y haz crecer
                 tu comunidad de clientes
               </p>
-              <Button asChild size="lg" variant="secondary">
+              <Button asChild size="lg">
                 <Link to="/register">
                   Registrar mi Pulperia
                   <ChevronRight className="w-5 h-5" />

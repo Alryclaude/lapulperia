@@ -22,7 +22,7 @@ export default {
           900: '#7f1d1d',
           950: '#450a0a',
         },
-        // Accent - Warm amber (for highlights, featured items)
+        // Accent - Golden (for stars, highlights, featured items)
         accent: {
           50: '#fffbeb',
           100: '#fef3c7',
@@ -34,6 +34,44 @@ export default {
           700: '#b45309',
           800: '#92400e',
           900: '#78350f',
+        },
+        // Golden for special highlights
+        gold: {
+          DEFAULT: '#FFD700',
+          light: '#FFE55C',
+          dark: '#B8860B',
+        },
+        // Cream colors (from the house walls)
+        cream: {
+          50: '#FFFDF7',
+          100: '#FEF7ED',
+          200: '#FEF3C7',
+          300: '#FDE68A',
+          400: '#F5E6C8',
+          500: '#E8D5B7',
+        },
+        // Brown colors (from the door)
+        brown: {
+          400: '#B45309',
+          500: '#92400E',
+          600: '#78350F',
+          700: '#5C3D2E',
+        },
+        // Navy (from windows)
+        navy: {
+          400: '#2D4A6F',
+          500: '#1E3A5F',
+          600: '#1A2F4A',
+        },
+        // Dark theme background colors
+        dark: {
+          DEFAULT: '#0F0D15',
+          50: '#2A2735',
+          100: '#1F1B2E',
+          200: '#1A1625',
+          300: '#15121D',
+          400: '#0F0D15',
+          500: '#0A0810',
         },
         // Semantic colors
         success: {
@@ -86,6 +124,9 @@ export default {
           primary: '#ffffff',
           secondary: '#fafafa',
           elevated: '#ffffff',
+          // Dark mode surfaces
+          dark: '#1F1B2E',
+          'dark-elevated': '#2A2735',
         },
         // shadcn/ui CSS variable colors
         border: 'hsl(var(--border))',
@@ -131,17 +172,28 @@ export default {
         'lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
         'xl': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
         '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+        // Dark mode shadows
+        'dark-sm': '0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3)',
+        'dark-md': '0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3)',
+        'dark-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3)',
         // Glows
         'glow': '0 0 0 3px rgba(34, 197, 94, 0.15)',
         'glow-accent': '0 0 0 3px rgba(251, 191, 36, 0.15)',
+        'glow-gold': '0 0 20px rgba(255, 215, 0, 0.3)',
+        'glow-red': '0 0 20px rgba(239, 68, 68, 0.3)',
         // Colored shadows
         'primary': '0 4px 14px 0 rgba(239, 68, 68, 0.3)',
         'success': '0 4px 14px 0 rgba(34, 197, 94, 0.3)',
         'accent': '0 4px 14px 0 rgba(245, 158, 11, 0.3)',
+        'gold': '0 4px 14px 0 rgba(255, 215, 0, 0.3)',
         // Focus rings
         'ring-primary': '0 0 0 3px rgba(239, 68, 68, 0.2)',
         'ring-success': '0 0 0 3px rgba(34, 197, 94, 0.2)',
         'ring-accent': '0 0 0 3px rgba(245, 158, 11, 0.2)',
+        'ring-gold': '0 0 0 3px rgba(255, 215, 0, 0.2)',
+        // Card hover
+        'card-hover': '0 8px 25px -5px rgba(0, 0, 0, 0.15), 0 0 10px rgba(239, 68, 68, 0.1)',
+        'card-hover-dark': '0 8px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(239, 68, 68, 0.15)',
       },
       spacing: {
         // Semantic spacing for layout
