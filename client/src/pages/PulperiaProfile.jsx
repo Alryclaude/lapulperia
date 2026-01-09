@@ -4,7 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   MapPin, Phone, Star, Heart, Share2, Clock, MessageCircle,
-  Package, MessageSquare, Store, Calendar, Info, ShoppingBag, Navigation, Maximize2, Minimize2,
+  Package, MessageSquare, Store, Info, ShoppingBag, Navigation, Maximize2, Minimize2,
+  CheckCircle, Calendar,
 } from 'lucide-react';
 import { pulperiaApi, productApi } from '../services/api';
 import { useAuthStore } from '../stores/authStore';
@@ -21,7 +22,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 
-// Format phone number for display (e.g., "9999-9999")
+// Format phone number for display
 const formatPhoneNumber = (phone) => {
   if (!phone) return '';
   const cleaned = phone.replace(/\D/g, '');
@@ -39,7 +40,6 @@ const PulperiaProfile = () => {
   const [activeTab, setActiveTab] = useState('products');
   const [isMapExpanded, setIsMapExpanded] = useState(false);
 
-  // Fetch pulperia
   const { data: pulperiaData, isLoading } = useQuery({
     queryKey: ['pulperia', id],
     queryFn: () => pulperiaApi.getById(id),
@@ -48,7 +48,6 @@ const PulperiaProfile = () => {
   const pulperia = pulperiaData?.data?.pulperia;
   const isFavorite = pulperiaData?.data?.isFavorite;
 
-  // Fetch products
   const { data: productsData, isLoading: loadingProducts } = useQuery({
     queryKey: ['pulperia-products', id, selectedCategory],
     queryFn: () => productApi.getByPulperia(id, { category: selectedCategory }),
@@ -58,16 +57,14 @@ const PulperiaProfile = () => {
   const products = productsData?.data?.products || [];
   const categories = productsData?.data?.categories || [];
 
-  // Toggle favorite
   const favoriteMutation = useMutation({
     mutationFn: () => pulperiaApi.toggleFavorite(id, { notifyOnOpen: true }),
     onSuccess: (response) => {
-      queryClient.invalidateQueries(['pulperia', id]);
+      queryClient.invalidateQueries({ queryKey: ['pulperia', id] });
       toast.success(response.data.isFavorite ? 'Agregado a favoritos' : 'Eliminado de favoritos');
     },
   });
 
-  // Open WhatsApp
   const handleWhatsApp = () => {
     const phone = pulperia.whatsapp || pulperia.phone;
     if (phone) {
@@ -75,7 +72,6 @@ const PulperiaProfile = () => {
     }
   };
 
-  // Open Google Maps
   const handleDirections = () => {
     if (pulperia.latitude && pulperia.longitude) {
       window.open(
@@ -85,26 +81,25 @@ const PulperiaProfile = () => {
     }
   };
 
-  // Loading state
+  // Loading skeleton
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div className="h-56 rounded-2xl bg-dark-100/60 animate-pulse" />
-        <div className="space-y-4">
-          <div className="h-8 w-2/3 rounded-lg bg-dark-100/60 animate-pulse" />
-          <div className="h-5 w-1/3 rounded-lg bg-dark-100/60 animate-pulse" />
-          <div className="h-20 rounded-xl bg-dark-100/60 animate-pulse" />
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="aspect-square rounded-xl bg-dark-100/60 animate-pulse" />
-          ))}
+      <div className="space-y-0">
+        <div className="h-48 md:h-56 bg-dark-100/60 animate-pulse" />
+        <div className="px-4 -mt-16 relative z-10">
+          <div className="flex items-end gap-4">
+            <div className="w-28 h-28 rounded-full bg-dark-200 animate-pulse border-4 border-dark-400" />
+            <div className="flex-1 pb-3">
+              <div className="h-6 w-48 bg-dark-200 animate-pulse rounded mb-2" />
+              <div className="h-4 w-32 bg-dark-200 animate-pulse rounded" />
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
-  // Not found state
+  // Not found
   if (!pulperia) {
     return (
       <motion.div
@@ -137,60 +132,42 @@ const PulperiaProfile = () => {
   const status = statusConfig[pulperia.status] || statusConfig.CLOSED;
 
   return (
-    <div className="space-y-6 pb-6">
+    <div className="pb-6 -mx-4 sm:mx-0">
+      {/* ===== TWITTER/X STYLE HEADER ===== */}
+
       {/* Banner */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="relative h-56 md:h-72 rounded-2xl overflow-hidden"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="relative h-48 md:h-56"
       >
         {pulperia.banner ? (
           <img src={pulperia.banner} alt="" className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-primary-600 to-primary-800" />
+          <div className="w-full h-full bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-dark-400 via-transparent to-transparent" />
 
-        {/* Status Badge */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
-          className="absolute top-4 left-4"
-        >
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${status.bg} backdrop-blur-md border border-white/10`}>
-            <div className={`w-2 h-2 rounded-full ${status.dot} animate-pulse`} />
-            <span className={`text-sm font-medium ${status.text}`}>{status.label}</span>
-          </div>
-        </motion.div>
-
-        {/* Actions */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
-          className="absolute top-4 right-4 flex gap-2"
-        >
+        {/* Top Actions */}
+        <div className="absolute top-4 right-4 flex gap-2">
           {isAuthenticated && (
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => favoriteMutation.mutate()}
-              className={`p-2.5 rounded-xl backdrop-blur-md shadow-lg transition-all border border-white/10 ${
+              className={`p-2.5 rounded-full backdrop-blur-md shadow-lg transition-all border border-white/20 ${
                 isFavorite
                   ? 'bg-red-500/80 text-white'
-                  : 'bg-dark-100/60 text-white hover:bg-dark-100/80'
+                  : 'bg-black/40 text-white hover:bg-black/60'
               }`}
             >
               <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
             </motion.button>
           )}
-
-          {/* Share Sheet */}
           <Sheet>
             <SheetTrigger asChild>
               <motion.button
                 whileTap={{ scale: 0.9 }}
-                className="p-2.5 rounded-xl bg-dark-100/60 text-white hover:bg-dark-100/80 backdrop-blur-md shadow-lg transition-colors border border-white/10"
+                className="p-2.5 rounded-full bg-black/40 text-white hover:bg-black/60 backdrop-blur-md shadow-lg transition-colors border border-white/20"
               >
                 <Share2 className="w-5 h-5" />
               </motion.button>
@@ -200,144 +177,185 @@ const PulperiaProfile = () => {
                 <SheetTitle className="text-white">Compartir {pulperia.name}</SheetTitle>
               </SheetHeader>
               <div className="py-6">
-                <ShareButtons
-                  title={pulperia.name}
-                  text={`Mira ${pulperia.name} en La Pulperia`}
-                  variant="icons"
-                />
+                <ShareButtons title={pulperia.name} text={`Mira ${pulperia.name} en La Pulperia`} variant="icons" />
               </div>
             </SheetContent>
           </Sheet>
-        </motion.div>
-
-        {/* Logo - Bottom positioned */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="absolute -bottom-12 left-6"
-        >
-          {pulperia.logo ? (
-            <img
-              src={pulperia.logo}
-              alt={pulperia.name}
-              className="w-24 h-24 rounded-2xl border-4 border-dark-50 shadow-xl object-cover"
-            />
-          ) : (
-            <div className="w-24 h-24 rounded-2xl border-4 border-dark-50 shadow-xl bg-primary-500/20 flex items-center justify-center">
-              <span className="text-4xl font-bold text-primary-400">
-                {pulperia.name.charAt(0)}
-              </span>
-            </div>
-          )}
-        </motion.div>
+        </div>
       </motion.div>
 
-      {/* Info Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="pt-14 space-y-4"
-      >
-        {/* Name & Rating */}
-        <div className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-5">
-          <h1 className="text-2xl font-bold text-white break-words leading-tight">{pulperia.name}</h1>
-
-          {pulperia.rating > 0 && (
-            <div className="flex items-center gap-3 mt-3">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-yellow-500/20 rounded-xl border border-yellow-500/30">
-                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                <span className="font-bold text-yellow-400">{pulperia.rating.toFixed(1)}</span>
-              </div>
-              <span className="text-sm text-gray-400">({pulperia.reviewCount} resenas)</span>
-            </div>
-          )}
-
-          {pulperia.description && (
-            <p className="text-gray-400 mt-4 leading-relaxed">{pulperia.description}</p>
-          )}
-        </div>
-
-        {/* Contact Section - Enhanced */}
-        <div className="space-y-3">
-          {/* Location Card - Full Width */}
-          <motion.button
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.99 }}
-            onClick={handleDirections}
-            disabled={!pulperia.latitude || !pulperia.longitude}
-            className="w-full bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-4 text-left hover:border-blue-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      {/* Profile Header - Twitter/X Style */}
+      <div className="px-4 sm:px-6">
+        <div className="relative">
+          {/* Logo - Overlapping Banner */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            className="absolute -top-16 left-0"
           >
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-                <MapPin className="w-6 h-6 text-blue-400" />
+            {pulperia.logo ? (
+              <img
+                src={pulperia.logo}
+                alt={pulperia.name}
+                className="w-28 h-28 md:w-32 md:h-32 rounded-full border-4 border-dark-400 shadow-2xl object-cover"
+              />
+            ) : (
+              <div className="w-28 h-28 md:w-32 md:h-32 rounded-full border-4 border-dark-400 shadow-2xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center">
+                <span className="text-4xl md:text-5xl font-bold text-white">
+                  {pulperia.name.charAt(0)}
+                </span>
               </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-white">Direccion</h3>
-                <p className="text-sm text-gray-400 mt-1">{pulperia.address || 'Direccion no disponible'}</p>
-                {pulperia.reference && (
-                  <p className="text-xs text-gray-500 mt-1">Ref: {pulperia.reference}</p>
-                )}
-              </div>
-              <Navigation className="w-5 h-5 text-blue-400 flex-shrink-0 mt-1" />
-            </div>
-          </motion.button>
-
-          {/* Contact Cards Grid */}
-          <div className="grid grid-cols-2 gap-3">
-            {/* WhatsApp Card */}
-            {(pulperia.whatsapp || pulperia.phone) && (
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleWhatsApp}
-                className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-4 text-left hover:border-green-500/30 transition-all"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center flex-shrink-0">
-                    <MessageCircle className="w-5 h-5 text-green-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-white text-sm">WhatsApp</h3>
-                    <p className="text-sm text-green-400 font-medium truncate">
-                      {formatPhoneNumber(pulperia.whatsapp || pulperia.phone)}
-                    </p>
-                  </div>
-                </div>
-              </motion.button>
             )}
+          </motion.div>
 
-            {/* Phone Call Card */}
+          {/* Contact Buttons - Right Aligned */}
+          <div className="flex justify-end gap-2 pt-3 pb-2">
             {pulperia.phone && (
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => window.open(`tel:+504${pulperia.phone.replace(/\D/g, '')}`, '_self')}
-                className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-4 text-left hover:border-primary-500/30 transition-all"
+                className="px-4 py-2 rounded-full bg-dark-100/80 border border-white/10 text-white font-medium hover:bg-dark-100 transition-colors flex items-center gap-2"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary-500/20 flex items-center justify-center flex-shrink-0">
-                    <Phone className="w-5 h-5 text-primary-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-white text-sm">Llamar</h3>
-                    <p className="text-sm text-primary-400 font-medium truncate">
-                      {formatPhoneNumber(pulperia.phone)}
-                    </p>
-                  </div>
-                </div>
+                <Phone className="w-4 h-4" />
+                <span className="hidden sm:inline">Llamar</span>
+              </motion.button>
+            )}
+            {(pulperia.whatsapp || pulperia.phone) && (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleWhatsApp}
+                className="px-4 py-2 rounded-full bg-green-500 text-white font-medium hover:bg-green-600 transition-colors flex items-center gap-2"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span className="hidden sm:inline">WhatsApp</span>
               </motion.button>
             )}
           </div>
+
+          {/* Name & Info */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="pt-8 md:pt-10"
+          >
+            {/* Name & Verified */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-2xl md:text-3xl font-bold text-white">{pulperia.name}</h1>
+              {pulperia.isVerified && (
+                <CheckCircle className="w-6 h-6 text-blue-400 fill-blue-400/20" />
+              )}
+            </div>
+
+            {/* Meta Info Row */}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2 text-gray-400">
+              {/* Rating */}
+              {pulperia.rating > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                  <span className="font-semibold text-yellow-400">{pulperia.rating.toFixed(1)}</span>
+                  <span className="text-gray-500">({pulperia.reviewCount})</span>
+                </div>
+              )}
+
+              {/* Status */}
+              <div className={`flex items-center gap-1.5 ${status.text}`}>
+                <div className={`w-2 h-2 rounded-full ${status.dot} animate-pulse`} />
+                <span className="font-medium">{status.label}</span>
+              </div>
+
+              {/* Founded Year */}
+              {pulperia.foundedYear && (
+                <div className="flex items-center gap-1.5 text-gray-500">
+                  <Calendar className="w-4 h-4" />
+                  <span>Desde {pulperia.foundedYear}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Location */}
+            {pulperia.address && (
+              <button
+                onClick={handleDirections}
+                disabled={!pulperia.latitude || !pulperia.longitude}
+                className="flex items-center gap-1.5 mt-2 text-gray-400 hover:text-blue-400 transition-colors disabled:hover:text-gray-400"
+              >
+                <MapPin className="w-4 h-4 flex-shrink-0" />
+                <span className="text-sm truncate">{pulperia.address}</span>
+              </button>
+            )}
+
+            {/* Phone Display */}
+            {pulperia.phone && (
+              <div className="flex items-center gap-1.5 mt-1 text-gray-400">
+                <Phone className="w-4 h-4 flex-shrink-0" />
+                <span className="text-sm">{formatPhoneNumber(pulperia.phone)}</span>
+              </div>
+            )}
+          </motion.div>
+
+          {/* Bio/Description */}
+          {pulperia.description && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="mt-4 text-gray-300 leading-relaxed"
+            >
+              {pulperia.description}
+            </motion.p>
+          )}
+
+          {/* Story */}
+          {pulperia.story && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="mt-4 p-4 bg-dark-100/40 rounded-xl border border-white/5"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <Info className="w-4 h-4 text-purple-400" />
+                <span className="text-sm font-medium text-purple-400">Nuestra Historia</span>
+              </div>
+              <p className="text-sm text-gray-400 leading-relaxed">{pulperia.story}</p>
+            </motion.div>
+          )}
+
+          {/* Stats Bar */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="flex items-center gap-6 mt-4 py-3 border-t border-white/5"
+          >
+            <div className="text-center">
+              <span className="block text-lg font-bold text-white">{products.length}</span>
+              <span className="text-xs text-gray-500">Productos</span>
+            </div>
+            <div className="text-center">
+              <span className="block text-lg font-bold text-white">{pulperia.reviewCount || 0}</span>
+              <span className="text-xs text-gray-500">Resenas</span>
+            </div>
+            {pulperia._count?.favorites > 0 && (
+              <div className="text-center">
+                <span className="block text-lg font-bold text-white">{pulperia._count.favorites}</span>
+                <span className="text-xs text-gray-500">Favoritos</span>
+              </div>
+            )}
+          </motion.div>
         </div>
 
-        {/* Mini Map - Expandable */}
+        {/* Mini Map */}
         {pulperia.latitude && pulperia.longitude && (
           <motion.div
-            animate={{ height: isMapExpanded ? 350 : 180 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="relative rounded-2xl overflow-hidden border border-white/5"
+            initial={{ opacity: 0, y: 10, height: 150 }}
+            animate={{ opacity: 1, y: 0, height: isMapExpanded ? 300 : 150 }}
+            transition={{ delay: 0.6 }}
+            className="relative rounded-xl overflow-hidden border border-white/5 mt-4"
           >
             <MiniMap
               center={[pulperia.latitude, pulperia.longitude]}
@@ -349,110 +367,67 @@ const PulperiaProfile = () => {
             />
             <button
               onClick={() => setIsMapExpanded(!isMapExpanded)}
-              className="absolute top-3 right-3 p-2 bg-dark-100/80 backdrop-blur-md rounded-lg border border-white/10 text-white hover:bg-dark-100 transition-colors"
+              className="absolute top-2 right-2 p-2 bg-dark-100/80 backdrop-blur-md rounded-lg border border-white/10 text-white hover:bg-dark-100 transition-colors"
             >
               {isMapExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
             </button>
-            {pulperia.reference && (
-              <div className="absolute bottom-3 left-3 right-3 px-3 py-2 bg-dark-100/80 backdrop-blur-md rounded-lg border border-white/10">
-                <p className="text-xs text-gray-300 truncate">{pulperia.reference}</p>
-              </div>
-            )}
+            <button
+              onClick={handleDirections}
+              className="absolute bottom-2 left-2 right-2 py-2 bg-blue-500/90 backdrop-blur-md rounded-lg text-white text-sm font-medium hover:bg-blue-500 transition-colors flex items-center justify-center gap-2"
+            >
+              <Navigation className="w-4 h-4" />
+              Obtener direcciones
+            </button>
           </motion.div>
         )}
 
-        {/* Story Card */}
-        <AnimatePresence>
-          {pulperia.story && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-5"
+        {/* ===== TABS - Twitter/X Style Underline ===== */}
+        <div className="mt-6 border-b border-white/5">
+          <div className="flex">
+            <button
+              onClick={() => setActiveTab('products')}
+              className={`relative flex-1 py-4 text-center font-medium transition-colors ${
+                activeTab === 'products' ? 'text-white' : 'text-gray-500 hover:text-gray-300'
+              }`}
             >
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
-                  <Info className="w-5 h-5 text-purple-400" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-white">Nuestra Historia</h3>
-                </div>
-                {pulperia.foundedYear && (
-                  <span className="px-3 py-1 text-xs font-medium bg-purple-500/20 text-purple-400 rounded-full border border-purple-500/30">
-                    Desde {pulperia.foundedYear}
-                  </span>
+              <span className="flex items-center justify-center gap-2">
+                <ShoppingBag className="w-4 h-4" />
+                Productos
+                {products.length > 0 && (
+                  <span className="px-2 py-0.5 text-xs rounded-full bg-white/10">{products.length}</span>
                 )}
-              </div>
-              <p className="text-gray-400 leading-relaxed text-sm">{pulperia.story}</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
-
-      {/* Tabs - Glass Morphism Style */}
-      <div className="space-y-4">
-        {/* Tab Buttons */}
-        <div className="flex gap-2 p-1.5 bg-dark-100/60 backdrop-blur-sm rounded-xl border border-white/5">
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setActiveTab('products')}
-            className={`relative flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
-              activeTab === 'products' ? 'text-white' : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            {activeTab === 'products' && (
-              <motion.div
-                layoutId="activeTabBg"
-                className="absolute inset-0 bg-primary-500/20 rounded-lg border border-primary-500/30"
-                transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
-              />
-            )}
-            <ShoppingBag className="w-4 h-4 relative z-10" />
-            <span className="relative z-10">Productos</span>
-            {products.length > 0 && (
-              <motion.span
-                animate={{ scale: activeTab === 'products' ? [1, 1.1, 1] : 1 }}
-                transition={{ duration: 0.3 }}
-                className={`relative z-10 px-2 py-0.5 text-xs rounded-full ${
-                  activeTab === 'products' ? 'bg-primary-500 text-white' : 'bg-white/10 text-gray-400'
-                }`}
-              >
-                {products.length}
-              </motion.span>
-            )}
-          </motion.button>
-
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setActiveTab('reviews')}
-            className={`relative flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
-              activeTab === 'reviews' ? 'text-white' : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            {activeTab === 'reviews' && (
-              <motion.div
-                layoutId="activeTabBg"
-                className="absolute inset-0 bg-primary-500/20 rounded-lg border border-primary-500/30"
-                transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
-              />
-            )}
-            <MessageSquare className="w-4 h-4 relative z-10" />
-            <span className="relative z-10">Resenas</span>
-            {pulperia.reviewCount > 0 && (
-              <motion.span
-                animate={{ scale: activeTab === 'reviews' ? [1, 1.1, 1] : 1 }}
-                transition={{ duration: 0.3 }}
-                className={`relative z-10 px-2 py-0.5 text-xs rounded-full ${
-                  activeTab === 'reviews' ? 'bg-primary-500 text-white' : 'bg-white/10 text-gray-400'
-                }`}
-              >
-                {pulperia.reviewCount}
-              </motion.span>
-            )}
-          </motion.button>
+              </span>
+              {activeTab === 'products' && (
+                <motion.div
+                  layoutId="tabIndicator"
+                  className="absolute bottom-0 left-0 right-0 h-1 bg-primary-500 rounded-full"
+                />
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('reviews')}
+              className={`relative flex-1 py-4 text-center font-medium transition-colors ${
+                activeTab === 'reviews' ? 'text-white' : 'text-gray-500 hover:text-gray-300'
+              }`}
+            >
+              <span className="flex items-center justify-center gap-2">
+                <MessageSquare className="w-4 h-4" />
+                Resenas
+                {pulperia.reviewCount > 0 && (
+                  <span className="px-2 py-0.5 text-xs rounded-full bg-white/10">{pulperia.reviewCount}</span>
+                )}
+              </span>
+              {activeTab === 'reviews' && (
+                <motion.div
+                  layoutId="tabIndicator"
+                  className="absolute bottom-0 left-0 right-0 h-1 bg-primary-500 rounded-full"
+                />
+              )}
+            </button>
+          </div>
         </div>
 
-        {/* Tab Content */}
+        {/* ===== TAB CONTENT ===== */}
         <AnimatePresence mode="wait">
           {activeTab === 'products' && (
             <motion.div
@@ -460,35 +435,33 @@ const PulperiaProfile = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
+              className="pt-6"
             >
-              {/* Categories Filter */}
+              {/* Categories */}
               {categories.length > 0 && (
                 <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4">
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
+                  <button
                     onClick={() => setSelectedCategory(null)}
-                    className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${
+                    className={`px-4 py-2 rounded-full font-medium whitespace-nowrap transition-all ${
                       !selectedCategory
-                        ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/20'
+                        ? 'bg-primary-500 text-white'
                         : 'bg-dark-100/60 text-gray-400 hover:text-white border border-white/5'
                     }`}
                   >
                     Todos
-                  </motion.button>
+                  </button>
                   {categories.map((cat) => (
-                    <motion.button
+                    <button
                       key={cat}
-                      whileTap={{ scale: 0.95 }}
                       onClick={() => setSelectedCategory(cat)}
-                      className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${
+                      className={`px-4 py-2 rounded-full font-medium whitespace-nowrap transition-all ${
                         selectedCategory === cat
-                          ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/20'
+                          ? 'bg-primary-500 text-white'
                           : 'bg-dark-100/60 text-gray-400 hover:text-white border border-white/5'
                       }`}
                     >
                       {cat}
-                    </motion.button>
+                    </button>
                   ))}
                 </div>
               )}
@@ -498,10 +471,10 @@ const PulperiaProfile = () => {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {[...Array(4)].map((_, i) => (
                     <div key={i} className="bg-dark-100/60 rounded-xl overflow-hidden">
-                      <div className="aspect-square bg-dark-100 animate-pulse" />
+                      <div className="aspect-square bg-dark-200 animate-pulse" />
                       <div className="p-3 space-y-2">
-                        <div className="h-4 bg-dark-100 rounded animate-pulse" />
-                        <div className="h-4 w-1/2 bg-dark-100 rounded animate-pulse" />
+                        <div className="h-4 bg-dark-200 rounded animate-pulse" />
+                        <div className="h-4 w-1/2 bg-dark-200 rounded animate-pulse" />
                       </div>
                     </div>
                   ))}
@@ -520,16 +493,12 @@ const PulperiaProfile = () => {
                   ))}
                 </div>
               ) : (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="text-center py-16"
-                >
+                <div className="text-center py-16">
                   <div className="w-16 h-16 bg-dark-100/60 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Package className="w-8 h-8 text-gray-500" />
                   </div>
                   <p className="text-gray-400">No hay productos disponibles</p>
-                </motion.div>
+                </div>
               )}
             </motion.div>
           )}
@@ -540,13 +509,10 @@ const PulperiaProfile = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="space-y-4"
+              className="pt-6 space-y-4"
             >
-              {/* Review Form */}
               <ReviewForm pulperiaId={id} />
 
-              {/* Existing Reviews */}
               {pulperia.reviews && pulperia.reviews.length > 0 ? (
                 <div className="space-y-4">
                   {pulperia.reviews.map((review, index) => (
@@ -573,26 +539,20 @@ const PulperiaProfile = () => {
                         )}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
-                            <span className="font-medium text-white truncate">
-                              {review.user.name}
-                            </span>
+                            <span className="font-medium text-white truncate">{review.user.name}</span>
                             <div className="flex items-center gap-0.5 shrink-0">
                               {[...Array(5)].map((_, i) => (
                                 <Star
                                   key={i}
                                   className={`w-3.5 h-3.5 ${
-                                    i < review.rating
-                                      ? 'text-yellow-400 fill-yellow-400'
-                                      : 'text-gray-600'
+                                    i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-600'
                                   }`}
                                 />
                               ))}
                             </div>
                           </div>
                           {review.comment && (
-                            <p className="text-gray-400 mt-2 text-sm leading-relaxed">
-                              {review.comment}
-                            </p>
+                            <p className="text-gray-400 mt-2 text-sm leading-relaxed">{review.comment}</p>
                           )}
                           <span className="text-xs text-gray-500 mt-2 block">
                             {new Date(review.createdAt).toLocaleDateString('es-HN', {
@@ -607,36 +567,31 @@ const PulperiaProfile = () => {
                   ))}
                 </div>
               ) : (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="text-center py-16"
-                >
+                <div className="text-center py-16">
                   <div className="w-16 h-16 bg-dark-100/60 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <MessageSquare className="w-8 h-8 text-gray-500" />
                   </div>
                   <p className="font-medium text-white mb-1">Aun no hay resenas</p>
                   <p className="text-sm text-gray-400">Se el primero en dejar una resena</p>
-                </motion.div>
+                </div>
               )}
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Floating WhatsApp Button */}
+      {/* Floating WhatsApp - Mobile Only */}
       {(pulperia.whatsapp || pulperia.phone) && (
         <motion.button
           initial={{ opacity: 0, scale: 0.8, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
+          transition={{ delay: 0.8 }}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={handleWhatsApp}
-          className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 z-40 flex items-center gap-2 px-5 py-3 bg-green-500 hover:bg-green-600 text-white font-medium rounded-full shadow-lg shadow-green-500/30 transition-colors"
+          className="sm:hidden fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 z-40 w-14 h-14 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-lg shadow-green-500/30 flex items-center justify-center"
         >
-          <MessageCircle className="w-5 h-5" />
-          <span className="hidden sm:inline">WhatsApp</span>
+          <MessageCircle className="w-6 h-6" />
         </motion.button>
       )}
     </div>

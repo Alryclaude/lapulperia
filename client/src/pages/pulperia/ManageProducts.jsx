@@ -36,7 +36,7 @@ const ManageProducts = () => {
     mutationFn: (data) => productApi.create(data),
     onSuccess: () => {
       toast.success('Producto creado');
-      queryClient.invalidateQueries(['my-products']);
+      queryClient.invalidateQueries({ queryKey: ['my-products'] });
       closeModal();
     },
     onError: (error) => toast.error(error.response?.data?.error?.message || 'Error al crear producto'),
@@ -45,7 +45,7 @@ const ManageProducts = () => {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => productApi.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries(['my-products']);
+      queryClient.invalidateQueries({ queryKey: ['my-products'] });
     },
     onError: (error) => toast.error(error.response?.data?.error?.message || 'Error al actualizar'),
   });
@@ -53,7 +53,7 @@ const ManageProducts = () => {
   const updateImageMutation = useMutation({
     mutationFn: ({ id, data }) => productApi.updateImage(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries(['my-products']);
+      queryClient.invalidateQueries({ queryKey: ['my-products'] });
     },
     onError: (error) => toast.error(error.response?.data?.error?.message || 'Error al actualizar imagen'),
   });
@@ -62,14 +62,14 @@ const ManageProducts = () => {
     mutationFn: (id) => productApi.delete(id),
     onSuccess: () => {
       toast.success('Producto eliminado');
-      queryClient.invalidateQueries(['my-products']);
+      queryClient.invalidateQueries({ queryKey: ['my-products'] });
     },
     onError: (error) => toast.error(error.response?.data?.error?.message || 'Error al eliminar'),
   });
 
   const toggleStockMutation = useMutation({
     mutationFn: ({ id, outOfStock }) => productApi.update(id, { outOfStock }),
-    onSuccess: () => queryClient.invalidateQueries(['my-products']),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['my-products'] }),
   });
 
   const openModal = (product = null) => {
