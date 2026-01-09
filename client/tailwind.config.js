@@ -8,38 +8,38 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Primary - Red theme (La Pulperia brand)
+        // Primary - Red theme (La Pulperia brand) - More vibrant
         primary: {
           50: '#fef2f2',
           100: '#fee2e2',
           200: '#fecaca',
           300: '#fca5a5',
           400: '#f87171',
-          500: '#ef4444',
-          600: '#dc2626',
-          700: '#b91c1c',
-          800: '#991b1b',
+          500: '#E53935',  // More vibrant red
+          600: '#D32F2F',
+          700: '#C62828',
+          800: '#B71C1C',
           900: '#7f1d1d',
           950: '#450a0a',
         },
-        // Accent - Golden (for stars, highlights, featured items)
+        // Accent - Golden (brighter for better visibility)
         accent: {
           50: '#fffbeb',
           100: '#fef3c7',
           200: '#fde68a',
           300: '#fcd34d',
-          400: '#fbbf24',
-          500: '#f59e0b',
-          600: '#d97706',
-          700: '#b45309',
-          800: '#92400e',
-          900: '#78350f',
+          400: '#FFB300',  // Brighter golden
+          500: '#FFA000',
+          600: '#FF8F00',
+          700: '#FF6F00',
+          800: '#E65100',
+          900: '#BF360C',
         },
-        // Golden for special highlights
+        // Golden for special highlights - Brighter
         gold: {
           DEFAULT: '#FFD700',
-          light: '#FFE55C',
-          dark: '#B8860B',
+          light: '#FFEA00',
+          dark: '#FFC107',
         },
         // Cream colors (from the house walls)
         cream: {
@@ -63,15 +63,15 @@ export default {
           500: '#1E3A5F',
           600: '#1A2F4A',
         },
-        // Dark theme background colors
+        // Dark theme background colors - Improved for better contrast
         dark: {
-          DEFAULT: '#0F0D15',
-          50: '#2A2735',
-          100: '#1F1B2E',
-          200: '#1A1625',
-          300: '#15121D',
-          400: '#0F0D15',
-          500: '#0A0810',
+          DEFAULT: '#0D0B11',
+          50: '#2D2A38',    // Lighter for borders, dividers
+          100: '#221F2D',   // Cards elevated
+          200: '#1A1722',   // Cards base
+          300: '#14121A',   // Secondary background
+          400: '#0D0B11',   // Primary background
+          500: '#08070B',   // Deepest black
         },
         // Semantic colors
         success: {
@@ -198,7 +198,7 @@ export default {
       spacing: {
         // Semantic spacing for layout
         'header': '4rem',        // 64px - header height
-        'bottom-nav': '5rem',    // 80px - bottom nav + safe area
+        'bottom-nav': '4rem',    // 64px - bottom nav (h-16)
         'section': '2rem',       // 32px - section spacing
         'section-lg': '3rem',    // 48px - large section spacing
       },

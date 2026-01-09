@@ -55,45 +55,45 @@
     --chart-5: 262 83% 58%;
   }
 
-  /* Dark mode - Deep purple/black with warm accents */
+  /* Dark mode - Elegant deep purple/black with improved contrast */
   .dark {
-    --background: 260 30% 6%;
-    --foreground: 0 0% 98%;
+    --background: 270 25% 4%;
+    --foreground: 0 0% 96%;
 
-    /* Card - Slightly elevated dark surface */
-    --card: 260 25% 12%;
-    --card-foreground: 0 0% 98%;
+    /* Card - Elevated dark surface with better visibility */
+    --card: 270 20% 9%;
+    --card-foreground: 0 0% 96%;
 
     /* Popover */
-    --popover: 260 25% 10%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 270 20% 8%;
+    --popover-foreground: 0 0% 96%;
 
-    /* Primary - La Pulperia Red */
-    --primary: 0 72% 51%;
+    /* Primary - La Pulperia Red (more vibrant) */
+    --primary: 4 82% 56%;
     --primary-foreground: 0 0% 98%;
 
     /* Secondary */
-    --secondary: 260 20% 18%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 270 15% 14%;
+    --secondary-foreground: 0 0% 96%;
 
-    /* Muted */
-    --muted: 260 20% 15%;
-    --muted-foreground: 0 0% 64%;
+    /* Muted - Better contrast for secondary text */
+    --muted: 270 15% 12%;
+    --muted-foreground: 0 0% 70%;
 
-    /* Accent - Golden */
-    --accent: 38 92% 50%;
-    --accent-foreground: 0 0% 98%;
+    /* Accent - Brighter Golden */
+    --accent: 43 96% 56%;
+    --accent-foreground: 0 0% 10%;
 
     /* Destructive */
-    --destructive: 0 62% 40%;
+    --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 98%;
 
-    /* Border and input */
-    --border: 260 20% 20%;
-    --input: 260 20% 20%;
+    /* Border and input - More visible */
+    --border: 270 15% 18%;
+    --input: 270 15% 16%;
 
     /* Ring */
-    --ring: 0 72% 51%;
+    --ring: 4 82% 56%;
   }
 }
 
@@ -114,17 +114,15 @@
 
   body {
     @apply bg-background text-foreground font-sans;
-    min-height: 100vh;
     min-height: 100dvh;
-    min-height: -webkit-fill-available;
     overscroll-behavior: none;
     overflow-x: hidden;
   }
 
   #root {
-    min-height: 100vh;
     min-height: 100dvh;
-    min-height: -webkit-fill-available;
+    display: flex;
+    flex-direction: column;
   }
 
   /* Dark mode is now default */
@@ -132,9 +130,13 @@
     @apply dark;
   }
 
-  /* Starfield background for dark mode */
+  /* Subtle gradient background for dark mode - elegant and professional */
   .dark body {
-    background: linear-gradient(180deg, #0F0D15 0%, #1A1625 50%, #0F0D15 100%);
+    background: linear-gradient(180deg,
+      hsl(270, 25%, 4%) 0%,
+      hsl(270, 20%, 6%) 50%,
+      hsl(270, 25%, 4%) 100%
+    );
     background-attachment: fixed;
   }
 

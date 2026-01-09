@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 import { Store, User, MapPin, Phone, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
+import { reverseGeocode } from '../services/geocoding';
 import toast from 'react-hot-toast';
 
 const Register = () => {
@@ -47,28 +48,46 @@ const Register = () => {
     }
   };
 
-  const handleGetLocation = useCallback(() => {
-    if (navigator.geolocation) {
-      setIsGettingLocation(true);
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setPulperiaData(prev => ({
-            ...prev,
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          }));
-          setIsGettingLocation(false);
-          toast.success('Ubicacion obtenida');
-        },
-        (error) => {
-          console.error('Geolocation error:', error);
-          setIsGettingLocation(false);
-          toast.error('No se pudo obtener la ubicacion. Puedes intentar de nuevo.');
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-      );
-    } else {
+  const handleGetLocation = useCallback(async () => {
+    if (!navigator.geolocation) {
       toast.error('Tu navegador no soporta geolocalizacion');
+      return;
+    }
+
+    setIsGettingLocation(true);
+
+    try {
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 60000,
+        });
+      });
+
+      const { latitude, longitude } = position.coords;
+
+      // Get address from coordinates
+      const { address } = await reverseGeocode(latitude, longitude);
+
+      setPulperiaData(prev => ({
+        ...prev,
+        latitude,
+        longitude,
+        // Only auto-fill if address field is empty
+        address: prev.address || address || '',
+      }));
+
+      if (address) {
+        toast.success('Ubicacion y direccion obtenidas');
+      } else {
+        toast.success('Ubicacion obtenida');
+      }
+    } catch (error) {
+      console.error('Geolocation error:', error);
+      toast.error('No se pudo obtener la ubicacion. Puedes intentar de nuevo.');
+    } finally {
+      setIsGettingLocation(false);
     }
   }, []);
 

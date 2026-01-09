@@ -112,10 +112,10 @@ const PulperiaProfile = () => {
         animate={{ opacity: 1, y: 0 }}
         className="text-center py-16"
       >
-        <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <Store className="w-8 h-8 text-gray-400" />
+        <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <Store className="w-8 h-8 text-muted-foreground" />
         </div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">Pulperia no encontrada</h2>
+        <h2 className="text-xl font-semibold text-foreground mb-2">Pulperia no encontrada</h2>
         <p className="text-muted-foreground mb-6">No pudimos encontrar esta pulperia</p>
         <Button asChild variant="outline">
           <Link to="/">Volver al inicio</Link>
@@ -236,12 +236,12 @@ const PulperiaProfile = () => {
       >
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <h1 className="text-2xl font-bold text-white break-words leading-tight">{pulperia.name}</h1>
+            <h1 className="text-2xl font-bold text-foreground break-words leading-tight line-clamp-2">{pulperia.name}</h1>
             {pulperia.rating > 0 && (
               <div className="flex items-center gap-2 mt-2">
-                <div className="flex items-center gap-1 px-2 py-1 bg-amber-50 rounded-lg">
-                  <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                  <span className="font-semibold text-amber-700">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-accent-500/30 rounded-lg border border-accent-500/40">
+                  <Star className="w-4 h-4 text-accent-400 fill-accent-400" />
+                  <span className="font-semibold text-accent-300">
                     {pulperia.rating.toFixed(1)}
                   </span>
                 </div>
@@ -269,12 +269,12 @@ const PulperiaProfile = () => {
         )}
 
         {/* Location */}
-        <div className="flex items-start gap-3 mt-4">
-          <div className="p-2 bg-primary-50 rounded-lg shrink-0">
-            <MapPin className="w-4 h-4 text-primary-600" />
+        <div className="flex items-start gap-3 mt-4 p-3 bg-card rounded-xl border border-border">
+          <div className="p-2 bg-primary-500/20 rounded-lg shrink-0">
+            <MapPin className="w-4 h-4 text-primary-400" />
           </div>
           <div>
-            <p className="text-gray-900">{pulperia.address}</p>
+            <p className="text-foreground font-medium">{pulperia.address}</p>
             {pulperia.reference && (
               <p className="text-sm text-muted-foreground mt-0.5">{pulperia.reference}</p>
             )}
@@ -303,10 +303,10 @@ const PulperiaProfile = () => {
             <Card>
               <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 bg-amber-50 rounded-lg">
-                    <Info className="w-4 h-4 text-amber-600" />
+                  <div className="p-2 bg-accent-500/20 rounded-lg">
+                    <Info className="w-4 h-4 text-accent-400" />
                   </div>
-                  <h3 className="font-semibold text-gray-900">
+                  <h3 className="font-semibold text-foreground">
                     Nuestra Historia
                   </h3>
                   {pulperia.foundedYear && (
@@ -408,8 +408,8 @@ const PulperiaProfile = () => {
               animate={{ opacity: 1 }}
               className="text-center py-16"
             >
-              <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Package className="w-8 h-8 text-gray-400" />
+              <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Package className="w-8 h-8 text-muted-foreground" />
               </div>
               <p className="text-muted-foreground">No hay productos disponibles</p>
             </motion.div>
@@ -444,7 +444,7 @@ const PulperiaProfile = () => {
                         )}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
-                            <span className="font-medium text-gray-900 truncate">
+                            <span className="font-medium text-foreground truncate">
                               {review.user.name}
                             </span>
                             <div className="flex items-center gap-0.5 shrink-0">
@@ -453,8 +453,8 @@ const PulperiaProfile = () => {
                                   key={i}
                                   className={`w-3.5 h-3.5 ${
                                     i < review.rating
-                                      ? 'text-amber-400 fill-amber-400'
-                                      : 'text-gray-200'
+                                      ? 'text-accent-400 fill-accent-400'
+                                      : 'text-muted-foreground/30'
                                   }`}
                                 />
                               ))}
@@ -485,10 +485,10 @@ const PulperiaProfile = () => {
               animate={{ opacity: 1 }}
               className="text-center py-16"
             >
-              <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <MessageSquare className="w-8 h-8 text-gray-400" />
+              <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <MessageSquare className="w-8 h-8 text-muted-foreground" />
               </div>
-              <p className="font-medium text-gray-900 mb-1">Aun no hay reseñas</p>
+              <p className="font-medium text-foreground mb-1">Aun no hay reseñas</p>
               <p className="text-sm text-muted-foreground">Se el primero en dejar una reseña</p>
             </motion.div>
           )}
@@ -501,7 +501,7 @@ const PulperiaProfile = () => {
           initial={{ opacity: 0, scale: 0.8, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="fixed bottom-20 right-4 z-40"
+          className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 z-40"
         >
           <Button
             onClick={handleWhatsApp}

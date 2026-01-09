@@ -1,80 +1,53 @@
-import { Outlet } from 'react-router-dom';
-import { useMemo } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import PullToRefresh from 'react-simple-pull-to-refresh';
+import { Loader2 } from 'lucide-react';
 import Header from './Header';
 import BottomNav from './BottomNav';
 import { useAuthStore } from '../../stores/authStore';
 
-// Generate random stars for background
-const generateStars = (count) => {
-  return Array.from({ length: count }, (_, i) => ({
-    id: i,
-    left: Math.random() * 100,
-    top: Math.random() * 100,
-    size: Math.random() * 2 + 1,
-    delay: Math.random() * 3,
-    duration: Math.random() * 2 + 2,
-  }));
-};
-
-// Starfield background component
-const Starfield = () => {
-  const stars = useMemo(() => generateStars(50), []);
-
-  return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-dark-400 via-dark-200 to-dark-400" />
-
-      {/* Stars */}
-      {stars.map((star) => (
-        <div
-          key={star.id}
-          className="absolute rounded-full bg-white"
-          style={{
-            left: `${star.left}%`,
-            top: `${star.top}%`,
-            width: `${star.size}px`,
-            height: `${star.size}px`,
-            opacity: 0.3,
-            animation: `twinkle ${star.duration}s ease-in-out infinite`,
-            animationDelay: `${star.delay}s`,
-          }}
-        />
-      ))}
-
-      {/* Subtle purple glow at top */}
-      <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full opacity-20"
-        style={{
-          background: 'radial-gradient(ellipse, rgba(139, 92, 246, 0.3) 0%, transparent 70%)',
-        }}
-      />
-    </div>
-  );
-};
+// Custom refresh indicator
+const RefreshIndicator = () => (
+  <div className="flex items-center justify-center py-4">
+    <Loader2 className="w-6 h-6 text-primary-500 animate-spin" />
+  </div>
+);
 
 const Layout = ({ isPulperia = false }) => {
   const { isAuthenticated, user } = useAuthStore();
+  const queryClient = useQueryClient();
+  const location = useLocation();
   const showBottomNav = isAuthenticated;
   const showPulperiaNav = isPulperia && user?.role === 'PULPERIA';
 
+  // Handle refresh - invalidate React Query cache
+  const handleRefresh = async () => {
+    await queryClient.invalidateQueries();
+    // Small delay for better UX
+    return new Promise((resolve) => setTimeout(resolve, 500));
+  };
+
   return (
-    <div className="min-h-screen relative">
-      {/* Starfield background */}
-      <Starfield />
+    <div className="min-h-dvh flex flex-col">
+      <Header isPulperia={showPulperiaNav} />
 
-      {/* Content */}
-      <div className="relative z-10">
-        <Header isPulperia={showPulperiaNav} />
-
-        <main className={`pt-16 ${showBottomNav ? 'pb-20' : 'pb-8'}`}>
+      <PullToRefresh
+        onRefresh={handleRefresh}
+        pullingContent={<RefreshIndicator />}
+        refreshingContent={<RefreshIndicator />}
+        resistance={2.5}
+        maxPullDownDistance={80}
+        pullDownThreshold={60}
+        className="flex-1 overflow-auto"
+      >
+        <main className={`pt-16 ${showBottomNav ? 'pb-[calc(4rem+env(safe-area-inset-bottom))]' : 'pb-8'}`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <Outlet />
+            <Outlet key={location.pathname} />
           </div>
         </main>
+      </PullToRefresh>
 
-        {showBottomNav && <BottomNav isPulperia={showPulperiaNav} />}
-      </div>
+      {showBottomNav && <BottomNav isPulperia={showPulperiaNav} />}
     </div>
   );
 };

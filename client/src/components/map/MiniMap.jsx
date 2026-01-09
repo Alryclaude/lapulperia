@@ -60,14 +60,26 @@ const MapCenterHandler = ({ center }) => {
   return null;
 };
 
-const MiniMap = ({ center, pulperias = [], className = '', zoom = 14, showControls = false }) => {
+const MiniMap = ({
+  center,
+  pulperias = [],
+  className = '',
+  zoom = 14,
+  showControls = false,
+  dragging = false,
+  touchZoom = false,
+}) => {
   if (!center) {
     return (
-      <div className={`bg-gray-100 flex items-center justify-center ${className}`}>
-        <p className="text-gray-500 text-sm">Cargando mapa...</p>
+      <div className={`bg-muted flex items-center justify-center ${className}`}>
+        <p className="text-muted-foreground text-sm">Cargando mapa...</p>
       </div>
     );
   }
+
+  // Enable dragging if explicitly set or if controls are shown
+  const enableDragging = dragging || showControls;
+  const enableTouchZoom = touchZoom || showControls;
 
   return (
     <MapContainer
@@ -76,7 +88,9 @@ const MiniMap = ({ center, pulperias = [], className = '', zoom = 14, showContro
       className={className}
       zoomControl={showControls}
       scrollWheelZoom={false}
-      dragging={showControls}
+      dragging={enableDragging}
+      touchZoom={enableTouchZoom}
+      tap={enableTouchZoom}
       style={{ zIndex: 1 }}
     >
       <TileLayer
