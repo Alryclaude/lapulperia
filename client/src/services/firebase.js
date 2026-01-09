@@ -58,6 +58,7 @@ export const onForegroundMessage = (callback) => {
 };
 
 export {
+  app,
   auth,
   googleProvider,
   signInWithPopup,

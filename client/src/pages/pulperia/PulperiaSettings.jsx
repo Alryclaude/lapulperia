@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Store, MapPin, Phone, Clock, Camera, Save, Trash2, Download,
-  AlertTriangle, Palmtree, X
+  AlertTriangle, Palmtree, X, Loader2
 } from 'lucide-react';
 import { pulperiaApi, userApi } from '../../services/api';
 import toast from 'react-hot-toast';
@@ -31,8 +31,11 @@ const PulperiaSettings = () => {
     whatsapp: '',
     story: '',
     foundedYear: '',
+    latitude: null,
+    longitude: null,
   });
 
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [logoFile, setLogoFile] = useState(null);
   const [bannerFile, setBannerFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState(null);
@@ -50,11 +53,39 @@ const PulperiaSettings = () => {
         whatsapp: pulperia.whatsapp || '',
         story: pulperia.story || '',
         foundedYear: pulperia.foundedYear || '',
+        latitude: pulperia.latitude || null,
+        longitude: pulperia.longitude || null,
       });
       setLogoPreview(pulperia.logo);
       setBannerPreview(pulperia.banner);
     }
   }, [pulperia]);
+
+  // Función para obtener ubicación
+  const handleGetLocation = useCallback(() => {
+    if (navigator.geolocation) {
+      setIsGettingLocation(true);
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setFormData(prev => ({
+            ...prev,
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          }));
+          setIsGettingLocation(false);
+          toast.success('Ubicacion actualizada');
+        },
+        (error) => {
+          console.error('Geolocation error:', error);
+          setIsGettingLocation(false);
+          toast.error('No se pudo obtener la ubicacion');
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      );
+    } else {
+      toast.error('Tu navegador no soporta geolocalizacion');
+    }
+  }, []);
 
   const updateMutation = useMutation({
     mutationFn: (data) => pulperiaApi.update(data),
@@ -160,7 +191,7 @@ const PulperiaSettings = () => {
   const handleVacation = () => {
     vacationMutation.mutate({
       vacationMessage,
-      vacationReturnDate: vacationReturn,
+      vacationUntil: vacationReturn,
     });
   };
 
@@ -303,6 +334,52 @@ const PulperiaSettings = () => {
             placeholder="Frente al palo de mango, casa azul..."
             className="input"
           />
+        </div>
+
+        {/* Ubicación GPS */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Ubicacion en el Mapa
+          </label>
+          <button
+            type="button"
+            onClick={handleGetLocation}
+            disabled={isGettingLocation}
+            className={`w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed rounded-xl transition-colors ${
+              formData.latitude && formData.latitude !== pulperia?.latitude
+                ? 'border-green-400 bg-green-50 text-green-700'
+                : formData.latitude
+                  ? 'border-gray-300 text-gray-600 hover:border-primary-500 hover:text-primary-600'
+                  : 'border-yellow-400 bg-yellow-50 text-yellow-700'
+            } disabled:opacity-50`}
+          >
+            {isGettingLocation ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Obteniendo ubicacion...
+              </>
+            ) : formData.latitude ? (
+              <>
+                <MapPin className="w-5 h-5" />
+                Actualizar mi ubicacion
+              </>
+            ) : (
+              <>
+                <MapPin className="w-5 h-5" />
+                Configurar ubicacion (requerido)
+              </>
+            )}
+          </button>
+          {formData.latitude && formData.latitude !== pulperia?.latitude && (
+            <p className="text-xs text-green-600 mt-2 text-center">
+              Nueva ubicacion lista - Guarda los cambios para aplicar
+            </p>
+          )}
+          {!formData.latitude && (
+            <p className="text-xs text-yellow-600 mt-2 text-center">
+              Sin ubicacion, tu pulperia no aparecera en el mapa
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">

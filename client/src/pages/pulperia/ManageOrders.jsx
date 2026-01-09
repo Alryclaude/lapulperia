@@ -16,6 +16,7 @@ import {
 import { orderApi } from '../../services/api';
 import toast from 'react-hot-toast';
 import { io } from 'socket.io-client';
+import { playNotificationSound, vibrate } from '../../services/notifications';
 import { useAuthStore } from '../../stores/authStore';
 
 const statusConfig = {
@@ -57,13 +58,9 @@ const ManageOrders = () => {
         icon: '🔔',
         duration: 5000,
       });
-      // Play sound
-      const audio = new Audio('/sounds/notification.mp3');
-      audio.play().catch(() => {});
-      // Vibrate if supported
-      if (navigator.vibrate) {
-        navigator.vibrate([200, 100, 200]);
-      }
+      // Play sound and vibrate
+      playNotificationSound('order');
+      vibrate([200, 100, 200]);
     });
 
     return () => {

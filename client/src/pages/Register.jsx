@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
-import { Store, User, MapPin, Phone, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Store, User, MapPin, Phone, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Register = () => {
@@ -22,6 +22,7 @@ const Register = () => {
     latitude: 14.0818,
     longitude: -87.2068,
   });
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
@@ -46,26 +47,37 @@ const Register = () => {
     }
   };
 
-  const handleGetLocation = () => {
+  const handleGetLocation = useCallback(() => {
     if (navigator.geolocation) {
+      setIsGettingLocation(true);
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setPulperiaData({
-            ...pulperiaData,
+          setPulperiaData(prev => ({
+            ...prev,
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
-          });
+          }));
+          setIsGettingLocation(false);
           toast.success('Ubicacion obtenida');
         },
         (error) => {
           console.error('Geolocation error:', error);
-          toast.error('No se pudo obtener la ubicacion');
-        }
+          setIsGettingLocation(false);
+          toast.error('No se pudo obtener la ubicacion. Puedes intentar de nuevo.');
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
       );
     } else {
       toast.error('Tu navegador no soporta geolocalizacion');
     }
-  };
+  }, []);
+
+  // Auto-obtener ubicación cuando llegamos al paso 3 (crear pulpería)
+  useEffect(() => {
+    if (step === 3 && pulperiaData.latitude === 14.0818) {
+      handleGetLocation();
+    }
+  }, [step, handleGetLocation, pulperiaData.latitude]);
 
   const handleCreatePulperia = async (e) => {
     e.preventDefault();
@@ -238,14 +250,33 @@ const Register = () => {
             <button
               type="button"
               onClick={handleGetLocation}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-600 hover:border-primary-500 hover:text-primary-600 transition-colors"
+              disabled={isGettingLocation}
+              className={`w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed rounded-xl transition-colors ${
+                pulperiaData.latitude !== 14.0818
+                  ? 'border-green-400 bg-green-50 text-green-700'
+                  : 'border-gray-300 text-gray-600 hover:border-primary-500 hover:text-primary-600'
+              } disabled:opacity-50`}
             >
-              <MapPin className="w-5 h-5" />
-              Obtener mi ubicacion actual
+              {isGettingLocation ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Obteniendo ubicacion...
+                </>
+              ) : pulperiaData.latitude !== 14.0818 ? (
+                <>
+                  <MapPin className="w-5 h-5" />
+                  Ubicacion obtenida - Click para actualizar
+                </>
+              ) : (
+                <>
+                  <MapPin className="w-5 h-5" />
+                  Obtener mi ubicacion actual
+                </>
+              )}
             </button>
             {pulperiaData.latitude !== 14.0818 && (
-              <p className="text-sm text-primary-600 mt-2">
-                Ubicacion guardada correctamente
+              <p className="text-xs text-green-600 mt-2 text-center">
+                Tu pulperia aparecera en el mapa correctamente
               </p>
             )}
           </div>

@@ -59,7 +59,54 @@ export const onForegroundMessage = (callback) => {
   });
 };
 
-// Play notification sound
+// Generate synthetic notification tones using Web Audio API
+const generateTone = (type = 'default') => {
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    // Different tones for different notification types
+    const toneConfigs = {
+      default: { freq: 440, duration: 0.15, pattern: [1] },
+      order: { freq: 523, duration: 0.12, pattern: [1, 0.8, 1] }, // C5 - rising attention
+      success: { freq: 659, duration: 0.1, pattern: [1, 1.2] }, // E5 - positive
+      achievement: { freq: 784, duration: 0.1, pattern: [1, 1.25, 1.5] }, // G5 - celebratory
+    };
+
+    const config = toneConfigs[type] || toneConfigs.default;
+
+    oscillator.type = 'sine';
+    oscillator.frequency.value = config.freq;
+    gainNode.gain.value = 0.3;
+
+    oscillator.start(audioContext.currentTime);
+
+    // Play pattern of notes
+    let time = audioContext.currentTime;
+    config.pattern.forEach((multiplier, i) => {
+      oscillator.frequency.setValueAtTime(config.freq * multiplier, time);
+      time += config.duration;
+    });
+
+    // Fade out
+    gainNode.gain.exponentialRampToValueAtTime(0.01, time);
+    oscillator.stop(time + 0.05);
+
+    // Cleanup
+    setTimeout(() => audioContext.close(), (time - audioContext.currentTime + 0.1) * 1000);
+
+    return true;
+  } catch (error) {
+    console.warn('Web Audio API not available:', error);
+    return false;
+  }
+};
+
+// Play notification sound (with fallback to synthetic tones)
 export const playNotificationSound = (type = 'default') => {
   const sounds = {
     default: '/sounds/notification.mp3',
@@ -70,9 +117,17 @@ export const playNotificationSound = (type = 'default') => {
 
   const audio = new Audio(sounds[type] || sounds.default);
   audio.volume = 0.5;
+
+  // Try to play the file, fallback to synthetic tone
   audio.play().catch(() => {
-    // Autoplay blocked, ignore
+    // File doesn't exist or autoplay blocked - use synthetic tone
+    generateTone(type);
   });
+
+  // Also handle file not found
+  audio.onerror = () => {
+    generateTone(type);
+  };
 };
 
 // Vibrate device

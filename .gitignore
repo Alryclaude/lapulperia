@@ -41,3 +41,5 @@ coverage/
 *.local
 .cache/
 .claude/
+_agent_docs/
+package-lock.json

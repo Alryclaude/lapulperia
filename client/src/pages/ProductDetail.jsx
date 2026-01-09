@@ -1,17 +1,34 @@
+import { useState, useRef, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Plus, Minus, Bell, Store, Share2 } from 'lucide-react';
+import { ArrowLeft, Plus, Minus, Bell, Store, Share2, X } from 'lucide-react';
 import Zoom from 'react-medium-image-zoom';
 import 'react-medium-image-zoom/dist/styles.css';
 import { productApi } from '../services/api';
 import { useCartStore } from '../stores/cartStore';
 import { useAuthStore } from '../stores/authStore';
+import ShareButtons from '../components/ShareButtons';
 import toast from 'react-hot-toast';
 
 const ProductDetail = () => {
   const { id } = useParams();
   const { isAuthenticated } = useAuthStore();
   const { addItem, isInCart, getItemQuantity, updateQuantity, removeItem } = useCartStore();
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const shareMenuRef = useRef(null);
+
+  // Close share menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (shareMenuRef.current && !shareMenuRef.current.contains(e.target)) {
+        setShowShareMenu(false);
+      }
+    };
+    if (showShareMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showShareMenu]);
 
   const { data, isLoading } = useQuery({
     queryKey: ['product', id],
@@ -42,19 +59,6 @@ const ProductDetail = () => {
       toast.success('Te avisaremos cuando llegue');
     } catch (error) {
       toast.error('Error al crear alerta');
-    }
-  };
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      await navigator.share({
-        title: product.name,
-        text: `Mira ${product.name} en La Pulperia`,
-        url: window.location.href,
-      });
-    } else {
-      await navigator.clipboard.writeText(window.location.href);
-      toast.success('Enlace copiado');
     }
   };
 
@@ -102,12 +106,34 @@ const ProductDetail = () => {
         </div>
 
         {/* Share */}
-        <button
-          onClick={handleShare}
-          className="absolute top-4 right-4 p-2.5 rounded-xl bg-white/90 hover:bg-white shadow"
-        >
-          <Share2 className="w-5 h-5 text-gray-600" />
-        </button>
+        <div className="absolute top-4 right-4" ref={shareMenuRef}>
+          <button
+            onClick={() => setShowShareMenu(!showShareMenu)}
+            className="p-2.5 rounded-xl bg-white/90 hover:bg-white shadow"
+          >
+            <Share2 className="w-5 h-5 text-gray-600" />
+          </button>
+
+          {/* Share dropdown menu */}
+          {showShareMenu && (
+            <div className="absolute right-0 mt-2 p-3 bg-white rounded-xl shadow-lg z-50 min-w-[200px]">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">Compartir</span>
+                <button
+                  onClick={() => setShowShareMenu(false)}
+                  className="p-1 hover:bg-gray-100 rounded-lg"
+                >
+                  <X className="w-4 h-4 text-gray-500" />
+                </button>
+              </div>
+              <ShareButtons
+                title={product.name}
+                text={`Mira ${product.name} en La Pulperia`}
+                variant="icons"
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Product Info */}

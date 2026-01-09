@@ -1,15 +1,16 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   MapPin, Phone, Star, Heart, Share2, Clock, MessageCircle,
-  ChevronRight, Package, ExternalLink, MessageSquare
+  ChevronRight, Package, ExternalLink, MessageSquare, X
 } from 'lucide-react';
 import { pulperiaApi, productApi, reviewApi } from '../services/api';
 import { useAuthStore } from '../stores/authStore';
 import ProductCard from '../components/products/ProductCard';
 import MiniMap from '../components/map/MiniMap';
 import ReviewForm from '../components/ReviewForm';
+import ShareButtons from '../components/ShareButtons';
 import toast from 'react-hot-toast';
 
 const PulperiaProfile = () => {
@@ -17,6 +18,21 @@ const PulperiaProfile = () => {
   const { isAuthenticated } = useAuthStore();
   const queryClient = useQueryClient();
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const shareMenuRef = useRef(null);
+
+  // Close share menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (shareMenuRef.current && !shareMenuRef.current.contains(e.target)) {
+        setShowShareMenu(false);
+      }
+    };
+    if (showShareMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showShareMenu]);
 
   // Fetch pulperia
   const { data: pulperiaData, isLoading } = useQuery({
@@ -46,21 +62,6 @@ const PulperiaProfile = () => {
       toast.success(response.data.isFavorite ? 'Agregado a favoritos' : 'Eliminado de favoritos');
     },
   });
-
-  // Share
-  const handleShare = async () => {
-    const url = window.location.href;
-    if (navigator.share) {
-      await navigator.share({
-        title: pulperia.name,
-        text: `Mira ${pulperia.name} en La Pulperia`,
-        url,
-      });
-    } else {
-      await navigator.clipboard.writeText(url);
-      toast.success('Enlace copiado');
-    }
-  };
 
   // Open WhatsApp
   const handleWhatsApp = () => {
@@ -124,12 +125,34 @@ const PulperiaProfile = () => {
               <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
             </button>
           )}
-          <button
-            onClick={handleShare}
-            className="p-2.5 rounded-xl bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm"
-          >
-            <Share2 className="w-5 h-5" />
-          </button>
+          <div className="relative" ref={shareMenuRef}>
+            <button
+              onClick={() => setShowShareMenu(!showShareMenu)}
+              className="p-2.5 rounded-xl bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm"
+            >
+              <Share2 className="w-5 h-5" />
+            </button>
+
+            {/* Share dropdown menu */}
+            {showShareMenu && (
+              <div className="absolute right-0 mt-2 p-3 bg-white rounded-xl shadow-lg z-50 min-w-[200px]">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-700">Compartir</span>
+                  <button
+                    onClick={() => setShowShareMenu(false)}
+                    className="p-1 hover:bg-gray-100 rounded-lg"
+                  >
+                    <X className="w-4 h-4 text-gray-500" />
+                  </button>
+                </div>
+                <ShareButtons
+                  title={pulperia.name}
+                  text={`Mira ${pulperia.name} en La Pulperia`}
+                  variant="icons"
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Logo */}
