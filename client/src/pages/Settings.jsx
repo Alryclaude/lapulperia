@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Bell, Shield, Moon, Globe, Smartphone, Download, Trash2,
-  ChevronRight, AlertTriangle, X
+  ChevronRight, AlertTriangle, X, Settings as SettingsIcon
 } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 import { userApi } from '../services/api';
@@ -83,205 +84,282 @@ const Settings = () => {
     toast.success('Configuracion actualizada');
   };
 
+  const SettingToggle = ({ enabled, onChange }) => (
+    <motion.button
+      whileTap={{ scale: 0.95 }}
+      onClick={onChange}
+      className={`w-12 h-7 rounded-full transition-colors relative ${
+        enabled ? 'bg-primary-500' : 'bg-dark-200'
+      }`}
+    >
+      <motion.div
+        layout
+        className={`w-5 h-5 bg-white rounded-full shadow absolute top-1 ${
+          enabled ? 'right-1' : 'left-1'
+        }`}
+      />
+    </motion.button>
+  );
+
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Configuracion</h1>
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center gap-4"
+      >
+        <div className="w-12 h-12 rounded-xl bg-primary-500/20 flex items-center justify-center">
+          <SettingsIcon className="w-6 h-6 text-primary-400" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-white">Configuracion</h1>
+          <p className="text-gray-400 text-sm">Personaliza tu experiencia</p>
+        </div>
+      </motion.div>
 
       {/* Notifications */}
-      <div className="card overflow-hidden">
-        <h2 className="px-5 py-3 bg-gray-50 font-medium text-gray-700 text-sm">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 overflow-hidden"
+      >
+        <h2 className="px-5 py-3 bg-dark-200/50 font-medium text-gray-300 text-sm border-b border-white/5">
           Notificaciones
         </h2>
-        <div className="divide-y">
+        <div className="divide-y divide-white/5">
           <div className="flex items-center justify-between px-5 py-4">
             <div className="flex items-center gap-3">
-              <Bell className="w-5 h-5 text-gray-500" />
+              <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                <Bell className="w-5 h-5 text-blue-400" />
+              </div>
               <div>
-                <p className="text-gray-900">Notificaciones Push</p>
+                <p className="text-white font-medium">Notificaciones Push</p>
                 <p className="text-sm text-gray-500">Recibir alertas de pedidos y ofertas</p>
               </div>
             </div>
-            <button
-              onClick={() => toggleSetting('notifications')}
-              className={`w-12 h-7 rounded-full transition-colors ${settings.notifications ? 'bg-primary-500' : 'bg-gray-300'
-                }`}
-            >
-              <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${settings.notifications ? 'translate-x-6' : 'translate-x-1'
-                }`} />
-            </button>
+            <SettingToggle enabled={settings.notifications} onChange={() => toggleSetting('notifications')} />
           </div>
 
           <div className="flex items-center justify-between px-5 py-4">
             <div className="flex items-center gap-3">
-              <Smartphone className="w-5 h-5 text-gray-500" />
+              <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                <Smartphone className="w-5 h-5 text-purple-400" />
+              </div>
               <div>
-                <p className="text-gray-900">Vibracion</p>
+                <p className="text-white font-medium">Vibracion</p>
                 <p className="text-sm text-gray-500">Vibrar al recibir notificaciones</p>
               </div>
             </div>
-            <button
-              onClick={() => toggleSetting('vibration')}
-              className={`w-12 h-7 rounded-full transition-colors ${settings.vibration ? 'bg-primary-500' : 'bg-gray-300'
-                }`}
-            >
-              <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${settings.vibration ? 'translate-x-6' : 'translate-x-1'
-                }`} />
-            </button>
+            <SettingToggle enabled={settings.vibration} onChange={() => toggleSetting('vibration')} />
           </div>
 
           <div className="flex items-center justify-between px-5 py-4">
             <div className="flex items-center gap-3">
-              <Bell className="w-5 h-5 text-gray-500" />
+              <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
+                <Bell className="w-5 h-5 text-green-400" />
+              </div>
               <div>
-                <p className="text-gray-900">Sonidos</p>
+                <p className="text-white font-medium">Sonidos</p>
                 <p className="text-sm text-gray-500">Reproducir sonidos de alerta</p>
               </div>
             </div>
-            <button
-              onClick={() => toggleSetting('sounds')}
-              className={`w-12 h-7 rounded-full transition-colors ${settings.sounds ? 'bg-primary-500' : 'bg-gray-300'
-                }`}
-            >
-              <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${settings.sounds ? 'translate-x-6' : 'translate-x-1'
-                }`} />
-            </button>
+            <SettingToggle enabled={settings.sounds} onChange={() => toggleSetting('sounds')} />
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Appearance */}
-      <div className="card overflow-hidden">
-        <h2 className="px-5 py-3 bg-gray-50 font-medium text-gray-700 text-sm">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+        className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 overflow-hidden"
+      >
+        <h2 className="px-5 py-3 bg-dark-200/50 font-medium text-gray-300 text-sm border-b border-white/5">
           Apariencia
         </h2>
-        <div className="divide-y">
+        <div className="divide-y divide-white/5">
           <div className="flex items-center justify-between px-5 py-4">
             <div className="flex items-center gap-3">
-              <Moon className="w-5 h-5 text-gray-500" />
+              <div className="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center">
+                <Moon className="w-5 h-5 text-indigo-400" />
+              </div>
               <div>
-                <p className="text-gray-900">Modo Oscuro</p>
+                <p className="text-white font-medium">Modo Oscuro</p>
                 <p className="text-sm text-gray-500">Tema oscuro para la aplicacion</p>
               </div>
             </div>
-            <button
-              onClick={() => toggleSetting('darkMode')}
-              className={`w-12 h-7 rounded-full transition-colors ${settings.darkMode ? 'bg-primary-500' : 'bg-gray-300'
-                }`}
-            >
-              <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${settings.darkMode ? 'translate-x-6' : 'translate-x-1'
-                }`} />
-            </button>
+            <SettingToggle enabled={settings.darkMode} onChange={() => toggleSetting('darkMode')} />
           </div>
 
           <div className="flex items-center justify-between px-5 py-4">
             <div className="flex items-center gap-3">
-              <Globe className="w-5 h-5 text-gray-500" />
+              <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
+                <Globe className="w-5 h-5 text-cyan-400" />
+              </div>
               <div>
-                <p className="text-gray-900">Idioma</p>
-                <p className="text-sm text-gray-500">Español (Honduras)</p>
+                <p className="text-white font-medium">Idioma</p>
+                <p className="text-sm text-gray-500">Espanol (Honduras)</p>
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-gray-400" />
+            <ChevronRight className="w-5 h-5 text-gray-500" />
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Data */}
-      <div className="card overflow-hidden">
-        <h2 className="px-5 py-3 bg-gray-50 font-medium text-gray-700 text-sm">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 overflow-hidden"
+      >
+        <h2 className="px-5 py-3 bg-dark-200/50 font-medium text-gray-300 text-sm border-b border-white/5">
           Datos
         </h2>
-        <div className="divide-y">
-          <button
+        <div className="divide-y divide-white/5">
+          <motion.button
+            whileHover={{ backgroundColor: 'rgba(255,255,255,0.02)' }}
+            whileTap={{ scale: 0.99 }}
             onClick={() => exportMutation.mutate()}
             disabled={exportMutation.isPending}
-            className="flex items-center gap-3 w-full px-5 py-4 hover:bg-gray-50 text-left"
+            className="flex items-center gap-3 w-full px-5 py-4 text-left transition-colors"
           >
-            <Download className="w-5 h-5 text-gray-500" />
+            <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
+              <Download className="w-5 h-5 text-amber-400" />
+            </div>
             <div className="flex-1">
-              <p className="text-gray-900">Exportar mis Datos</p>
+              <p className="text-white font-medium">Exportar mis Datos</p>
               <p className="text-sm text-gray-500">Descargar una copia de tu informacion</p>
             </div>
             {exportMutation.isPending && (
               <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
             )}
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
+            whileHover={{ backgroundColor: 'rgba(239,68,68,0.05)' }}
+            whileTap={{ scale: 0.99 }}
             onClick={() => setShowDeleteModal(true)}
-            className="flex items-center gap-3 w-full px-5 py-4 hover:bg-red-50 text-left"
+            className="flex items-center gap-3 w-full px-5 py-4 text-left transition-colors"
           >
-            <Trash2 className="w-5 h-5 text-red-500" />
+            <div className="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center">
+              <Trash2 className="w-5 h-5 text-red-400" />
+            </div>
             <div className="flex-1">
-              <p className="text-red-600">Eliminar Cuenta</p>
+              <p className="text-red-400 font-medium">Eliminar Cuenta</p>
               <p className="text-sm text-gray-500">Borrar permanentemente todos tus datos</p>
             </div>
-          </button>
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Legal */}
-      <div className="card overflow-hidden">
-        <h2 className="px-5 py-3 bg-gray-50 font-medium text-gray-700 text-sm">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25 }}
+        className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 overflow-hidden"
+      >
+        <h2 className="px-5 py-3 bg-dark-200/50 font-medium text-gray-300 text-sm border-b border-white/5">
           Legal
         </h2>
-        <div className="divide-y">
-          <button className="flex items-center justify-between w-full px-5 py-4 hover:bg-gray-50">
-            <span className="text-gray-900">Terminos de Servicio</span>
-            <ChevronRight className="w-5 h-5 text-gray-400" />
-          </button>
-          <button className="flex items-center justify-between w-full px-5 py-4 hover:bg-gray-50">
-            <span className="text-gray-900">Politica de Privacidad</span>
-            <ChevronRight className="w-5 h-5 text-gray-400" />
-          </button>
+        <div className="divide-y divide-white/5">
+          <motion.button
+            whileHover={{ backgroundColor: 'rgba(255,255,255,0.02)' }}
+            className="flex items-center justify-between w-full px-5 py-4 transition-colors"
+          >
+            <span className="text-white font-medium">Terminos de Servicio</span>
+            <ChevronRight className="w-5 h-5 text-gray-500" />
+          </motion.button>
+          <motion.button
+            whileHover={{ backgroundColor: 'rgba(255,255,255,0.02)' }}
+            className="flex items-center justify-between w-full px-5 py-4 transition-colors"
+          >
+            <span className="text-white font-medium">Politica de Privacidad</span>
+            <ChevronRight className="w-5 h-5 text-gray-500" />
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Version */}
-      <p className="text-center text-sm text-gray-400">
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+        className="text-center text-sm text-gray-500"
+      >
         La Pulperia v1.0.0
-      </p>
+      </motion.p>
 
       {/* Delete Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6">
-            <div className="flex items-center gap-3 text-red-600 mb-4">
-              <AlertTriangle className="w-8 h-8" />
-              <h2 className="text-xl font-bold">Eliminar Cuenta</h2>
-            </div>
+      <AnimatePresence>
+        {showDeleteModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 z-[100]"
+            onClick={(e) => e.target === e.currentTarget && setShowDeleteModal(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 100, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 100, scale: 0.95 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="bg-dark-100 rounded-t-3xl sm:rounded-2xl max-w-md w-full p-6 border border-white/10"
+            >
+              <div className="flex items-center gap-3 text-red-400 mb-4">
+                <div className="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center">
+                  <AlertTriangle className="w-6 h-6" />
+                </div>
+                <h2 className="text-xl font-bold">Eliminar Cuenta</h2>
+              </div>
 
-            <p className="text-gray-600 mb-4">
-              Esta accion eliminara permanentemente tu cuenta y todos tus datos. No podras recuperarlos.
-            </p>
+              <p className="text-gray-400 mb-4">
+                Esta accion eliminara permanentemente tu cuenta y todos tus datos. No podras recuperarlos.
+              </p>
 
-            <p className="text-sm text-gray-500 mb-4">
-              Escribe <strong>ELIMINAR</strong> para confirmar:
-            </p>
+              <p className="text-sm text-gray-500 mb-4">
+                Escribe <strong className="text-white">ELIMINAR</strong> para confirmar:
+              </p>
 
-            <input
-              type="text"
-              value={deleteConfirm}
-              onChange={(e) => setDeleteConfirm(e.target.value)}
-              className="input mb-4"
-              placeholder="ELIMINAR"
-            />
+              <input
+                type="text"
+                value={deleteConfirm}
+                onChange={(e) => setDeleteConfirm(e.target.value)}
+                className="w-full px-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-red-500/50 focus:ring-1 focus:ring-red-500/20 transition-all mb-4"
+                placeholder="ELIMINAR"
+              />
 
-            <div className="flex gap-3">
-              <button onClick={() => setShowDeleteModal(false)} className="btn-secondary flex-1">
-                Cancelar
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={deleteConfirm !== 'ELIMINAR' || deleteMutation.isPending}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {deleteMutation.isPending ? 'Eliminando...' : 'Eliminar Cuenta'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+              <div className="flex gap-3">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowDeleteModal(false)}
+                  className="flex-1 px-4 py-3 bg-dark-200/50 hover:bg-dark-200 border border-white/5 text-white rounded-xl font-medium transition-colors"
+                >
+                  Cancelar
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: deleteConfirm === 'ELIMINAR' ? 1.02 : 1 }}
+                  whileTap={{ scale: deleteConfirm === 'ELIMINAR' ? 0.98 : 1 }}
+                  onClick={handleDelete}
+                  disabled={deleteConfirm !== 'ELIMINAR' || deleteMutation.isPending}
+                  className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors"
+                >
+                  {deleteMutation.isPending ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" />
+                  ) : (
+                    'Eliminar Cuenta'
+                  )}
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

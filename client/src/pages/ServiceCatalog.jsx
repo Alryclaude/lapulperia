@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, Star, Phone, MessageCircle, MapPin, Camera, Plus,
   Trash2, Edit2, X, Check, Wrench
@@ -122,11 +123,11 @@ const ServiceCatalog = ({ isOwner }) => {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="skeleton h-32 rounded-xl" />
-        <div className="skeleton h-8 w-1/2" />
+        <div className="h-32 rounded-xl bg-dark-200 animate-pulse" />
+        <div className="h-8 w-1/2 bg-dark-200 animate-pulse rounded" />
         <div className="grid grid-cols-3 gap-2">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="skeleton aspect-square rounded-lg" />
+            <div key={i} className="aspect-square rounded-lg bg-dark-200 animate-pulse" />
           ))}
         </div>
       </div>
@@ -137,51 +138,98 @@ const ServiceCatalog = ({ isOwner }) => {
   if (isOwner && !service) {
     return (
       <div className="max-w-2xl mx-auto space-y-6">
-        <h1 className="text-2xl font-bold text-gray-900">Mis Servicios</h1>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-4"
+        >
+          <div className="w-12 h-12 rounded-xl bg-primary-500/20 flex items-center justify-center">
+            <Wrench className="w-6 h-6 text-primary-400" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-white">Mis Servicios</h1>
+            <p className="text-gray-400 text-sm">Ofrece tus habilidades profesionales</p>
+          </div>
+        </motion.div>
 
-        <div className="text-center py-12">
-          <Wrench className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-12 text-center"
+        >
+          <div className="w-16 h-16 rounded-2xl bg-primary-500/20 flex items-center justify-center mx-auto mb-4">
+            <Wrench className="w-8 h-8 text-primary-400" />
+          </div>
+          <h2 className="text-xl font-semibold text-white mb-2">
             Ofrece tus servicios
           </h2>
-          <p className="text-gray-500 mb-6">
+          <p className="text-gray-400 mb-6">
             Muestra tus habilidades y encuentra clientes
           </p>
-          <button onClick={() => openModal()} className="btn-primary">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => openModal()}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-medium transition-colors"
+          >
             <Plus className="w-5 h-5" />
             Crear Catalogo
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
 
         {/* Modal */}
-        {showModal && renderModal()}
+        <AnimatePresence>
+          {showModal && renderModal()}
+        </AnimatePresence>
       </div>
     );
   }
 
   if (!service && !isOwner) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-500">Servicio no encontrado</p>
+      <div className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-12 text-center">
+        <p className="text-gray-400">Servicio no encontrado</p>
       </div>
     );
   }
 
   const renderModal = () => (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-5 border-b flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900">
-            {editService ? 'Editar Servicio' : 'Nuevo Servicio'}
-          </h2>
-          <button onClick={closeModal} className="p-2 hover:bg-gray-100 rounded-lg">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center z-[100]"
+      onClick={(e) => e.target === e.currentTarget && closeModal()}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 100, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 100, scale: 0.95 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+        className="bg-dark-100 rounded-t-3xl sm:rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto sm:m-4 border border-white/10"
+      >
+        <div className="p-5 border-b border-white/5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary-500/20 flex items-center justify-center">
+              {editService ? <Edit2 className="w-5 h-5 text-primary-400" /> : <Plus className="w-5 h-5 text-primary-400" />}
+            </div>
+            <h2 className="text-xl font-bold text-white">
+              {editService ? 'Editar Servicio' : 'Nuevo Servicio'}
+            </h2>
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={closeModal}
+            className="p-2 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-colors"
+          >
             <X className="w-5 h-5" />
-          </button>
+          </motion.button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               Profesion / Oficio *
             </label>
             <input
@@ -189,32 +237,32 @@ const ServiceCatalog = ({ isOwner }) => {
               value={formData.profession}
               onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
               placeholder="Ej: Carpintero, Electricista, Plomero..."
-              className="input"
+              className="w-full px-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/20 transition-all"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               Descripcion
             </label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Describe los servicios que ofreces, experiencia, disponibilidad..."
-              className="input min-h-[120px]"
+              className="w-full px-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/20 transition-all min-h-[120px] resize-none"
             />
           </div>
 
           {/* Images */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               Fotos de trabajos ({images.length + newImages.length}/6)
             </label>
             <div className="grid grid-cols-3 gap-2">
               {images.map((img, i) => (
                 <div key={`existing-${i}`} className="relative aspect-square">
-                  <img src={img} alt="" className="w-full h-full object-cover rounded-lg" />
+                  <img src={img} alt="" className="w-full h-full object-cover rounded-lg border border-white/10" />
                 </div>
               ))}
               {newImages.map((file, i) => (
@@ -222,20 +270,22 @@ const ServiceCatalog = ({ isOwner }) => {
                   <img
                     src={URL.createObjectURL(file)}
                     alt=""
-                    className="w-full h-full object-cover rounded-lg"
+                    className="w-full h-full object-cover rounded-lg border border-white/10"
                   />
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                     type="button"
                     onClick={() => setNewImages(newImages.filter((_, idx) => idx !== i))}
-                    className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full"
+                    className="absolute top-1 right-1 p-1 bg-red-500/80 backdrop-blur-sm text-white rounded-full hover:bg-red-500 transition-colors"
                   >
                     <X className="w-3 h-3" />
-                  </button>
+                  </motion.button>
                 </div>
               ))}
               {images.length + newImages.length < 6 && (
-                <label className="aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary-500 hover:bg-primary-50/50">
-                  <Camera className="w-6 h-6 text-gray-400" />
+                <label className="aspect-square border-2 border-dashed border-white/10 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary-500/50 hover:bg-primary-500/5 transition-colors">
+                  <Camera className="w-6 h-6 text-gray-500" />
                   <span className="text-xs text-gray-500 mt-1">Agregar</span>
                   <input
                     type="file"
@@ -250,13 +300,21 @@ const ServiceCatalog = ({ isOwner }) => {
           </div>
 
           <div className="flex gap-3 pt-4">
-            <button type="button" onClick={closeModal} className="btn-secondary flex-1">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type="button"
+              onClick={closeModal}
+              className="flex-1 px-4 py-3 bg-dark-200/50 hover:bg-dark-200 border border-white/5 text-white rounded-xl font-medium transition-colors"
+            >
               Cancelar
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={createMutation.isPending || updateMutation.isPending}
-              className="btn-primary flex-1"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-primary-500 hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors"
             >
               {(createMutation.isPending || updateMutation.isPending) ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -266,110 +324,148 @@ const ServiceCatalog = ({ isOwner }) => {
                   {editService ? 'Guardar' : 'Publicar'}
                 </>
               )}
-            </button>
+            </motion.button>
           </div>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Back */}
       {!isOwner && (
-        <Link to="/services" className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900">
+        <Link to="/services" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
           <ArrowLeft className="w-5 h-5" />
           Ver todos los servicios
         </Link>
       )}
 
       {isOwner && (
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Mis Servicios</h1>
-          <button onClick={() => openModal(service)} className="btn-secondary">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-between"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-primary-500/20 flex items-center justify-center">
+              <Wrench className="w-6 h-6 text-primary-400" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-white">Mis Servicios</h1>
+              <p className="text-gray-400 text-sm">Tu catalogo profesional</p>
+            </div>
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => openModal(service)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-dark-200/50 hover:bg-dark-200 border border-white/5 text-white rounded-xl font-medium transition-colors"
+          >
             <Edit2 className="w-4 h-4" />
             Editar
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
       )}
 
       {/* Profile */}
-      <div className="card p-6">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-6"
+      >
         <div className="flex items-center gap-4">
           {serviceUser.avatar ? (
             <img
               src={serviceUser.avatar}
               alt={serviceUser.name}
-              className="w-20 h-20 rounded-2xl object-cover"
+              className="w-20 h-20 rounded-2xl object-cover border border-white/10"
             />
           ) : (
-            <div className="w-20 h-20 rounded-2xl bg-primary-100 flex items-center justify-center">
-              <span className="text-2xl font-bold text-primary-600">
+            <div className="w-20 h-20 rounded-2xl bg-primary-500/20 flex items-center justify-center border border-primary-500/30">
+              <span className="text-2xl font-bold text-primary-400">
                 {serviceUser.name?.charAt(0)}
               </span>
             </div>
           )}
           <div className="flex-1">
-            <h1 className="text-xl font-bold text-gray-900">{serviceUser.name}</h1>
-            <p className="text-primary-600 font-semibold">{service.profession}</p>
+            <h1 className="text-xl font-bold text-white">{serviceUser.name}</h1>
+            <p className="text-primary-400 font-semibold">{service.profession}</p>
             {service.rating > 0 && (
               <div className="flex items-center gap-1 mt-1">
-                <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-                <span className="font-medium">{service.rating.toFixed(1)}</span>
-                <span className="text-gray-500">({service.reviewCount} reseñas)</span>
+                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                <span className="font-medium text-white">{service.rating.toFixed(1)}</span>
+                <span className="text-gray-500">({service.reviewCount} resenas)</span>
               </div>
             )}
           </div>
         </div>
 
         {service.description && (
-          <p className="text-gray-600 mt-4">{service.description}</p>
+          <p className="text-gray-400 mt-4">{service.description}</p>
         )}
 
         {/* Contact */}
         {!isOwner && serviceUser.phone && (
-          <button onClick={handleWhatsApp} className="btn-primary w-full mt-4">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleWhatsApp}
+            className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium transition-colors"
+          >
             <MessageCircle className="w-5 h-5" />
             Contactar por WhatsApp
-          </button>
+          </motion.button>
         )}
-      </div>
+      </motion.div>
 
       {/* Portfolio */}
       {service.images?.length > 0 && (
-        <div className="card p-5">
-          <h2 className="font-semibold text-gray-900 mb-4">Trabajos Realizados</h2>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-5"
+        >
+          <h2 className="font-semibold text-white mb-4">Trabajos Realizados</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {service.images.map((img, i) => (
               <Zoom key={i}>
                 <img
                   src={img}
                   alt={`Trabajo ${i + 1}`}
-                  className="w-full aspect-square object-cover rounded-xl cursor-pointer hover:opacity-90 transition-opacity"
+                  className="w-full aspect-square object-cover rounded-xl cursor-pointer hover:opacity-90 transition-opacity border border-white/5"
                 />
               </Zoom>
             ))}
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Delete */}
       {isOwner && (
-        <button
+        <motion.button
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
           onClick={() => {
             if (window.confirm('Eliminar tu catalogo de servicios?')) {
               deleteMutation.mutate(service.id);
             }
           }}
-          className="card w-full p-4 flex items-center justify-center gap-2 text-red-600 hover:bg-red-50"
+          className="w-full bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-4 flex items-center justify-center gap-2 text-red-400 hover:bg-red-500/10 hover:border-red-500/30 transition-all"
         >
           <Trash2 className="w-5 h-5" />
           Eliminar Catalogo
-        </button>
+        </motion.button>
       )}
 
       {/* Modal */}
-      {showModal && renderModal()}
+      <AnimatePresence>
+        {showModal && renderModal()}
+      </AnimatePresence>
     </div>
   );
 };

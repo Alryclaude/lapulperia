@@ -13,6 +13,7 @@ const ManageProducts = () => {
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
+  const [deleteProduct, setDeleteProduct] = useState(null); // Para modal de confirmación
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -182,10 +183,36 @@ const ManageProducts = () => {
     }
   };
 
-  const handleDelete = (product) => {
-    if (window.confirm(`Eliminar "${product.name}"?`)) {
-      deleteMutation.mutate(product.id);
+  const handleDelete = (product, e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
     }
+    setDeleteProduct(product);
+  };
+
+  const confirmDelete = () => {
+    if (deleteProduct) {
+      deleteMutation.mutate(deleteProduct.id);
+      setDeleteProduct(null);
+    }
+  };
+
+  const handleEdit = (product, e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    openModal(product);
+  };
+
+  const handleToggleStock = (product, e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    toggleStockMutation.mutate({ id: product.id, outOfStock: !product.outOfStock });
+    toast.success(product.outOfStock ? 'Producto disponible' : 'Producto agotado');
   };
 
   return (
@@ -293,7 +320,7 @@ const ManageProducts = () => {
                   <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
-                    onClick={() => openModal(product)}
+                    onClick={(e) => handleEdit(product, e)}
                     className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 border border-white/10 transition-colors"
                   >
                     <Edit2 className="w-4 h-4" />
@@ -301,7 +328,7 @@ const ManageProducts = () => {
                   <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
-                    onClick={() => toggleStockMutation.mutate({ id: product.id, outOfStock: !product.outOfStock })}
+                    onClick={(e) => handleToggleStock(product, e)}
                     className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 border border-white/10 transition-colors"
                   >
                     {product.outOfStock ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
@@ -309,7 +336,7 @@ const ManageProducts = () => {
                   <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
-                    onClick={() => handleDelete(product)}
+                    onClick={(e) => handleDelete(product, e)}
                     className="p-2.5 rounded-xl bg-red-500/20 backdrop-blur-sm text-red-400 hover:bg-red-500/30 border border-red-500/30 transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -319,28 +346,31 @@ const ManageProducts = () => {
                 {/* Mobile: Always visible action bar at bottom of image */}
                 <div className="flex md:hidden absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent pt-8 pb-2 px-2">
                   <div className="flex items-center justify-center gap-2 w-full">
-                    <motion.button
-                      whileTap={{ scale: 0.9 }}
-                      onClick={(e) => { e.stopPropagation(); openModal(product); }}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/10 backdrop-blur-sm text-white border border-white/10"
+                    <button
+                      type="button"
+                      onClick={(e) => handleEdit(product, e)}
+                      onTouchEnd={(e) => { e.preventDefault(); handleEdit(product, e); }}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-white/10 backdrop-blur-sm text-white border border-white/10 active:bg-white/20 touch-manipulation"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
                       <span className="text-xs font-medium">Editar</span>
-                    </motion.button>
-                    <motion.button
-                      whileTap={{ scale: 0.9 }}
-                      onClick={(e) => { e.stopPropagation(); toggleStockMutation.mutate({ id: product.id, outOfStock: !product.outOfStock }); }}
-                      className="p-2 rounded-lg bg-white/10 backdrop-blur-sm text-white border border-white/10"
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => handleToggleStock(product, e)}
+                      onTouchEnd={(e) => { e.preventDefault(); handleToggleStock(product, e); }}
+                      className="p-2.5 rounded-lg bg-white/10 backdrop-blur-sm text-white border border-white/10 active:bg-white/20 touch-manipulation"
                     >
                       {product.outOfStock ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                    </motion.button>
-                    <motion.button
-                      whileTap={{ scale: 0.9 }}
-                      onClick={(e) => { e.stopPropagation(); handleDelete(product); }}
-                      className="p-2 rounded-lg bg-red-500/20 backdrop-blur-sm text-red-400 border border-red-500/30"
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => handleDelete(product, e)}
+                      onTouchEnd={(e) => { e.preventDefault(); handleDelete(product, e); }}
+                      className="p-2.5 rounded-lg bg-red-500/20 backdrop-blur-sm text-red-400 border border-red-500/30 active:bg-red-500/30 touch-manipulation"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
-                    </motion.button>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -620,6 +650,80 @@ const ManageProducts = () => {
                   </div>
                 </div>
               </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {deleteProduct && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center z-[100]"
+            onClick={(e) => e.target === e.currentTarget && setDeleteProduct(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 100, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 100, scale: 0.95 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="bg-dark-100 rounded-t-3xl sm:rounded-2xl max-w-md w-full p-6 sm:m-4 border border-white/10"
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center">
+                  <Trash2 className="w-6 h-6 text-red-400" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">Eliminar producto</h2>
+                  <p className="text-gray-400 text-sm">Esta accion no se puede deshacer</p>
+                </div>
+              </div>
+
+              <div className="bg-dark-200/50 rounded-xl p-4 mb-6 border border-white/5">
+                <div className="flex items-center gap-3">
+                  {deleteProduct.imageUrl && (
+                    <img
+                      src={deleteProduct.imageUrl}
+                      alt={deleteProduct.name}
+                      className="w-14 h-14 rounded-lg object-cover border border-white/10"
+                    />
+                  )}
+                  <div>
+                    <p className="font-medium text-white">{deleteProduct.name}</p>
+                    <p className="text-primary-400 text-sm font-medium">L. {deleteProduct.price.toFixed(2)}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setDeleteProduct(null)}
+                  className="flex-1 px-4 py-3 bg-dark-200/50 hover:bg-dark-200 border border-white/5 text-white rounded-xl font-medium transition-colors"
+                >
+                  Cancelar
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={confirmDelete}
+                  disabled={deleteMutation.isPending}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors"
+                >
+                  {deleteMutation.isPending ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      Eliminar
+                    </>
+                  )}
+                </motion.button>
+              </div>
             </motion.div>
           </motion.div>
         )}
