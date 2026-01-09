@@ -80,58 +80,7 @@ router.get('/', optionalAuth, async (req, res) => {
   }
 });
 
-// Get single pulperia
-router.get('/:id', optionalAuth, async (req, res) => {
-  try {
-    const pulperia = await prisma.pulperia.findUnique({
-      where: { id: req.params.id },
-      include: {
-        user: {
-          select: { name: true, avatar: true },
-        },
-        products: {
-          where: { isAvailable: true },
-          orderBy: [{ isFeatured: 'desc' }, { createdAt: 'desc' }],
-        },
-        reviews: {
-          include: {
-            user: { select: { name: true, avatar: true } },
-          },
-          orderBy: { createdAt: 'desc' },
-          take: 10,
-        },
-        achievements: true,
-        loyaltyProgram: true,
-        _count: {
-          select: { products: true, reviews: true, orders: true },
-        },
-      },
-    });
-
-    if (!pulperia) {
-      return res.status(404).json({ error: { message: 'Pulpería no encontrada' } });
-    }
-
-    // Check if user has favorited
-    let isFavorite = false;
-    if (req.user) {
-      const favorite = await prisma.favorite.findUnique({
-        where: {
-          userId_pulperiaId: {
-            userId: req.user.id,
-            pulperiaId: pulperia.id,
-          },
-        },
-      });
-      isFavorite = !!favorite;
-    }
-
-    res.json({ pulperia, isFavorite });
-  } catch (error) {
-    console.error('Get pulperia error:', error);
-    res.status(500).json({ error: { message: 'Error al obtener pulpería' } });
-  }
-});
+// IMPORTANTE: Rutas específicas DEBEN ir antes de /:id para evitar conflictos
 
 // Get user's favorite pulperias
 router.get('/favorites', authenticate, async (req, res) => {
@@ -180,6 +129,59 @@ router.get('/me', authenticate, requirePulperia, async (req, res) => {
     res.json({ pulperia });
   } catch (error) {
     console.error('Get my pulperia error:', error);
+    res.status(500).json({ error: { message: 'Error al obtener pulpería' } });
+  }
+});
+
+// Get single pulperia (DEBE ir después de rutas específicas como /favorites y /me)
+router.get('/:id', optionalAuth, async (req, res) => {
+  try {
+    const pulperia = await prisma.pulperia.findUnique({
+      where: { id: req.params.id },
+      include: {
+        user: {
+          select: { name: true, avatar: true },
+        },
+        products: {
+          where: { isAvailable: true },
+          orderBy: [{ isFeatured: 'desc' }, { createdAt: 'desc' }],
+        },
+        reviews: {
+          include: {
+            user: { select: { name: true, avatar: true } },
+          },
+          orderBy: { createdAt: 'desc' },
+          take: 10,
+        },
+        achievements: true,
+        loyaltyProgram: true,
+        _count: {
+          select: { products: true, reviews: true, orders: true },
+        },
+      },
+    });
+
+    if (!pulperia) {
+      return res.status(404).json({ error: { message: 'Pulpería no encontrada' } });
+    }
+
+    // Check if user has favorited
+    let isFavorite = false;
+    if (req.user) {
+      const favorite = await prisma.favorite.findUnique({
+        where: {
+          userId_pulperiaId: {
+            userId: req.user.id,
+            pulperiaId: pulperia.id,
+          },
+        },
+      });
+      isFavorite = !!favorite;
+    }
+
+    res.json({ pulperia, isFavorite });
+  } catch (error) {
+    console.error('Get pulperia error:', error);
     res.status(500).json({ error: { message: 'Error al obtener pulpería' } });
   }
 });

@@ -79,6 +79,8 @@ const Home = () => {
         limit: 12,
       }),
     enabled: !!location,
+    refetchInterval: 30000, // Refresh every 30 seconds to show updated status
+    staleTime: 15000, // Consider data stale after 15 seconds
   });
 
   const pulperias = pulperiasData?.data?.pulperias || [];

@@ -30,7 +30,10 @@ const ServiceCatalog = ({ isOwner }) => {
     queryFn: () => isOwner ? serviceApi.getMine() : serviceApi.getById(id),
   });
 
-  const service = data?.data?.service;
+  // getMine() retorna { services: [...] } (array), getById() retorna { service: ... } (singular)
+  const service = isOwner
+    ? data?.data?.services?.[0]
+    : data?.data?.service;
   const serviceUser = service?.user || user;
 
   const createMutation = useMutation({
