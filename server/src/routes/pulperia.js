@@ -133,6 +133,33 @@ router.get('/:id', optionalAuth, async (req, res) => {
   }
 });
 
+// Get user's favorite pulperias
+router.get('/favorites', authenticate, async (req, res) => {
+  try {
+    const favorites = await prisma.favorite.findMany({
+      where: { userId: req.user.id },
+      include: {
+        pulperia: {
+          include: {
+            _count: { select: { products: true, reviews: true } },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    res.json({
+      pulperias: favorites.map((f) => ({
+        ...f.pulperia,
+        isFavorite: true,
+      })),
+    });
+  } catch (error) {
+    console.error('Get favorites error:', error);
+    res.status(500).json({ error: { message: 'Error al obtener favoritos' } });
+  }
+});
+
 // Get my pulperia
 router.get('/me', authenticate, requirePulperia, async (req, res) => {
   try {

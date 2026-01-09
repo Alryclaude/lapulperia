@@ -42,8 +42,8 @@ router.get('/', optionalAuth, async (req, res) => {
     });
 
     res.json({
-      catalogs,
-      professions: professions.map((p) => p.profession),
+      services: catalogs,
+      categories: professions.map((p) => p.profession),
     });
   } catch (error) {
     console.error('Get services error:', error);
@@ -59,7 +59,7 @@ router.get('/my-catalogs', authenticate, async (req, res) => {
       orderBy: { createdAt: 'desc' },
     });
 
-    res.json({ catalogs });
+    res.json({ services: catalogs });
   } catch (error) {
     console.error('Get my catalogs error:', error);
     res.status(500).json({ error: { message: 'Error al obtener catálogos' } });
@@ -79,7 +79,7 @@ router.get('/user/:userId', optionalAuth, async (req, res) => {
       orderBy: { createdAt: 'desc' },
     });
 
-    res.json({ catalogs });
+    res.json({ services: catalogs });
   } catch (error) {
     console.error('Get user catalogs error:', error);
     res.status(500).json({ error: { message: 'Error al obtener catálogos' } });
@@ -102,7 +102,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
       return res.status(404).json({ error: { message: 'Catálogo no encontrado' } });
     }
 
-    res.json({ catalog });
+    res.json({ service: catalog });
   } catch (error) {
     console.error('Get catalog error:', error);
     res.status(500).json({ error: { message: 'Error al obtener catálogo' } });
