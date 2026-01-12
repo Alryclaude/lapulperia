@@ -51,7 +51,7 @@ const Login = () => {
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
             <Store className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Bienvenido</h1>
+          <h1 className="text-2xl font-bold text-white">Bienvenido</h1>
           <p className="text-gray-500 mt-1">Inicia sesion para continuar</p>
         </div>
 
@@ -59,7 +59,7 @@ const Login = () => {
         <button
           onClick={handleGoogleLogin}
           disabled={isLoading}
-          className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-xl font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-dark-800 border border-dark-600 rounded-xl font-medium text-gray-200 hover:bg-dark-700 hover:border-dark-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
@@ -89,10 +89,10 @@ const Login = () => {
         {/* Divider */}
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-200" />
+            <div className="w-full border-t border-dark-600" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">o</span>
+            <span className="px-2 bg-dark-900 text-gray-400">o</span>
           </div>
         </div>
 

@@ -123,14 +123,14 @@ const Register = () => {
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
               <Store className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">Crear Cuenta</h1>
+            <h1 className="text-2xl font-bold text-white">Crear Cuenta</h1>
             <p className="text-gray-500 mt-1">Unete a La Pulperia</p>
           </div>
 
           <button
             onClick={handleGoogleLogin}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-xl font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-dark-800 border border-dark-600 rounded-xl font-medium text-gray-200 hover:bg-dark-700 hover:border-dark-500 transition-all disabled:opacity-50"
           >
             {isLoading ? (
               <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
@@ -155,7 +155,7 @@ const Register = () => {
       <div className="w-full max-w-lg">
         <div className="card p-8 shadow-xl">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">Que deseas hacer?</h1>
+            <h1 className="text-2xl font-bold text-white">Que deseas hacer?</h1>
             <p className="text-gray-500 mt-1">Elige como quieres usar La Pulperia</p>
           </div>
 
@@ -163,13 +163,13 @@ const Register = () => {
             {/* Client Option */}
             <button
               onClick={() => handleRoleSelect('CLIENT')}
-              className="flex items-start gap-4 p-5 bg-white border-2 border-gray-200 rounded-2xl hover:border-primary-500 hover:bg-primary-50/50 transition-all text-left group"
+              className="flex items-start gap-4 p-5 bg-dark-800 border-2 border-dark-600 rounded-2xl hover:border-primary-500 hover:bg-dark-700 transition-all text-left group"
             >
               <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-200 transition-colors">
                 <User className="w-6 h-6 text-blue-600" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-gray-900">Soy Cliente</h3>
+                <h3 className="font-semibold text-white">Soy Cliente</h3>
                 <p className="text-sm text-gray-500 mt-1">
                   Quiero comprar en pulperias cerca de mi, buscar empleos y ofrecer mis servicios
                 </p>
@@ -180,13 +180,13 @@ const Register = () => {
             {/* Pulperia Option */}
             <button
               onClick={() => handleRoleSelect('PULPERIA')}
-              className="flex items-start gap-4 p-5 bg-white border-2 border-gray-200 rounded-2xl hover:border-primary-500 hover:bg-primary-50/50 transition-all text-left group"
+              className="flex items-start gap-4 p-5 bg-dark-800 border-2 border-dark-600 rounded-2xl hover:border-primary-500 hover:bg-dark-700 transition-all text-left group"
             >
               <div className="w-12 h-12 rounded-xl bg-primary-100 flex items-center justify-center flex-shrink-0 group-hover:bg-primary-200 transition-colors">
                 <Store className="w-6 h-6 text-primary-600" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-gray-900">Tengo una Pulperia</h3>
+                <h3 className="font-semibold text-white">Tengo una Pulperia</h3>
                 <p className="text-sm text-gray-500 mt-1">
                   Quiero vender mis productos, recibir pedidos y ofrecer empleos
                 </p>
@@ -212,14 +212,14 @@ const Register = () => {
         </button>
 
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Tu Pulperia</h1>
+          <h1 className="text-2xl font-bold text-white">Tu Pulperia</h1>
           <p className="text-gray-500 mt-1">Cuentanos sobre tu negocio</p>
         </div>
 
         <form onSubmit={handleCreatePulperia} className="space-y-5">
           {/* Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-gray-300 mb-1.5">
               Nombre de la Pulperia *
             </label>
             <input
@@ -234,7 +234,7 @@ const Register = () => {
 
           {/* Address */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-gray-300 mb-1.5">
               Direccion *
             </label>
             <input
@@ -249,7 +249,7 @@ const Register = () => {
 
           {/* Reference */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-gray-300 mb-1.5">
               Referencia (como llegar)
             </label>
             <input
@@ -263,7 +263,7 @@ const Register = () => {
 
           {/* Location */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-gray-300 mb-1.5">
               Ubicacion
             </label>
             <button
@@ -303,7 +303,7 @@ const Register = () => {
           {/* Phone */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-sm font-medium text-gray-300 mb-1.5">
                 Telefono
               </label>
               <input
@@ -315,7 +315,7 @@ const Register = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-sm font-medium text-gray-300 mb-1.5">
                 WhatsApp
               </label>
               <input

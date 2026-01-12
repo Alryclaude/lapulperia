@@ -7,6 +7,9 @@ import App from './App';
 import { queryClient } from './lib/queryClient';
 import './styles/index.css';
 
+// Force dark mode permanently
+document.documentElement.classList.add('dark');
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>

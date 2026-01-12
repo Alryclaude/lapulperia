@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Bell, Shield, Moon, Globe, Smartphone, Download, Trash2,
+  Bell, Shield, Globe, Smartphone, Download, Trash2,
   ChevronRight, AlertTriangle, X, Settings as SettingsIcon
 } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
@@ -15,7 +15,7 @@ const Settings = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState('');
 
-  // Load settings from localStorage with dark mode based on document class
+  // Load settings from localStorage
   const [settings, setSettings] = useState(() => {
     const saved = localStorage.getItem('app-settings');
     if (saved) {
@@ -25,23 +25,8 @@ const Settings = () => {
       notifications: true,
       sounds: true,
       vibration: true,
-      darkMode: document.documentElement.classList.contains('dark'),
     };
   });
-
-  // Apply dark mode on mount and when changed
-  const applyDarkMode = (isDark) => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  };
-
-  // Apply on mount
-  useState(() => {
-    applyDarkMode(settings.darkMode);
-  }, []);
 
   const exportMutation = useMutation({
     mutationFn: () => userApi.exportData('json'),
@@ -93,11 +78,6 @@ const Settings = () => {
     const newSettings = { ...settings, [key]: !settings[key] };
     setSettings(newSettings);
     localStorage.setItem('app-settings', JSON.stringify(newSettings));
-
-    // Apply dark mode immediately
-    if (key === 'darkMode') {
-      applyDarkMode(!settings.darkMode);
-    }
 
     if (key !== 'notifications') {
       toast.success('Configuracion actualizada');
@@ -200,19 +180,6 @@ const Settings = () => {
           Apariencia
         </h2>
         <div className="divide-y divide-white/5">
-          <div className="flex items-center justify-between px-5 py-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center">
-                <Moon className="w-5 h-5 text-indigo-400" />
-              </div>
-              <div>
-                <p className="text-white font-medium">Modo Oscuro</p>
-                <p className="text-sm text-gray-500">Tema oscuro para la aplicacion</p>
-              </div>
-            </div>
-            <SettingToggle enabled={settings.darkMode} onChange={() => toggleSetting('darkMode')} />
-          </div>
-
           <div className="flex items-center justify-between px-5 py-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
