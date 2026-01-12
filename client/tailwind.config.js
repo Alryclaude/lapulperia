@@ -22,18 +22,18 @@ export default {
           900: '#7f1d1d',
           950: '#450a0a',
         },
-        // Accent - Golden (brighter for better visibility)
+        // Accent - Golden (REVAMP: More vibrant)
         accent: {
-          50: '#fffbeb',
-          100: '#fef3c7',
-          200: '#fde68a',
-          300: '#fcd34d',
-          400: '#FFB300',  // Brighter golden
-          500: '#FFA000',
-          600: '#FF8F00',
-          700: '#FF6F00',
-          800: '#E65100',
-          900: '#BF360C',
+          50: '#FEFCE8',
+          100: '#FEF9C3',
+          200: '#FEF08A',
+          300: '#FDE047',
+          400: '#FACC15',  // Vibrant yellow-gold
+          500: '#EAB308',
+          600: '#CA8A04',
+          700: '#A16207',
+          800: '#854D0E',
+          900: '#713F12',
         },
         // Golden for special highlights - Brighter
         gold: {
@@ -63,15 +63,31 @@ export default {
           500: '#1E3A5F',
           600: '#1A2F4A',
         },
-        // Dark theme background colors - Improved for better contrast
+        // Dark theme background colors - REVAMP: Better contrast
         dark: {
-          DEFAULT: '#0D0B11',
-          50: '#2D2A38',    // Lighter for borders, dividers
-          100: '#221F2D',   // Cards elevated
-          200: '#1A1722',   // Cards base
-          300: '#14121A',   // Secondary background
-          400: '#0D0B11',   // Primary background
-          500: '#08070B',   // Deepest black
+          DEFAULT: '#0F0F12',
+          50: '#3D3D42',    // Borders, dividers - MORE VISIBLE
+          100: '#2A2A2F',   // Cards elevated - MUCH LIGHTER
+          200: '#222226',   // Cards base
+          300: '#1A1A1E',   // Secondary background
+          400: '#0F0F12',   // Primary background
+          500: '#0A0A0D',   // Deepest black
+        },
+        // REVAMP: New vibrant accent colors
+        cyan: {
+          400: '#22D3EE',
+          500: '#06B6D4',
+          600: '#0891B2',
+        },
+        purple: {
+          400: '#A78BFA',
+          500: '#8B5CF6',
+          600: '#7C3AED',
+        },
+        lime: {
+          400: '#A3E635',
+          500: '#84CC16',
+          600: '#65A30D',
         },
         // Semantic colors
         success: {
@@ -194,6 +210,12 @@ export default {
         // Card hover
         'card-hover': '0 8px 25px -5px rgba(0, 0, 0, 0.15), 0 0 10px rgba(239, 68, 68, 0.1)',
         'card-hover-dark': '0 8px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(239, 68, 68, 0.15)',
+        // REVAMP: Enhanced glow effects
+        'glow-primary': '0 0 20px rgba(220, 38, 38, 0.4), 0 0 40px rgba(220, 38, 38, 0.2)',
+        'glow-cyan': '0 0 20px rgba(6, 182, 212, 0.4), 0 0 40px rgba(6, 182, 212, 0.2)',
+        'glow-purple': '0 0 20px rgba(139, 92, 246, 0.4), 0 0 40px rgba(139, 92, 246, 0.2)',
+        'glow-lime': '0 0 20px rgba(132, 204, 22, 0.4), 0 0 40px rgba(132, 204, 22, 0.2)',
+        'glow-status-open': '0 0 12px rgba(34, 197, 94, 0.5)',
       },
       spacing: {
         // Semantic spacing for layout

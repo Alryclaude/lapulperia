@@ -222,46 +222,46 @@ const FullscreenMap = ({
               icon={createMarkerIcon(pulperia)}
             >
               <Popup className="pulperia-popup">
-                <div className="p-1 min-w-[200px]">
-                  <Link
-                    to={`/pulperia/${pulperia.id}`}
-                    className="block hover:opacity-80 transition-opacity"
-                    onClick={onClose}
-                  >
-                    <div className="flex items-center gap-3 mb-2">
-                      {pulperia.logo ? (
-                        <img
-                          src={pulperia.logo}
-                          alt={pulperia.name}
-                          className="w-12 h-12 rounded-lg object-cover"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 rounded-lg bg-primary-100 flex items-center justify-center">
-                          <span className="text-primary-600 font-bold text-lg">
-                            {pulperia.name.charAt(0)}
-                          </span>
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-900 text-sm truncate">
-                          {pulperia.name}
-                        </h3>
-                        <div className="flex items-center gap-1 mt-1">
-                          <div className={`w-2 h-2 rounded-full ${pulperia.status === 'OPEN' ? 'bg-green-500' : 'bg-red-500'}`} />
-                          <span className={`text-xs ${pulperia.status === 'OPEN' ? 'text-green-600' : 'text-red-500'}`}>
-                            {pulperia.status === 'OPEN' ? 'Abierto' : 'Cerrado'}
-                          </span>
-                        </div>
+                <div className="popup-content">
+                  <div className="popup-header">
+                    {pulperia.logo ? (
+                      <img
+                        src={pulperia.logo}
+                        alt={pulperia.name}
+                        className="popup-logo"
+                      />
+                    ) : (
+                      <div className="popup-logo popup-logo-placeholder">
+                        {pulperia.name.charAt(0)}
+                      </div>
+                    )}
+                    <div className="popup-info">
+                      <h3 className="popup-name">{pulperia.name}</h3>
+                      <div className="popup-meta">
+                        <span className={`popup-status ${pulperia.status === 'OPEN' ? 'open' : 'closed'}`}>
+                          <span className={`popup-status-dot ${pulperia.status === 'OPEN' ? 'open' : 'closed'}`} />
+                          {pulperia.status === 'OPEN' ? 'Abierto' : 'Cerrado'}
+                        </span>
+                        {pulperia.distance && (
+                          <>
+                            <span className="popup-divider">•</span>
+                            <span className="popup-distance">
+                              {pulperia.distance < 1000
+                                ? `${Math.round(pulperia.distance)}m`
+                                : `${(pulperia.distance / 1000).toFixed(1)}km`
+                              }
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
-                    {pulperia.distance && (
-                      <p className="text-xs text-gray-500">
-                        A {pulperia.distance < 1000
-                          ? `${Math.round(pulperia.distance)}m`
-                          : `${(pulperia.distance / 1000).toFixed(1)}km`
-                        }
-                      </p>
-                    )}
+                  </div>
+                  <Link
+                    to={`/pulperia/${pulperia.id}`}
+                    className="popup-btn"
+                    onClick={onClose}
+                  >
+                    Ver tienda →
                   </Link>
                 </div>
               </Popup>

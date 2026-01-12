@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
+// REVAMP: Enhanced glass effect card
 const Card = React.forwardRef(({ className, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
-      'rounded-2xl border border-border bg-card text-card-foreground shadow-sm transition-all duration-200',
+      'rounded-2xl border border-white/[0.08] bg-dark-100/80 backdrop-blur-sm text-card-foreground shadow-lg transition-all duration-300',
       className
     )}
     {...props}
@@ -54,12 +55,14 @@ const CardFooter = React.forwardRef(({ className, ...props }, ref) => (
 ));
 CardFooter.displayName = 'CardFooter';
 
-// Interactive card variant with hover effect
+// REVAMP: Interactive card with vibrant hover effect
 const CardInteractive = React.forwardRef(({ className, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
-      'rounded-2xl border border-border bg-card text-card-foreground shadow-sm transition-all duration-200 cursor-pointer hover:shadow-md hover:border-gray-200 hover:-translate-y-0.5 active:scale-[0.99]',
+      'rounded-2xl border border-white/[0.08] bg-dark-100/80 backdrop-blur-sm text-card-foreground shadow-lg transition-all duration-300 cursor-pointer',
+      'hover:shadow-[0_8px_30px_rgba(0,0,0,0.4),0_0_0_1px_rgba(220,38,38,0.1)] hover:border-primary-500/20 hover:-translate-y-1',
+      'active:scale-[0.98]',
       className
     )}
     {...props}

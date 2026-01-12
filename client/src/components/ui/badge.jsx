@@ -3,35 +3,36 @@ import { cva } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const badgeVariants = cva(
-  'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors',
+  'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold transition-all border',
   {
     variants: {
       variant: {
-        default: 'bg-primary-100 text-primary-700',
-        secondary: 'bg-secondary text-secondary-foreground',
-        destructive: 'bg-error-100 text-error-700',
-        outline: 'border border-input bg-background text-foreground',
-        success: 'bg-success-100 text-success-700',
-        warning: 'bg-warning-100 text-warning-700',
-        accent: 'bg-accent-100 text-accent-700',
-        info: 'bg-info-100 text-info-700',
-        gray: 'bg-gray-100 text-gray-600',
-        // Status variants for pulperias
-        open: 'bg-success-100 text-success-700',
-        closing: 'bg-warning-100 text-warning-700',
-        closed: 'bg-gray-100 text-gray-500',
-        vacation: 'bg-info-100 text-info-700',
-        // Order status variants
-        pending: 'bg-warning-100 text-warning-700',
-        accepted: 'bg-info-100 text-info-700',
-        preparing: 'bg-purple-100 text-purple-700',
-        ready: 'bg-success-100 text-success-700',
-        delivered: 'bg-gray-100 text-gray-600',
-        cancelled: 'bg-error-100 text-error-700',
+        // REVAMP: Vibrant colors for dark theme
+        default: 'bg-primary-500/20 text-primary-400 border-primary-500/30',
+        secondary: 'bg-dark-100 text-gray-300 border-dark-50',
+        destructive: 'bg-red-500/20 text-red-400 border-red-500/30',
+        outline: 'border-dark-50 bg-transparent text-gray-300',
+        success: 'bg-green-500/20 text-green-400 border-green-500/30',
+        warning: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+        accent: 'bg-accent-500/20 text-accent-400 border-accent-500/30',
+        info: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
+        gray: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
+        // Status variants for pulperias - VIBRANT
+        open: 'bg-green-500/20 text-green-400 border-green-500/30 shadow-[0_0_12px_rgba(34,197,94,0.3)]',
+        closing: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+        closed: 'bg-gray-600/20 text-gray-500 border-gray-600/30',
+        vacation: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
+        // Order status variants - VIBRANT
+        pending: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+        accepted: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
+        preparing: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+        ready: 'bg-green-500/20 text-green-400 border-green-500/30',
+        delivered: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
+        cancelled: 'bg-red-500/20 text-red-400 border-red-500/30',
       },
       size: {
         default: 'px-2.5 py-1 text-xs',
-        sm: 'px-2 py-0.5 text-xs',
+        sm: 'px-2 py-0.5 text-[11px]',
         lg: 'px-3 py-1.5 text-sm',
       },
     },
@@ -55,20 +56,20 @@ const Badge = React.forwardRef(
 );
 Badge.displayName = 'Badge';
 
-// Badge with dot indicator (for status)
+// Badge with dot indicator (for status) - REVAMP: Enhanced glow
 const StatusBadge = React.forwardRef(
   ({ className, variant, status, children, ...props }, ref) => {
     const statusColors = {
-      open: 'bg-status-open',
-      closing: 'bg-status-closing',
-      closed: 'bg-status-closed',
-      vacation: 'bg-status-vacation',
-      pending: 'bg-status-pending',
-      accepted: 'bg-status-accepted',
-      preparing: 'bg-status-preparing',
-      ready: 'bg-status-ready',
-      delivered: 'bg-status-delivered',
-      cancelled: 'bg-status-cancelled',
+      open: 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]',
+      closing: 'bg-amber-500 shadow-[0_0_6px_rgba(245,158,11,0.5)]',
+      closed: 'bg-gray-500',
+      vacation: 'bg-cyan-500 shadow-[0_0_6px_rgba(6,182,212,0.5)]',
+      pending: 'bg-amber-500',
+      accepted: 'bg-cyan-500',
+      preparing: 'bg-purple-500',
+      ready: 'bg-green-500',
+      delivered: 'bg-gray-500',
+      cancelled: 'bg-red-500',
     };
 
     const dotColor = statusColors[status] || statusColors[variant] || 'bg-gray-400';
@@ -82,7 +83,7 @@ const StatusBadge = React.forwardRef(
       >
         <span
           className={cn(
-            'w-2 h-2 rounded-full',
+            'w-2 h-2 rounded-full transition-all',
             dotColor,
             isAnimated && 'animate-pulse'
           )}

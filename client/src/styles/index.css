@@ -55,45 +55,45 @@
     --chart-5: 262 83% 58%;
   }
 
-  /* Dark mode - Elegant deep purple/black with improved contrast */
+  /* Dark mode - REVAMP: Better contrast, more neutral tones */
   .dark {
-    --background: 270 25% 4%;
-    --foreground: 0 0% 96%;
+    --background: 240 6% 6%;
+    --foreground: 0 0% 98%;
 
-    /* Card - Elevated dark surface with better visibility */
-    --card: 270 20% 9%;
-    --card-foreground: 0 0% 96%;
+    /* Card - Elevated dark surface - MUCH BETTER CONTRAST */
+    --card: 240 5% 14%;
+    --card-foreground: 0 0% 98%;
 
     /* Popover */
-    --popover: 270 20% 8%;
-    --popover-foreground: 0 0% 96%;
+    --popover: 240 5% 12%;
+    --popover-foreground: 0 0% 98%;
 
-    /* Primary - La Pulperia Red (more vibrant) */
-    --primary: 4 82% 56%;
-    --primary-foreground: 0 0% 98%;
+    /* Primary - La Pulperia Red */
+    --primary: 0 84% 60%;
+    --primary-foreground: 0 0% 100%;
 
     /* Secondary */
-    --secondary: 270 15% 14%;
-    --secondary-foreground: 0 0% 96%;
+    --secondary: 240 5% 18%;
+    --secondary-foreground: 0 0% 98%;
 
-    /* Muted - Better contrast for secondary text */
-    --muted: 270 15% 12%;
-    --muted-foreground: 0 0% 70%;
+    /* Muted - BETTER CONTRAST for secondary text */
+    --muted: 240 5% 16%;
+    --muted-foreground: 0 0% 75%;
 
-    /* Accent - Brighter Golden */
-    --accent: 43 96% 56%;
+    /* Accent - Vibrant Golden */
+    --accent: 48 96% 53%;
     --accent-foreground: 0 0% 10%;
 
     /* Destructive */
-    --destructive: 0 72% 50%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    /* Border and input - More visible */
-    --border: 270 15% 18%;
-    --input: 270 15% 16%;
+    /* Border and input - MORE VISIBLE */
+    --border: 240 5% 22%;
+    --input: 240 5% 20%;
 
     /* Ring */
-    --ring: 4 82% 56%;
+    --ring: 0 84% 60%;
   }
 }
 
@@ -130,12 +130,12 @@
     @apply dark;
   }
 
-  /* Subtle gradient background for dark mode - elegant and professional */
+  /* REVAMP: Subtle gradient background for dark mode - more neutral */
   .dark body {
     background: linear-gradient(180deg,
-      hsl(270, 25%, 4%) 0%,
-      hsl(270, 20%, 6%) 50%,
-      hsl(270, 25%, 4%) 100%
+      hsl(240, 6%, 6%) 0%,
+      hsl(240, 5%, 8%) 50%,
+      hsl(240, 6%, 6%) 100%
     );
     background-attachment: fixed;
   }
@@ -384,13 +384,87 @@
     @apply bg-gradient-to-r from-accent-400 to-gold bg-clip-text text-transparent;
   }
 
-  /* Glow effects */
+  /* Glow effects - REVAMP: Enhanced */
   .glow-red {
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.3), 0 0 40px rgba(239, 68, 68, 0.1);
+    box-shadow: 0 0 20px rgba(220, 38, 38, 0.4), 0 0 40px rgba(220, 38, 38, 0.2);
   }
 
   .glow-gold {
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
+    box-shadow: 0 0 20px rgba(234, 179, 8, 0.4), 0 0 40px rgba(234, 179, 8, 0.2);
+  }
+
+  .glow-cyan {
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.4), 0 0 40px rgba(6, 182, 212, 0.2);
+  }
+
+  .glow-purple {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.4), 0 0 40px rgba(139, 92, 246, 0.2);
+  }
+
+  .glow-green {
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.5), 0 0 24px rgba(34, 197, 94, 0.3);
+  }
+
+  /* Gradient backgrounds - REVAMP */
+  .gradient-primary {
+    background: linear-gradient(135deg, #DC2626 0%, #F43F5E 100%);
+  }
+
+  .gradient-accent {
+    background: linear-gradient(135deg, #EAB308 0%, #FACC15 100%);
+  }
+
+  .gradient-dark {
+    background: linear-gradient(180deg, #0F0F12 0%, #1A1A1E 100%);
+  }
+
+  .gradient-mesh {
+    background:
+      radial-gradient(at 20% 80%, rgba(220, 38, 38, 0.12) 0%, transparent 50%),
+      radial-gradient(at 80% 20%, rgba(6, 182, 212, 0.08) 0%, transparent 50%),
+      radial-gradient(at 50% 50%, rgba(139, 92, 246, 0.05) 0%, transparent 70%);
+  }
+
+  /* Border gradient effect */
+  .border-gradient {
+    position: relative;
+    border: none;
+  }
+
+  .border-gradient::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.5), rgba(139, 92, 246, 0.3), rgba(6, 182, 212, 0.3));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* Animated gradient border on hover */
+  .hover-gradient-border:hover::before {
+    background: linear-gradient(135deg, #DC2626, #8B5CF6, #06B6D4, #DC2626);
+    background-size: 300% 300%;
+    animation: gradient-rotate 3s ease infinite;
+  }
+
+  /* Text styles - REVAMP */
+  .text-gradient-vibrant {
+    background: linear-gradient(135deg, #DC2626 0%, #F43F5E 50%, #FB7185 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-cyan {
+    background: linear-gradient(135deg, #06B6D4 0%, #22D3EE 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   /* Line clamp */
@@ -477,22 +551,175 @@
   }
 }
 
-/* Leaflet map customization */
+@keyframes gradient-rotate {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Leaflet map customization - REVAMP: Light popups for better readability */
 .leaflet-container {
   font-family: inherit;
   @apply rounded-xl;
 }
 
 .leaflet-popup-content-wrapper {
-  @apply rounded-xl shadow-lg border-0 bg-dark-100;
+  background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  border: none;
+  padding: 0;
+}
+
+.leaflet-popup-content {
+  margin: 0;
+  color: #1F2937;
+  font-weight: 500;
 }
 
 .leaflet-popup-tip {
-  @apply shadow-none bg-dark-100;
+  background: #FFFFFF;
+  box-shadow: none;
 }
 
-.dark .leaflet-popup-content {
-  @apply text-white;
+.leaflet-popup-close-button {
+  color: #6B7280 !important;
+  font-size: 20px !important;
+  padding: 8px !important;
+  right: 4px !important;
+  top: 4px !important;
+}
+
+.leaflet-popup-close-button:hover {
+  color: #1F2937 !important;
+}
+
+/* Popup content styling - REVAMP: Professional light-themed popups */
+.pulperia-popup .popup-content {
+  padding: 14px;
+  min-width: 200px;
+}
+
+.pulperia-popup .popup-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pulperia-popup .popup-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 2px solid #E5E7EB;
+  flex-shrink: 0;
+}
+
+.pulperia-popup .popup-logo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+  color: #DC2626;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.pulperia-popup .popup-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.pulperia-popup .popup-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 4px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pulperia-popup .popup-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.pulperia-popup .popup-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+}
+
+.pulperia-popup .popup-status.open {
+  color: #059669;
+}
+
+.pulperia-popup .popup-status.closed {
+  color: #6B7280;
+}
+
+.pulperia-popup .popup-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.pulperia-popup .popup-status-dot.open {
+  background-color: #10B981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+
+.pulperia-popup .popup-status-dot.closed {
+  background-color: #9CA3AF;
+}
+
+.pulperia-popup .popup-divider {
+  color: #D1D5DB;
+  font-weight: 400;
+}
+
+.pulperia-popup .popup-distance {
+  color: #6B7280;
+  font-weight: 500;
+}
+
+.pulperia-popup .popup-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #D97706;
+  font-weight: 600;
+}
+
+.pulperia-popup .popup-btn {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  margin-top: 12px;
+  background: linear-gradient(135deg, #DC2626 0%, #EF4444 100%);
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  text-align: center;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+}
+
+.pulperia-popup .popup-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
 }
 
 /* Custom marker styles */

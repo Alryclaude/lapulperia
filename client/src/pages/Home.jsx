@@ -8,7 +8,6 @@ import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import {
   InstallPrompt,
   HeroSection,
-  CategoryFilter,
   MapSection,
   OpenPulperiasSection,
   AllPulperiasSection,
@@ -19,8 +18,6 @@ import FullscreenMap from '../components/map/FullscreenMap';
 const Home = () => {
   const { isAuthenticated } = useAuthStore();
   const [location, setLocation] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [isMapExpanded, setIsMapExpanded] = useState(false);
   const [isFullMapOpen, setIsFullMapOpen] = useState(false);
   const { isInstallable, promptInstall, dismissPrompt } = useInstallPrompt();
 
@@ -78,16 +75,10 @@ const Home = () => {
 
       <HeroSection />
 
-      <CategoryFilter
-        selectedCategory={selectedCategory}
-        onCategoryChange={setSelectedCategory}
-      />
-
       <MapSection
         location={location}
         pulperias={pulperias}
-        isExpanded={isMapExpanded}
-        onToggleExpand={() => setIsMapExpanded(!isMapExpanded)}
+        openCount={openPulperias.length}
         onOpenFullMap={() => setIsFullMapOpen(true)}
       />
 
