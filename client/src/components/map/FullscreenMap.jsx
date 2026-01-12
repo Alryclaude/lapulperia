@@ -101,6 +101,25 @@ const FullscreenMap = ({
   const [mapCenter, setMapCenter] = useState(center);
   const [showOpenOnly, setShowOpenOnly] = useState(false);
 
+  // Handle Escape key and body scroll lock
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, onClose]);
+
   // Filter pulperias based on search and status
   const filteredPulperias = pulperias.filter((p) => {
     const matchesSearch = !searchQuery ||

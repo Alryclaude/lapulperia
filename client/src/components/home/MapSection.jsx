@@ -1,11 +1,10 @@
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { MapPin, ChevronRight, Maximize2, Minimize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FadeInView } from '@/components/ui';
 import MiniMap from '../map/MiniMap';
 
-const MapSection = ({ location, pulperias, isExpanded, onToggleExpand }) => {
+const MapSection = ({ location, pulperias, isExpanded, onToggleExpand, onOpenFullMap }) => {
   return (
     <FadeInView>
       <section className="space-y-4">
@@ -30,13 +29,13 @@ const MapSection = ({ location, pulperias, isExpanded, onToggleExpand }) => {
                 <Maximize2 className="w-4 h-4" />
               )}
             </Button>
-            <Link
-              to="/search?view=map"
+            <button
+              onClick={onOpenFullMap}
               className="text-primary-400 text-sm font-medium hover:text-primary-300 flex items-center gap-1 transition-colors"
             >
               Mapa completo
               <ChevronRight className="w-4 h-4" />
-            </Link>
+            </button>
           </div>
         </div>
 

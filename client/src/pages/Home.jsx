@@ -14,12 +14,14 @@ import {
   AllPulperiasSection,
   CTASection,
 } from '../components/home';
+import FullscreenMap from '../components/map/FullscreenMap';
 
 const Home = () => {
   const { isAuthenticated } = useAuthStore();
   const [location, setLocation] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isMapExpanded, setIsMapExpanded] = useState(false);
+  const [isFullMapOpen, setIsFullMapOpen] = useState(false);
   const { isInstallable, promptInstall, dismissPrompt } = useInstallPrompt();
 
   // Subscribe to real-time pulperia status updates
@@ -86,6 +88,7 @@ const Home = () => {
         pulperias={pulperias}
         isExpanded={isMapExpanded}
         onToggleExpand={() => setIsMapExpanded(!isMapExpanded)}
+        onOpenFullMap={() => setIsFullMapOpen(true)}
       />
 
       <OpenPulperiasSection pulperias={openPulperias} />
@@ -93,6 +96,14 @@ const Home = () => {
       <AllPulperiasSection pulperias={pulperias} isLoading={isLoading} />
 
       <CTASection isAuthenticated={isAuthenticated} />
+
+      <FullscreenMap
+        isOpen={isFullMapOpen}
+        onClose={() => setIsFullMapOpen(false)}
+        center={location ? [location.lat, location.lng] : null}
+        pulperias={pulperias}
+        userLocation={location ? [location.lat, location.lng] : null}
+      />
     </div>
   );
 };
