@@ -10,6 +10,7 @@ import {
 import { pulperiaApi, productApi } from '../services/api';
 import { useAuthStore } from '../stores/authStore';
 import ProductCard from '../components/products/ProductCard';
+import ProductDetailModal from '../components/products/ProductDetailModal';
 import MiniMap from '../components/map/MiniMap';
 import ReviewForm from '../components/ReviewForm';
 import ShareButtons from '../components/ShareButtons';
@@ -39,6 +40,13 @@ const PulperiaProfile = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [activeTab, setActiveTab] = useState('products');
   const [isMapExpanded, setIsMapExpanded] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [productModalOpen, setProductModalOpen] = useState(false);
+
+  const handleProductClick = (product) => {
+    setSelectedProduct(product);
+    setProductModalOpen(true);
+  };
 
   const { data: pulperiaData, isLoading } = useQuery({
     queryKey: ['pulperia', id],
@@ -132,14 +140,14 @@ const PulperiaProfile = () => {
   const status = statusConfig[pulperia.status] || statusConfig.CLOSED;
 
   return (
-    <div className="pb-6 -mx-4 sm:mx-0">
+    <div className="pb-24">
       {/* ===== TWITTER/X STYLE HEADER ===== */}
 
-      {/* Banner */}
+      {/* Banner - Full width on mobile */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="relative h-48 md:h-56"
+        className="relative h-48 md:h-56 -mx-4 sm:mx-0"
       >
         {pulperia.banner ? (
           <img src={pulperia.banner} alt="" className="w-full h-full object-cover" />
@@ -488,7 +496,11 @@ const PulperiaProfile = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.05 }}
                     >
-                      <ProductCard product={product} pulperia={pulperia} />
+                      <ProductCard
+                        product={product}
+                        pulperia={pulperia}
+                        onClick={handleProductClick}
+                      />
                     </motion.div>
                   ))}
                 </div>
@@ -594,6 +606,14 @@ const PulperiaProfile = () => {
           <MessageCircle className="w-6 h-6" />
         </motion.button>
       )}
+
+      {/* Product Detail Modal */}
+      <ProductDetailModal
+        product={selectedProduct}
+        pulperia={pulperia}
+        open={productModalOpen}
+        onOpenChange={setProductModalOpen}
+      />
     </div>
   );
 };

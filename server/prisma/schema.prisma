@@ -35,6 +35,19 @@ enum PulperiaStatus {
   VACATION
 }
 
+enum PromotionType {
+  PERCENTAGE
+  FIXED_AMOUNT
+  BUY_X_GET_Y
+  COMBO
+}
+
+enum PriceType {
+  FIXED
+  HOURLY
+  NEGOTIABLE
+}
+
 // Usuarios
 model User {
   id                  String              @id @default(cuid())
@@ -118,6 +131,9 @@ model Pulperia {
   achievements        Achievement[]
   loyaltyProgram      LoyaltyProgram?
   dailyStats          DailyStat[]
+  businessHours       BusinessHours?
+  promotions          Promotion[]
+  services            PulperiaService[]
 
   @@index([latitude, longitude])
   @@index([status])
@@ -143,6 +159,9 @@ model Product {
   // Stock management
   outOfStock          Boolean         @default(false)
   sellsQuickly        Boolean         @default(false)      // Badge automatico
+  stockQuantity       Int?                                  // null = no se trackea
+  lowStockAlert       Int?                                  // umbral de alerta
+  sku                 String?                               // SKU opcional
 
   // Temporada
   isSeasonal          Boolean         @default(false)
@@ -404,6 +423,74 @@ model DailyStat {
 
   @@unique([pulperiaId, date])
   @@index([date])
+}
+
+// Horarios de apertura
+model BusinessHours {
+  id                  String          @id @default(cuid())
+  pulperiaId          String          @unique
+  monday              Json?                                 // { open: "08:00", close: "18:00", closed: false }
+  tuesday             Json?
+  wednesday           Json?
+  thursday            Json?
+  friday              Json?
+  saturday            Json?
+  sunday              Json?
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  pulperia            Pulperia        @relation(fields: [pulperiaId], references: [id], onDelete: Cascade)
+}
+
+// Promociones y Descuentos
+model Promotion {
+  id                  String          @id @default(cuid())
+  pulperiaId          String
+  name                String
+  description         String?
+  type                PromotionType
+  value               Float                                 // Porcentaje o monto fijo
+  minPurchase         Float?                                // Compra minima
+  maxDiscount         Float?                                // Descuento maximo
+  productIds          String[]                              // IDs de productos aplicables
+  categoryIds         String[]                              // Categorias aplicables
+  startDate           DateTime
+  endDate             DateTime?
+  isActive            Boolean         @default(true)
+  usageCount          Int             @default(0)
+  maxUsage            Int?                                  // Limite de usos
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  pulperia            Pulperia        @relation(fields: [pulperiaId], references: [id], onDelete: Cascade)
+
+  @@index([pulperiaId])
+  @@index([isActive, startDate, endDate])
+}
+
+// Servicios de Pulperias (delivery, recargas, pagos, etc.)
+model PulperiaService {
+  id                  String          @id @default(cuid())
+  pulperiaId          String
+  name                String
+  description         String?
+  price               Float?
+  priceMax            Float?                                // Para precios variables
+  priceType           PriceType       @default(FIXED)
+  duration            String?                               // "30-45 min", "Inmediato"
+  imageUrl            String?
+  imagePublicId       String?
+  isAvailable         Boolean         @default(true)
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  pulperia            Pulperia        @relation(fields: [pulperiaId], references: [id], onDelete: Cascade)
+
+  @@index([pulperiaId])
+  @@index([isAvailable])
 }
 
 // Eventos y fiestas

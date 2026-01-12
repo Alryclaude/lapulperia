@@ -10,3 +10,6 @@ export { jobApi } from '../api/jobs';
 export { reviewApi } from '../api/reviews';
 export { serviceApi } from '../api/services';
 export { statsApi } from '../api/stats';
+export { businessHoursApi } from '../api/business-hours';
+export { promotionsApi } from '../api/promotions';
+export { pulperiaServicesApi } from '../api/pulperia-services';

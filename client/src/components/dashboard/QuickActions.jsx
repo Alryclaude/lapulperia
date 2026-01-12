@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Package, ShoppingBag, Users, Target, ArrowRight } from 'lucide-react';
+import { Package, ShoppingBag, Users, Target, ArrowRight, Wrench, Tag } from 'lucide-react';
 
 // REVAMP: Enhanced QuickActions with vibrant gradients
 const QuickActions = () => {
@@ -8,7 +8,7 @@ const QuickActions = () => {
     {
       to: '/manage/orders',
       icon: ShoppingBag,
-      title: 'Órdenes',
+      title: 'Ordenes',
       description: 'Gestiona tus pedidos',
       color: 'primary',
       gradient: 'from-primary-500/20 to-primary-600/10',
@@ -42,6 +42,30 @@ const QuickActions = () => {
       glow: 'shadow-[0_0_20px_rgba(139,92,246,0.15)]',
     },
     {
+      to: '/manage/services',
+      icon: Wrench,
+      title: 'Servicios',
+      description: 'Ofrece servicios',
+      color: 'amber',
+      gradient: 'from-amber-500/20 to-amber-600/10',
+      iconBg: 'from-amber-500/30 to-amber-600/20',
+      hoverBorder: 'hover:border-amber-500/40',
+      textColor: 'text-amber-400',
+      glow: 'shadow-[0_0_20px_rgba(245,158,11,0.15)]',
+    },
+    {
+      to: '/manage/promotions',
+      icon: Tag,
+      title: 'Promociones',
+      description: 'Descuentos y ofertas',
+      color: 'green',
+      gradient: 'from-green-500/20 to-green-600/10',
+      iconBg: 'from-green-500/30 to-green-600/20',
+      hoverBorder: 'hover:border-green-500/40',
+      textColor: 'text-green-400',
+      glow: 'shadow-[0_0_20px_rgba(34,197,94,0.15)]',
+    },
+    {
       to: '/pulperia/settings',
       icon: Target,
       title: 'Perfil',
@@ -58,7 +82,7 @@ const QuickActions = () => {
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-bold text-white">Acciones Rápidas</h2>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {actions.map(({ to, icon: Icon, title, description, gradient, iconBg, hoverBorder, textColor, glow }, index) => (
           <motion.div
             key={to}

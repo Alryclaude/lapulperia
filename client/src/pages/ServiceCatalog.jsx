@@ -277,7 +277,7 @@ const ServiceCatalog = ({ isOwner }) => {
   // Owner view with no service yet
   if (isOwner && !service) {
     return (
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div className="max-w-2xl mx-auto space-y-6 pb-24">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -335,7 +335,7 @@ const ServiceCatalog = ({ isOwner }) => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-6 pb-24">
       {/* Back */}
       {!isOwner && (
         <Link to="/services" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors">

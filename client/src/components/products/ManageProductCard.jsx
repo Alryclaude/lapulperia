@@ -1,7 +1,36 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Edit2, Trash2, Eye, EyeOff, Star, Calendar, AlertCircle, Tag } from 'lucide-react';
+import { Edit2, Trash2, Eye, EyeOff, Star, Calendar, AlertCircle, Tag, Minus, Plus, Package } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { productApi } from '@/api';
+import toast from 'react-hot-toast';
 
 const ManageProductCard = ({ product, index, onEdit, onDelete, onToggleStock }) => {
+  const [isUpdatingStock, setIsUpdatingStock] = useState(false);
+  const queryClient = useQueryClient();
+
+  const updateStockMutation = useMutation({
+    mutationFn: ({ id, quantity }) => productApi.updateStockQuantity(id, { stockQuantity: quantity }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['my-products']);
+      queryClient.invalidateQueries(['dashboard-stats']);
+    },
+    onError: () => {
+      toast.error('Error al actualizar stock');
+    },
+    onSettled: () => {
+      setIsUpdatingStock(false);
+    },
+  });
+
+  const handleQuickStock = (e, delta) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const newQuantity = Math.max(0, (product.stockQuantity || 0) + delta);
+    setIsUpdatingStock(true);
+    updateStockMutation.mutate({ id: product.id, quantity: newQuantity });
+  };
+
   const handleEdit = (e) => {
     if (e) {
       e.preventDefault();
@@ -26,6 +55,19 @@ const ManageProductCard = ({ product, index, onEdit, onDelete, onToggleStock }) 
     onToggleStock(product);
   };
 
+  // Determine stock status
+  const getStockStatus = () => {
+    if (product.outOfStock || product.stockQuantity === 0) {
+      return { status: 'out', color: 'red', label: 'Agotado' };
+    }
+    if (product.stockQuantity !== null && product.stockQuantity <= (product.lowStockAlert || 5)) {
+      return { status: 'low', color: 'yellow', label: 'Bajo' };
+    }
+    return { status: 'ok', color: 'green', label: 'Stock' };
+  };
+
+  const stockStatus = getStockStatus();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -35,7 +77,7 @@ const ManageProductCard = ({ product, index, onEdit, onDelete, onToggleStock }) 
     >
       <div className="relative aspect-square">
         <img
-          src={product.imageUrl}
+          src={product.imageUrl || '/placeholder-product.png'}
           alt={product.name}
           className={`w-full h-full object-cover ${product.outOfStock ? 'opacity-40 grayscale' : ''}`}
         />
@@ -54,12 +96,22 @@ const ManageProductCard = ({ product, index, onEdit, onDelete, onToggleStock }) 
               {product.seasonalTag || 'Temporada'}
             </span>
           )}
-          {product.outOfStock && (
-            <span className="flex items-center gap-1 px-2 py-1 bg-red-500/20 backdrop-blur-sm text-red-400 text-xs font-medium rounded-lg border border-red-500/30">
-              <AlertCircle className="w-3 h-3" />
-              Agotado
-            </span>
-          )}
+        </div>
+
+        {/* Stock badge - top right */}
+        <div className="absolute top-2 right-2">
+          <span className={`flex items-center gap-1 px-2 py-1 backdrop-blur-sm text-xs font-medium rounded-lg border ${
+            stockStatus.color === 'red'
+              ? 'bg-red-500/20 text-red-400 border-red-500/30'
+              : stockStatus.color === 'yellow'
+              ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+              : 'bg-green-500/20 text-green-400 border-green-500/30'
+          }`}>
+            {stockStatus.status === 'out' && <AlertCircle className="w-3 h-3" />}
+            {stockStatus.status === 'low' && <AlertCircle className="w-3 h-3" />}
+            {stockStatus.status === 'ok' && <Package className="w-3 h-3" />}
+            {product.stockQuantity !== null ? product.stockQuantity : stockStatus.label}
+          </span>
         </div>
 
         {/* Desktop: Actions Overlay (hover only) */}
@@ -125,11 +177,42 @@ const ManageProductCard = ({ product, index, onEdit, onDelete, onToggleStock }) 
       <div className="p-3">
         <h3 className="font-medium text-white truncate">{product.name}</h3>
         <p className="text-primary-400 font-semibold">L. {product.price.toFixed(2)}</p>
+
         {product.category && (
           <span className="flex items-center gap-1 text-xs text-gray-500 mt-1">
             <Tag className="w-3 h-3" />
             {product.category}
           </span>
+        )}
+
+        {/* Quick stock controls */}
+        {product.stockQuantity !== null && (
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/5">
+            <span className="text-xs text-gray-400">Stock:</span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={(e) => handleQuickStock(e, -1)}
+                disabled={isUpdatingStock || product.stockQuantity === 0}
+                className="w-6 h-6 rounded-md bg-dark-200 hover:bg-dark-300 flex items-center justify-center text-gray-400 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Minus className="w-3 h-3" />
+              </button>
+              <span className={`w-8 text-center text-sm font-medium ${
+                stockStatus.color === 'red' ? 'text-red-400' :
+                stockStatus.color === 'yellow' ? 'text-yellow-400' :
+                'text-white'
+              }`}>
+                {isUpdatingStock ? '...' : product.stockQuantity}
+              </span>
+              <button
+                onClick={(e) => handleQuickStock(e, 1)}
+                disabled={isUpdatingStock}
+                className="w-6 h-6 rounded-md bg-dark-200 hover:bg-dark-300 flex items-center justify-center text-gray-400 hover:text-white transition-colors disabled:opacity-50"
+              >
+                <Plus className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </motion.div>

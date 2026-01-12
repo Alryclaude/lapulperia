@@ -116,7 +116,7 @@ const ManageJobs = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}

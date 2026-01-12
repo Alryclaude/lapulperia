@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Edit2, X, Check, Image as ImageIcon, Star, Calendar, Sparkles } from 'lucide-react';
+import { Edit2, X, Check, Image as ImageIcon, Star, Calendar, Sparkles, Package, AlertTriangle, Hash } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const initialFormData = {
@@ -11,7 +11,23 @@ const initialFormData = {
   isFeatured: false,
   isSeasonal: false,
   seasonalTag: '',
+  stockQuantity: '',
+  lowStockAlert: '5',
+  sku: '',
 };
+
+const CATEGORIES = [
+  'Bebidas',
+  'Lacteos',
+  'Carnes',
+  'Panaderia',
+  'Abarrotes',
+  'Snacks',
+  'Frutas y Verduras',
+  'Limpieza',
+  'Cuidado Personal',
+  'Otros',
+];
 
 const ProductFormModal = ({
   isOpen,
@@ -23,6 +39,7 @@ const ProductFormModal = ({
   const [formData, setFormData] = useState(initialFormData);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [trackInventory, setTrackInventory] = useState(false);
 
   useEffect(() => {
     if (editProduct) {
@@ -34,11 +51,16 @@ const ProductFormModal = ({
         isFeatured: editProduct.isFeatured,
         isSeasonal: editProduct.isSeasonal,
         seasonalTag: editProduct.seasonalTag || '',
+        stockQuantity: editProduct.stockQuantity?.toString() || '',
+        lowStockAlert: editProduct.lowStockAlert?.toString() || '5',
+        sku: editProduct.sku || '',
       });
       setImagePreview(editProduct.imageUrl);
+      setTrackInventory(editProduct.stockQuantity !== null);
     } else {
       setFormData(initialFormData);
       setImagePreview(null);
+      setTrackInventory(false);
     }
     setImageFile(null);
   }, [editProduct, isOpen]);
@@ -63,13 +85,20 @@ const ProductFormModal = ({
       return;
     }
 
-    await onSubmit({ formData, imageFile, editProduct });
+    const submitData = {
+      ...formData,
+      stockQuantity: trackInventory ? parseInt(formData.stockQuantity) || 0 : null,
+      lowStockAlert: trackInventory ? parseInt(formData.lowStockAlert) || 5 : null,
+    };
+
+    await onSubmit({ formData: submitData, imageFile, editProduct });
   };
 
   const closeModal = () => {
     setFormData(initialFormData);
     setImageFile(null);
     setImagePreview(null);
+    setTrackInventory(false);
     onClose();
   };
 
@@ -168,52 +197,157 @@ const ProductFormModal = ({
                 />
               </div>
 
-              {/* Price */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Precio (Lempiras) *
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                  className="w-full px-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/20 transition-all"
-                  placeholder="0.00"
-                  required
-                />
-              </div>
+              {/* Price & Category Row */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Price */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Precio (L.) *
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    className="w-full px-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/20 transition-all"
+                    placeholder="0.00"
+                    required
+                  />
+                </div>
 
-              {/* Category */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Categoría
-                </label>
-                <input
-                  type="text"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  placeholder="Ej: Bebidas, Abarrotes..."
-                  className="w-full px-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/20 transition-all"
-                />
+                {/* Category */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Categoria
+                  </label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    className="w-full px-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/20 transition-all"
+                  >
+                    <option value="">Seleccionar...</option>
+                    {CATEGORIES.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               {/* Description */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Descripción
+                  Descripcion
                 </label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="w-full px-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/20 transition-all min-h-[80px] resize-none"
-                  placeholder="Descripción opcional..."
+                  placeholder="Descripcion opcional..."
                 />
               </div>
 
+              {/* Inventory Section */}
+              <div className="border-t border-white/5 pt-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <Package className="w-5 h-5 text-orange-400" />
+                  <span className="font-medium text-white">Inventario</span>
+                </div>
+
+                {/* Track Inventory Toggle */}
+                <label className="flex items-center gap-3 p-3 bg-dark-200/50 rounded-xl cursor-pointer border border-white/5 hover:border-orange-500/30 transition-colors mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center">
+                    <Package className="w-4 h-4 text-orange-400" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-white text-sm">Controlar inventario</p>
+                    <p className="text-xs text-gray-500">Llevar registro de cantidad</p>
+                  </div>
+                  <div className={`w-10 h-6 rounded-full transition-colors ${trackInventory ? 'bg-orange-500' : 'bg-dark-300'}`}>
+                    <motion.div
+                      animate={{ x: trackInventory ? 16 : 2 }}
+                      className="w-5 h-5 bg-white rounded-full mt-0.5"
+                    />
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={trackInventory}
+                    onChange={(e) => setTrackInventory(e.target.checked)}
+                    className="hidden"
+                  />
+                </label>
+
+                <AnimatePresence>
+                  {trackInventory && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden space-y-4"
+                    >
+                      <div className="grid grid-cols-2 gap-4">
+                        {/* Stock Quantity */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            <span className="flex items-center gap-1.5">
+                              <Package className="w-4 h-4 text-gray-400" />
+                              Stock actual
+                            </span>
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={formData.stockQuantity}
+                            onChange={(e) => setFormData({ ...formData, stockQuantity: e.target.value })}
+                            className="w-full px-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/20 transition-all"
+                            placeholder="0"
+                          />
+                        </div>
+
+                        {/* Low Stock Alert */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            <span className="flex items-center gap-1.5">
+                              <AlertTriangle className="w-4 h-4 text-yellow-400" />
+                              Alerta bajo
+                            </span>
+                          </label>
+                          <input
+                            type="number"
+                            min="1"
+                            value={formData.lowStockAlert}
+                            onChange={(e) => setFormData({ ...formData, lowStockAlert: e.target.value })}
+                            className="w-full px-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/20 transition-all"
+                            placeholder="5"
+                          />
+                        </div>
+                      </div>
+
+                      {/* SKU */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          <span className="flex items-center gap-1.5">
+                            <Hash className="w-4 h-4 text-gray-400" />
+                            SKU (opcional)
+                          </span>
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.sku}
+                          onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                          className="w-full px-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/20 transition-all"
+                          placeholder="Codigo interno del producto"
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
               {/* Badges */}
-              <div className="space-y-3">
+              <div className="border-t border-white/5 pt-5 space-y-3">
+                <span className="font-medium text-white">Opciones</span>
+
                 <label className="flex items-center gap-3 p-3 bg-dark-200/50 rounded-xl cursor-pointer border border-white/5 hover:border-yellow-500/30 transition-colors group">
                   <div className="w-8 h-8 rounded-lg bg-yellow-500/20 flex items-center justify-center">
                     <Star className="w-4 h-4 text-yellow-400" />

@@ -12,4 +12,8 @@ export const productApi = {
   toggleFeatured: (id) => api.patch(`/products/${id}/featured`),
   delete: (id) => api.delete(`/products/${id}`),
   createAlert: (id) => api.post(`/products/${id}/alert`),
+  // Stock management
+  updateStockQuantity: (id, data) => api.patch(`/products/${id}/stock-quantity`, data),
+  getLowStock: () => api.get('/products/low-stock'),
+  bulkStockUpdate: (updates) => api.post('/products/bulk-stock', { updates }),
 };

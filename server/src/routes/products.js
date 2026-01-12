@@ -352,6 +352,153 @@ router.patch('/:id/stock', authenticate, requirePulperia, async (req, res) => {
   }
 });
 
+// Update stock quantity
+router.patch('/:id/stock-quantity', authenticate, requirePulperia, async (req, res) => {
+  try {
+    const product = await prisma.product.findFirst({
+      where: { id: req.params.id, pulperiaId: req.user.pulperia.id },
+    });
+
+    if (!product) {
+      return res.status(404).json({ error: { message: 'Producto no encontrado' } });
+    }
+
+    const { stockQuantity, lowStockAlert, sku } = req.body;
+
+    // Determine if product should be marked out of stock
+    const shouldBeOutOfStock = stockQuantity !== null && stockQuantity !== undefined && stockQuantity <= 0;
+    const wasOutOfStock = product.outOfStock;
+
+    const updatedProduct = await prisma.product.update({
+      where: { id: req.params.id },
+      data: {
+        ...(stockQuantity !== undefined && { stockQuantity: stockQuantity !== null ? parseInt(stockQuantity) : null }),
+        ...(lowStockAlert !== undefined && { lowStockAlert: lowStockAlert !== null ? parseInt(lowStockAlert) : null }),
+        ...(sku !== undefined && { sku }),
+        ...(shouldBeOutOfStock !== undefined && { outOfStock: shouldBeOutOfStock }),
+      },
+    });
+
+    // If product came back in stock, notify users
+    if (wasOutOfStock && !updatedProduct.outOfStock) {
+      const alerts = await prisma.productAlert.findMany({
+        where: { productId: req.params.id, notified: false },
+      });
+
+      if (alerts.length > 0) {
+        const io = req.app.get('io');
+        const pulperia = await prisma.pulperia.findUnique({
+          where: { id: req.user.pulperia.id },
+          select: { name: true },
+        });
+
+        alerts.forEach(alert => {
+          io.to(alert.userId).emit('product-back-in-stock', {
+            productId: updatedProduct.id,
+            productName: updatedProduct.name,
+            productImage: updatedProduct.imageUrl,
+            pulperiaId: req.user.pulperia.id,
+            pulperiaName: pulperia?.name,
+            message: `¡${updatedProduct.name} ya está disponible en ${pulperia?.name}!`,
+          });
+        });
+
+        await prisma.productAlert.updateMany({
+          where: { productId: req.params.id },
+          data: { notified: true },
+        });
+      }
+    }
+
+    res.json({ product: updatedProduct });
+  } catch (error) {
+    console.error('Update stock quantity error:', error);
+    res.status(500).json({ error: { message: 'Error al actualizar cantidad de stock' } });
+  }
+});
+
+// Get low stock products
+router.get('/low-stock', authenticate, requirePulperia, async (req, res) => {
+  try {
+    const products = await prisma.product.findMany({
+      where: {
+        pulperiaId: req.user.pulperia.id,
+        isAvailable: true,
+        OR: [
+          { outOfStock: true },
+          {
+            AND: [
+              { stockQuantity: { not: null } },
+              { lowStockAlert: { not: null } },
+              // Prisma doesn't support comparing two fields directly, so we filter in JS
+            ],
+          },
+        ],
+      },
+      orderBy: { stockQuantity: 'asc' },
+    });
+
+    // Filter products where stockQuantity <= lowStockAlert
+    const lowStockProducts = products.filter((p) => {
+      if (p.outOfStock) return true;
+      if (p.stockQuantity !== null && p.lowStockAlert !== null) {
+        return p.stockQuantity <= p.lowStockAlert;
+      }
+      return false;
+    });
+
+    res.json({ products: lowStockProducts });
+  } catch (error) {
+    console.error('Get low stock products error:', error);
+    res.status(500).json({ error: { message: 'Error al obtener productos con bajo stock' } });
+  }
+});
+
+// Bulk stock update
+router.post('/bulk-stock', authenticate, requirePulperia, async (req, res) => {
+  try {
+    const { updates } = req.body;
+
+    if (!Array.isArray(updates) || updates.length === 0) {
+      return res.status(400).json({ error: { message: 'Se requiere un array de actualizaciones' } });
+    }
+
+    // Verify all products belong to this pulperia
+    const productIds = updates.map((u) => u.productId);
+    const products = await prisma.product.findMany({
+      where: {
+        id: { in: productIds },
+        pulperiaId: req.user.pulperia.id,
+      },
+    });
+
+    if (products.length !== productIds.length) {
+      return res.status(400).json({ error: { message: 'Algunos productos no fueron encontrados' } });
+    }
+
+    // Update each product
+    const results = await Promise.all(
+      updates.map(async (update) => {
+        const shouldBeOutOfStock = update.stockQuantity !== null && update.stockQuantity !== undefined && update.stockQuantity <= 0;
+
+        return prisma.product.update({
+          where: { id: update.productId },
+          data: {
+            ...(update.stockQuantity !== undefined && { stockQuantity: update.stockQuantity !== null ? parseInt(update.stockQuantity) : null }),
+            ...(update.lowStockAlert !== undefined && { lowStockAlert: update.lowStockAlert !== null ? parseInt(update.lowStockAlert) : null }),
+            outOfStock: shouldBeOutOfStock,
+          },
+        });
+      })
+    );
+
+    res.json({ products: results, updated: results.length });
+  } catch (error) {
+    console.error('Bulk stock update error:', error);
+    res.status(500).json({ error: { message: 'Error al actualizar stock masivamente' } });
+  }
+});
+
 // Toggle featured (producto del día)
 router.patch('/:id/featured', authenticate, requirePulperia, async (req, res) => {
   try {

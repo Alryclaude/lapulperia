@@ -34,6 +34,8 @@ import Dashboard from './pages/pulperia/Dashboard';
 import ManageProducts from './pages/pulperia/ManageProducts';
 import ManageOrders from './pages/pulperia/ManageOrders';
 import ManageJobs from './pages/pulperia/ManageJobs';
+import ManageServices from './pages/pulperia/ManageServices';
+import ManagePromotions from './pages/pulperia/ManagePromotions';
 import PulperiaSettings from './pages/pulperia/PulperiaSettings';
 
 // Components
@@ -111,6 +113,8 @@ function App() {
           <Route path="/manage/products" element={<ManageProducts />} />
           <Route path="/manage/orders" element={<ManageOrders />} />
           <Route path="/manage/jobs" element={<ManageJobs />} />
+          <Route path="/manage/services" element={<ManageServices />} />
+          <Route path="/manage/promotions" element={<ManagePromotions />} />
           <Route path="/pulperia/settings" element={<PulperiaSettings />} />
         </Route>
 

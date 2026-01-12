@@ -17,6 +17,9 @@ import reviewRoutes from './routes/reviews.js';
 import statsRoutes from './routes/stats.js';
 import serviceRoutes from './routes/services.js';
 import uploadRoutes from './routes/upload.js';
+import businessHoursRoutes from './routes/business-hours.js';
+import promotionsRoutes from './routes/promotions.js';
+import pulperiaServicesRoutes from './routes/pulperia-services.js';
 
 dotenv.config();
 
@@ -122,6 +125,9 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/business-hours', businessHoursRoutes);
+app.use('/api/promotions', promotionsRoutes);
+app.use('/api/pulperia-services', pulperiaServicesRoutes);
 
 /* =========================
    SOCKET EVENTS

@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cardHover } from '@/lib/animations';
 
-const ProductCard = ({ product, pulperia, showPulperia = false }) => {
+const ProductCard = ({ product, pulperia, showPulperia = false, onClick }) => {
   const { isAuthenticated } = useAuthStore();
   const { addItem, removeItem, isInCart, getItemQuantity, updateQuantity } = useCartStore();
 
@@ -50,8 +50,22 @@ const ProductCard = ({ product, pulperia, showPulperia = false }) => {
     }
   };
 
+  const handleCardClick = (e) => {
+    // Don't trigger card click if clicking on cart buttons
+    if (e.target.closest('button')) return;
+
+    if (onClick) {
+      onClick(product);
+    }
+  };
+
+  const CardWrapper = onClick ? 'div' : Link;
+  const wrapperProps = onClick
+    ? { onClick: handleCardClick, className: 'block cursor-pointer' }
+    : { to: `/product/${product.id}`, className: 'block' };
+
   return (
-    <Link to={`/product/${product.id}`} className="block">
+    <CardWrapper {...wrapperProps}>
       <motion.div
         variants={cardHover}
         initial="rest"
@@ -222,7 +236,7 @@ const ProductCard = ({ product, pulperia, showPulperia = false }) => {
           </div>
         </Card>
       </motion.div>
-    </Link>
+    </CardWrapper>
   );
 };
 
