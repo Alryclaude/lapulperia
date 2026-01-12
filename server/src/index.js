@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import rateLimit from 'express-rate-limit';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
@@ -70,11 +71,37 @@ app.use(cors({
 }));
 
 app.use(morgan('dev'));
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 
 // Make io available in routes
 app.set('io', io);
+
+/* =========================
+   RATE LIMITING
+========================= */
+
+// Rate limiting para rutas sensibles
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 10, // máximo 10 intentos por ventana
+  message: { error: { message: 'Demasiados intentos, intente de nuevo en 15 minutos' } },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const apiLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minuto
+  max: 100, // 100 requests por minuto
+  message: { error: { message: 'Demasiadas solicitudes, intente más tarde' } },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Aplicar rate limiting
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
+app.use('/api', apiLimiter);
 
 /* =========================
    ROUTES

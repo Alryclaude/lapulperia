@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]  // Enables PostgreSQL full-text search via Prisma queries
 }
 
 datasource db {
@@ -157,6 +158,7 @@ model Product {
   @@index([pulperiaId])
   @@index([category])
   @@index([isAvailable, outOfStock])
+  @@index([name])  // Index for text searches
 }
 
 // Ordenes

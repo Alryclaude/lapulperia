@@ -13,4 +13,5 @@ export const pulperiaApi = {
   setupLoyalty: (data) => api.post('/pulperias/me/loyalty', data),
   setVacation: (data) => api.patch('/pulperias/me/status', { status: 'VACATION', ...data }),
   close: () => api.post('/pulperias/me/close'),
+  uploadStoryImages: (formData) => api.post('/pulperias/me/story-images', formData),
 };

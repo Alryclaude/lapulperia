@@ -1,6 +1,6 @@
 import express from 'express';
 import { authenticate } from '../middleware/auth.js';
-import { uploadProduct, uploadLogo, uploadBanner } from '../services/cloudinary.js';
+import { uploadProduct } from '../services/cloudinary.js';
 
 const router = express.Router();
 

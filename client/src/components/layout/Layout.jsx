@@ -20,9 +20,14 @@ const Layout = ({ isPulperia = false }) => {
   const showBottomNav = isAuthenticated;
   const showPulperiaNav = isPulperia && user?.role === 'PULPERIA';
 
-  // Handle refresh - invalidate React Query cache
+  // Handle refresh - invalidate relevant React Query cache
   const handleRefresh = async () => {
-    await queryClient.invalidateQueries();
+    // Solo invalidar queries relevantes, no todo el cache
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['pulperias'] }),
+      queryClient.invalidateQueries({ queryKey: ['products'] }),
+      queryClient.invalidateQueries({ queryKey: ['orders'] }),
+    ]);
     // Small delay for better UX
     return new Promise((resolve) => setTimeout(resolve, 500));
   };

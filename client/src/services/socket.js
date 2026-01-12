@@ -24,11 +24,8 @@ class SocketService {
    */
   connect(userId = null) {
     if (this.socket?.connected) {
-      console.log('[Socket] Already connected');
       return;
     }
-
-    console.log('[Socket] Connecting to:', SOCKET_URL);
 
     this.socket = io(SOCKET_URL, {
       transports: ['websocket', 'polling'],
@@ -50,56 +47,37 @@ class SocketService {
     this.socket.on('connect', () => {
       this.isConnected = true;
       this.reconnectAttempts = 0;
-      console.log('[Socket] Connected:', this.socket.id);
 
       // Join user-specific room for targeted notifications
       if (userId) {
         this.socket.emit('join', userId);
-        console.log('[Socket] Joined room:', userId);
       }
     });
 
-    this.socket.on('disconnect', (reason) => {
+    this.socket.on('disconnect', () => {
       this.isConnected = false;
-      console.log('[Socket] Disconnected:', reason);
     });
 
-    this.socket.on('connect_error', (error) => {
+    this.socket.on('connect_error', () => {
       this.reconnectAttempts++;
-      console.error('[Socket] Connection error:', error.message);
-
-      if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-        console.log('[Socket] Max reconnection attempts reached');
-      }
     });
 
     // Business events
     this.socket.on('pulperia-status-changed', (data) => {
-      console.log('[Socket] Pulperia status changed:', data);
-
-      // Invalidate relevant queries to trigger refetch
       queryClient.invalidateQueries({ queryKey: ['pulperias'] });
       queryClient.invalidateQueries({ queryKey: ['pulperia', data.pulperiaId] });
-
-      // Notify subscribers
       this.notifyListeners('pulperia-status-changed', data);
     });
 
     this.socket.on('new-order', (data) => {
-      console.log('[Socket] New order received:', data);
-
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
-
       this.notifyListeners('new-order', data);
     });
 
     this.socket.on('order-updated', (data) => {
-      console.log('[Socket] Order updated:', data);
-
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['order', data.orderId] });
-
       this.notifyListeners('order-updated', data);
     });
   }
@@ -113,7 +91,6 @@ class SocketService {
       this.socket = null;
       this.isConnected = false;
       this.listeners.clear();
-      console.log('[Socket] Manually disconnected');
     }
   }
 
@@ -144,8 +121,8 @@ class SocketService {
       callbacks.forEach((callback) => {
         try {
           callback(data);
-        } catch (error) {
-          console.error(`[Socket] Error in ${event} listener:`, error);
+        } catch {
+          // Error silenciado en producción
         }
       });
     }
@@ -158,7 +135,6 @@ class SocketService {
   joinRoom(roomId) {
     if (this.socket?.connected) {
       this.socket.emit('join', roomId);
-      console.log('[Socket] Joined room:', roomId);
     }
   }
 
@@ -169,7 +145,6 @@ class SocketService {
   leaveRoom(roomId) {
     if (this.socket?.connected) {
       this.socket.emit('leave', roomId);
-      console.log('[Socket] Left room:', roomId);
     }
   }
 

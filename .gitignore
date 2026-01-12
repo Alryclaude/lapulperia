@@ -43,3 +43,12 @@ coverage/
 .claude/
 _agent_docs/
 package-lock.json
+server/.env
+
+# Claude Code temp files
+tmpclaude-*
+**/tmpclaude-*
+nul
+$HOME/
+bugs/
+**/CLAUDE.md

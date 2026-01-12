@@ -25,8 +25,7 @@ export const useAuthStore = create(
                 isAuthenticated: true,
                 isLoading: false,
               });
-            } catch (error) {
-              console.error('Error getting user:', error);
+            } catch {
               set({ user: null, token: null, isAuthenticated: false, isLoading: false });
             }
           } else {
@@ -56,7 +55,6 @@ export const useAuthStore = create(
 
           return { user: response.data.user, isNewUser: response.data.isNewUser };
         } catch (error) {
-          console.error('Login error:', error);
           throw error;
         }
       },
@@ -68,7 +66,6 @@ export const useAuthStore = create(
           set({ user: response.data.user });
           return response.data;
         } catch (error) {
-          console.error('Register pulperia error:', error);
           throw error;
         }
       },
@@ -79,7 +76,6 @@ export const useAuthStore = create(
           set({ user: response.data.user });
           return response.data.user;
         } catch (error) {
-          console.error('Update user error:', error);
           throw error;
         }
       },
@@ -91,8 +87,8 @@ export const useAuthStore = create(
           set({ user: null, token: null, isAuthenticated: false });
           // Clear localStorage to prevent stale data
           localStorage.removeItem('auth-storage');
-        } catch (error) {
-          console.error('Logout error:', error);
+        } catch {
+          // Ignorar errores de logout
         }
       },
 
@@ -103,7 +99,6 @@ export const useAuthStore = create(
           set({ user: null, token: null, isAuthenticated: false });
           return response.data;
         } catch (error) {
-          console.error('Delete account error:', error);
           throw error;
         }
       },
@@ -112,8 +107,8 @@ export const useAuthStore = create(
         try {
           const response = await api.get('/auth/me');
           set({ user: response.data.user });
-        } catch (error) {
-          console.error('Refresh user error:', error);
+        } catch {
+          // Ignorar errores de refresh
         }
       },
     }),

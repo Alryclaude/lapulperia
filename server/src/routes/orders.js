@@ -274,31 +274,34 @@ router.patch('/:id/status', authenticate, requirePulperia, async (req, res) => {
       return res.status(404).json({ error: { message: 'Pedido no encontrado' } });
     }
 
-    const updateData = { status };
+    let updatedOrder;
 
-    switch (status) {
-      case 'ACCEPTED':
-        updateData.acceptedAt = new Date();
-        break;
-      case 'READY':
-        updateData.readyAt = new Date();
-        break;
-      case 'DELIVERED':
-        updateData.deliveredAt = new Date();
+    // Use transaction for DELIVERED status to ensure all updates succeed or fail together
+    if (status === 'DELIVERED') {
+      updatedOrder = await prisma.$transaction(async (tx) => {
+        // Update order status
+        const updated = await tx.order.update({
+          where: { id: req.params.id },
+          data: { status, deliveredAt: new Date() },
+          include: { items: true },
+        });
+
         // Update pulperia stats
-        await prisma.pulperia.update({
+        await tx.pulperia.update({
           where: { id: req.user.pulperia.id },
           data: {
             totalOrders: { increment: 1 },
             totalSales: { increment: 1 },
           },
         });
-        // Add loyalty points
-        const loyaltyProgram = await prisma.loyaltyProgram.findUnique({
+
+        // Add loyalty points if program exists
+        const loyaltyProgram = await tx.loyaltyProgram.findUnique({
           where: { pulperiaId: req.user.pulperia.id },
         });
+
         if (loyaltyProgram && loyaltyProgram.isActive) {
-          await prisma.loyaltyPoint.upsert({
+          await tx.loyaltyPoint.upsert({
             where: {
               loyaltyProgramId_userId: {
                 loyaltyProgramId: loyaltyProgram.id,
@@ -315,20 +318,35 @@ router.patch('/:id/status', authenticate, requirePulperia, async (req, res) => {
             },
           });
         }
-        // Check for achievements
-        await checkAchievements(req.user.pulperia.id);
-        break;
-      case 'CANCELLED':
-        updateData.cancelledAt = new Date();
-        updateData.cancelReason = cancelReason;
-        break;
-    }
 
-    const updatedOrder = await prisma.order.update({
-      where: { id: req.params.id },
-      data: updateData,
-      include: { items: true },
-    });
+        return updated;
+      });
+
+      // Check achievements outside transaction (non-critical)
+      checkAchievements(req.user.pulperia.id).catch(() => {});
+    } else {
+      // For other statuses, simple update
+      const updateData = { status };
+
+      switch (status) {
+        case 'ACCEPTED':
+          updateData.acceptedAt = new Date();
+          break;
+        case 'READY':
+          updateData.readyAt = new Date();
+          break;
+        case 'CANCELLED':
+          updateData.cancelledAt = new Date();
+          updateData.cancelReason = cancelReason;
+          break;
+      }
+
+      updatedOrder = await prisma.order.update({
+        where: { id: req.params.id },
+        data: updateData,
+        include: { items: true },
+      });
+    }
 
     // Notify customer
     const io = req.app.get('io');

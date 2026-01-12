@@ -28,10 +28,10 @@ const ServiceCatalog = ({ isOwner }) => {
 
   const { data, isLoading } = useQuery({
     queryKey: ['service', serviceId],
-    queryFn: () => isOwner ? serviceApi.getMine() : serviceApi.getById(id),
+    queryFn: () => isOwner ? serviceApi.getMyCatalogs() : serviceApi.getById(id),
   });
 
-  // getMine() retorna { services: [...] } (array), getById() retorna { service: ... } (singular)
+  // getMyCatalogs() retorna { services: [...] } (array), getById() retorna { service: ... } (singular)
   const service = isOwner
     ? data?.data?.services?.[0]
     : data?.data?.service;
