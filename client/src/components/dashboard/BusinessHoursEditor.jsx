@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Clock, Save, ToggleLeft, ToggleRight, Palmtree } from 'lucide-react';
+import { Clock, Save, ToggleLeft, ToggleRight, Palmtree, Copy } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { businessHoursApi } from '@/api';
 import toast from 'react-hot-toast';
@@ -203,33 +203,34 @@ const BusinessHoursEditor = () => {
               {hours[day.key].closed ? (
                 <span className="text-gray-500 text-sm">Cerrado</span>
               ) : (
-                <div className="flex items-center gap-2 flex-1">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
                   <select
                     value={hours[day.key].open}
                     onChange={(e) => handleTimeChange(day.key, 'open', e.target.value)}
-                    className="px-3 py-1.5 rounded-lg bg-dark-300 border border-white/10 text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                    className="px-2 py-1.5 rounded-lg bg-dark-300 border border-white/10 text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50 flex-shrink-0"
                   >
                     {TIME_OPTIONS.map(time => (
                       <option key={time} value={time}>{time}</option>
                     ))}
                   </select>
-                  <span className="text-gray-400">a</span>
+                  <span className="text-gray-400 flex-shrink-0">a</span>
                   <select
                     value={hours[day.key].close}
                     onChange={(e) => handleTimeChange(day.key, 'close', e.target.value)}
-                    className="px-3 py-1.5 rounded-lg bg-dark-300 border border-white/10 text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                    className="px-2 py-1.5 rounded-lg bg-dark-300 border border-white/10 text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50 flex-shrink-0"
                   >
                     {TIME_OPTIONS.map(time => (
                       <option key={time} value={time}>{time}</option>
                     ))}
                   </select>
 
-                  {/* Copy to all button */}
+                  {/* Copy to all button - icon on mobile, text on desktop */}
                   <button
                     onClick={() => copyToAll(day.key)}
-                    className="ml-auto text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                    className="ml-auto flex-shrink-0 p-1.5 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-colors"
+                    title="Copiar a todos los dias"
                   >
-                    Copiar a todos
+                    <Copy className="w-4 h-4" />
                   </button>
                 </div>
               )}

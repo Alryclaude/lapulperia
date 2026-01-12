@@ -29,9 +29,11 @@ router.get('/dashboard', authenticate, requirePulperia, async (req, res) => {
     const todayStart = new Date(now);
     todayStart.setHours(0, 0, 0, 0);
 
-    // This week start (Monday)
+    // This week start (Monday) - handles Sunday correctly
     const weekStart = new Date(now);
-    weekStart.setDate(now.getDate() - now.getDay() + 1);
+    const dayOfWeek = now.getDay();
+    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    weekStart.setDate(now.getDate() + diff);
     weekStart.setHours(0, 0, 0, 0);
 
     // This month start

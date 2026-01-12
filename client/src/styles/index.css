@@ -123,6 +123,14 @@
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
+    background: inherit;
+  }
+
+  /* Prevent white flashes on overscroll */
+  .ptr,
+  .ptr__children {
+    background: inherit !important;
+    overscroll-behavior: contain;
   }
 
   /* Dark mode is now default */

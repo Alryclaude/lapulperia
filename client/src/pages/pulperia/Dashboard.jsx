@@ -114,7 +114,7 @@ const Dashboard = () => {
           <h1 className="text-2xl font-bold text-white">{pulperia?.name || 'Mi Pulperia'}</h1>
           <div className="flex items-center gap-2 mt-1 text-gray-400 text-sm">
             <MapPin className="w-4 h-4" />
-            <span>{pulperia?.neighborhood || 'Sin ubicacion'}</span>
+            <span>{pulperia?.address || 'Sin ubicacion'}</span>
           </div>
         </div>
         <StatusToggle isOpen={isOpen} onToggle={handleToggleStatus} />

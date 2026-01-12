@@ -163,7 +163,7 @@ const PromotionFormModal = ({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 100, scale: 0.95 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="bg-dark-100 rounded-t-3xl sm:rounded-2xl max-w-lg w-full max-h-[90vh] sm:max-h-[85vh] flex flex-col sm:m-4 border border-white/10"
+          className="bg-dark-100 rounded-t-3xl sm:rounded-2xl max-w-lg w-full max-h-[85vh] sm:max-h-[85vh] flex flex-col sm:m-4 border border-white/10"
         >
           {/* Modal Header */}
           <div className="p-5 border-b border-white/5 flex items-center justify-between flex-shrink-0">
@@ -424,7 +424,7 @@ const PromotionFormModal = ({
                 <label className="block text-sm font-medium text-gray-300">
                   Condiciones (opcional)
                 </label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs text-gray-500 mb-1">Compra minima</label>
                     <div className="relative">
@@ -489,7 +489,7 @@ const PromotionFormModal = ({
                     Vigencia
                   </span>
                 </label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs text-gray-500 mb-1">Fecha inicio *</label>
                     <input
@@ -548,8 +548,8 @@ const PromotionFormModal = ({
 
             {/* Fixed Action Buttons */}
             <div
-              className="p-5 border-t border-white/5 bg-dark-100 flex-shrink-0"
-              style={{ paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))' }}
+              className="p-5 border-t border-white/5 bg-dark-100 flex-shrink-0 relative z-10"
+              style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
             >
               <div className="flex gap-3">
                 <motion.button
@@ -557,7 +557,7 @@ const PromotionFormModal = ({
                   whileTap={{ scale: 0.98 }}
                   type="button"
                   onClick={closeModal}
-                  className="flex-1 px-4 py-3 bg-dark-200/50 hover:bg-dark-200 border border-white/5 text-white rounded-xl font-medium transition-colors"
+                  className="flex-1 px-4 py-3.5 bg-dark-200/50 hover:bg-dark-200 border border-white/5 text-white rounded-xl font-medium transition-colors pointer-events-auto"
                 >
                   Cancelar
                 </motion.button>
@@ -566,7 +566,7 @@ const PromotionFormModal = ({
                   whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors pointer-events-auto"
                 >
                   {isSubmitting ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
