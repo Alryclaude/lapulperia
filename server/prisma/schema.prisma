@@ -57,6 +57,8 @@ model User {
   phone               String?
   role                Role                @default(CLIENT)
   firebaseUid         String              @unique
+  fcmToken            String?             // Firebase Cloud Messaging token para push notifications
+  fcmTokenUpdatedAt   DateTime?           // Cuándo se actualizó el token FCM
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
 

@@ -1,7 +1,20 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { auth, googleProvider, signInWithPopup, signOut, onAuthStateChanged } from '../services/firebase';
+import { auth, googleProvider, signInWithPopup, signOut, onAuthStateChanged, requestNotificationPermission } from '../services/firebase';
 import api from '../services/api';
+
+// Función para registrar token FCM en el servidor
+const registerFcmToken = async () => {
+  try {
+    const fcmToken = await requestNotificationPermission();
+    if (fcmToken) {
+      await api.post('/auth/register-push-token', { fcmToken });
+      console.log('FCM token registrado exitosamente');
+    }
+  } catch (error) {
+    console.error('Error registrando token FCM:', error);
+  }
+};
 
 export const useAuthStore = create(
   persist(
@@ -25,6 +38,9 @@ export const useAuthStore = create(
                 isAuthenticated: true,
                 isLoading: false,
               });
+
+              // Registrar/actualizar token FCM
+              registerFcmToken();
             } catch {
               set({ user: null, token: null, isAuthenticated: false, isLoading: false });
             }
@@ -52,6 +68,9 @@ export const useAuthStore = create(
             token,
             isAuthenticated: true,
           });
+
+          // Registrar token FCM para push notifications
+          registerFcmToken();
 
           return { user: response.data.user, isNewUser: response.data.isNewUser };
         } catch (error) {
@@ -82,6 +101,12 @@ export const useAuthStore = create(
 
       logout: async () => {
         try {
+          // Eliminar token FCM del servidor antes de cerrar sesión
+          try {
+            await api.delete('/auth/push-token');
+          } catch {
+            // Ignorar errores de eliminación de token
+          }
           await signOut(auth);
           // Clear all auth state
           set({ user: null, token: null, isAuthenticated: false });

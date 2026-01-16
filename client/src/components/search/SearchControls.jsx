@@ -2,13 +2,6 @@ import { Package, Store, MapPin, SlidersHorizontal, Grid3X3, List } from 'lucide
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
 
 // REVAMP: Enhanced SearchControls with vibrant styling
 const SearchControls = ({
@@ -95,65 +88,17 @@ const SearchControls = ({
           </span>
         </Button>
 
-        {/* Filter sheet - REVAMP */}
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="outline" size="sm" className="border-white/[0.08] text-gray-300 hover:text-white hover:border-purple-500/50">
-              <SlidersHorizontal className="w-4 h-4" />
-              <span className="hidden sm:inline">Filtros</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="bottom" className="h-[60vh] bg-dark-200/95 backdrop-blur-xl border-white/[0.08]">
-            <SheetHeader>
-              <SheetTitle className="text-white">Filtrar resultados</SheetTitle>
-            </SheetHeader>
-            <div className="py-6 space-y-6">
-              <div>
-                <h4 className="font-semibold text-white mb-3">Categoría</h4>
-                <div className="flex flex-wrap gap-2">
-                  {['Todos', 'Abarrotes', 'Bebidas', 'Snacks', 'Lácteos', 'Limpieza'].map(
-                    (cat, i) => (
-                      <Badge
-                        key={cat}
-                        variant={i === 0 ? 'default' : 'outline'}
-                        className={`cursor-pointer transition-all duration-200 ${
-                          i === 0
-                            ? 'bg-gradient-to-br from-primary-500 to-primary-600 hover:shadow-lg'
-                            : 'border-white/[0.08] text-gray-300 hover:border-primary-500/50 hover:text-white'
-                        }`}
-                      >
-                        {cat}
-                      </Badge>
-                    )
-                  )}
-                </div>
-              </div>
-              <div>
-                <h4 className="font-semibold text-white mb-3">Ordenar por</h4>
-                <div className="flex flex-wrap gap-2">
-                  {['Relevancia', 'Precio menor', 'Precio mayor', 'Cercanía'].map(
-                    (opt, i) => (
-                      <Badge
-                        key={opt}
-                        variant={i === 0 ? 'default' : 'outline'}
-                        className={`cursor-pointer transition-all duration-200 ${
-                          i === 0
-                            ? 'bg-gradient-to-br from-cyan-500 to-cyan-600 hover:shadow-lg'
-                            : 'border-white/[0.08] text-gray-300 hover:border-cyan-500/50 hover:text-white'
-                        }`}
-                      >
-                        {opt}
-                      </Badge>
-                    )
-                  )}
-                </div>
-              </div>
-            </div>
-            <Button className="w-full bg-gradient-to-br from-primary-500 to-primary-600 hover:shadow-[0_6px_20px_rgba(220,38,38,0.4)]">
-              Aplicar filtros
-            </Button>
-          </SheetContent>
-        </Sheet>
+        {/* Filtros - deshabilitados temporalmente hasta conectar con backend */}
+        <Button
+          variant="outline"
+          size="sm"
+          disabled
+          className="border-white/[0.08] text-gray-500 cursor-not-allowed opacity-50"
+          title="Próximamente"
+        >
+          <SlidersHorizontal className="w-4 h-4" />
+          <span className="hidden sm:inline">Filtros</span>
+        </Button>
       </div>
     </div>
   );

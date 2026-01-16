@@ -25,7 +25,13 @@ const TopProducts = ({ products }) => {
           ))}
         </div>
       ) : (
-        <p className="text-gray-500 text-sm">No hay datos aun</p>
+        <div className="text-center py-6">
+          <div className="w-12 h-12 rounded-xl bg-gray-500/10 flex items-center justify-center mx-auto mb-3">
+            <span className="text-2xl">📊</span>
+          </div>
+          <p className="text-gray-400 text-sm">Aún no hay datos de ventas</p>
+          <p className="text-gray-500 text-xs mt-1">Los productos más vendidos aparecerán aquí</p>
+        </div>
       )}
     </div>
   );

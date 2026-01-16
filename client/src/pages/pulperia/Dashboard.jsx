@@ -16,7 +16,6 @@ import {
   StatsCards,
   AchievementsBadges,
   QuickActions,
-  InsightsPanel,
   ExportSection,
   SalesChart,
   TopProductsChart,
@@ -58,14 +57,6 @@ const Dashboard = () => {
 
   const stats = statsData?.data || {};
 
-  // Fetch insights
-  const { data: insightsData } = useQuery({
-    queryKey: ['insights'],
-    queryFn: () => statsApi.getInsights(),
-  });
-
-  const insights = insightsData?.data?.insights || [];
-
   // Toggle open/closed status
   const handleToggleStatus = async () => {
     try {
@@ -73,7 +64,7 @@ const Dashboard = () => {
       await pulperiaApi.updateStatus({ status: newStatus });
       setIsOpen(!isOpen);
       await refreshUser();
-      toast.success(isOpen ? 'Pulperia cerrada' : 'Pulperia abierta!');
+      toast.success(isOpen ? 'Pulpería cerrada' : '¡Pulpería abierta!');
     } catch {
       toast.error('Error al cambiar estado');
     }
@@ -111,10 +102,10 @@ const Dashboard = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">{pulperia?.name || 'Mi Pulperia'}</h1>
+          <h1 className="text-2xl font-bold text-white">{pulperia?.name || 'Mi Pulpería'}</h1>
           <div className="flex items-center gap-2 mt-1 text-gray-400 text-sm">
             <MapPin className="w-4 h-4" />
-            <span>{pulperia?.address || 'Sin ubicacion'}</span>
+            <span>{pulperia?.address || 'Sin ubicación'}</span>
           </div>
         </div>
         <StatusToggle isOpen={isOpen} onToggle={handleToggleStatus} />
@@ -164,11 +155,8 @@ const Dashboard = () => {
                 <TopProductsChart products={stats.topProducts} />
               </div>
 
-              {/* Peak Hours & Insights */}
-              <div className="grid lg:grid-cols-2 gap-6">
-                <PeakHoursChart peakHours={stats.peakHours} />
-                <InsightsPanel insights={insights} />
-              </div>
+              {/* Peak Hours */}
+              <PeakHoursChart peakHours={stats.peakHours} />
 
               {/* Achievements */}
               <AchievementsBadges achievements={stats.achievements} />
@@ -248,7 +236,7 @@ const Dashboard = () => {
                 >
                   <h3 className="font-semibold text-white mb-4">Productos Sin Movimiento</h3>
                   <p className="text-sm text-gray-400 mb-4">
-                    Estos productos no se han vendido en las ultimas 2 semanas
+                    Estos productos no se han vendido en las últimas 2 semanas
                   </p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                     {stats.slowMovingProducts.slice(0, 8).map((product) => (

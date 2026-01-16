@@ -208,6 +208,48 @@ router.get('/export', authenticate, async (req, res) => {
   }
 });
 
+// Register FCM push token
+router.post('/register-push-token', authenticate, async (req, res) => {
+  try {
+    const { fcmToken } = req.body;
+
+    if (!fcmToken) {
+      return res.status(400).json({ error: { message: 'Token FCM requerido' } });
+    }
+
+    await prisma.user.update({
+      where: { id: req.user.id },
+      data: {
+        fcmToken,
+        fcmTokenUpdatedAt: new Date(),
+      },
+    });
+
+    res.json({ success: true, message: 'Token registrado exitosamente' });
+  } catch (error) {
+    console.error('Register FCM token error:', error);
+    res.status(500).json({ error: { message: 'Error al registrar token' } });
+  }
+});
+
+// Delete FCM push token (for logout)
+router.delete('/push-token', authenticate, async (req, res) => {
+  try {
+    await prisma.user.update({
+      where: { id: req.user.id },
+      data: {
+        fcmToken: null,
+        fcmTokenUpdatedAt: null,
+      },
+    });
+
+    res.json({ success: true, message: 'Token eliminado exitosamente' });
+  } catch (error) {
+    console.error('Delete FCM token error:', error);
+    res.status(500).json({ error: { message: 'Error al eliminar token' } });
+  }
+});
+
 // Delete account
 router.delete('/me', authenticate, async (req, res) => {
   try {

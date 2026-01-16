@@ -1,6 +1,7 @@
 import express from 'express';
 import prisma from '../services/prisma.js';
 import { authenticate, requirePulperia } from '../middleware/auth.js';
+import { sendPushNotification } from '../services/firebase.js';
 import { v4 as uuidv4 } from 'uuid';
 
 const router = express.Router();
@@ -163,6 +164,25 @@ router.post('/', authenticate, async (req, res) => {
       message: '¡Nueva orden recibida!',
     });
 
+    // Send push notification to pulperia owner
+    const pulperiaOwner = await prisma.user.findUnique({
+      where: { id: pulperia.userId },
+      select: { fcmToken: true },
+    });
+
+    if (pulperiaOwner?.fcmToken) {
+      await sendPushNotification(
+        pulperiaOwner.fcmToken,
+        '¡Nueva orden recibida!',
+        `${req.user.name} hizo un pedido por L.${total.toFixed(2)}`,
+        {
+          type: 'new_order',
+          orderId: order.id,
+          isPulperia: 'true',
+        }
+      );
+    }
+
     res.status(201).json({ order });
   } catch (error) {
     console.error('Create order error:', error);
@@ -251,6 +271,25 @@ router.post('/batch', authenticate, async (req, res) => {
         order,
         message: '¡Nueva orden recibida!',
       });
+
+      // Send push notification to pulperia owner
+      const pulperiaOwner = await prisma.user.findUnique({
+        where: { id: pulperia.userId },
+        select: { fcmToken: true },
+      });
+
+      if (pulperiaOwner?.fcmToken) {
+        await sendPushNotification(
+          pulperiaOwner.fcmToken,
+          '¡Nueva orden recibida!',
+          `Nuevo pedido por L.${total.toFixed(2)}`,
+          {
+            type: 'new_order',
+            orderId: order.id,
+            isPulperia: 'true',
+          }
+        );
+      }
     }
 
     res.status(201).json({ orders: createdOrders });
@@ -348,12 +387,32 @@ router.patch('/:id/status', authenticate, requirePulperia, async (req, res) => {
       });
     }
 
-    // Notify customer
+    // Notify customer via socket
     const io = req.app.get('io');
     io.to(order.userId).emit('order-updated', {
       order: updatedOrder,
       message: getStatusMessage(status),
     });
+
+    // Send push notification to customer
+    const customer = await prisma.user.findUnique({
+      where: { id: order.userId },
+      select: { fcmToken: true },
+    });
+
+    if (customer?.fcmToken) {
+      await sendPushNotification(
+        customer.fcmToken,
+        getPushTitle(status),
+        getStatusMessage(status),
+        {
+          type: 'order_update',
+          orderId: order.id,
+          status,
+          isPulperia: 'false',
+        }
+      );
+    }
 
     res.json({ order: updatedOrder });
   } catch (error) {
@@ -405,6 +464,17 @@ function getStatusMessage(status) {
     CANCELLED: 'Tu pedido fue cancelado.',
   };
   return messages[status] || 'Estado del pedido actualizado';
+}
+
+function getPushTitle(status) {
+  const titles = {
+    ACCEPTED: '¡Pedido Aceptado!',
+    PREPARING: 'Preparando tu pedido',
+    READY: '¡Pedido Listo!',
+    DELIVERED: '¡Entregado!',
+    CANCELLED: 'Pedido Cancelado',
+  };
+  return titles[status] || 'La Pulpería';
 }
 
 async function checkAchievements(pulperiaId) {

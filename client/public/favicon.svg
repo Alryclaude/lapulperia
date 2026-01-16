@@ -1,13 +1,26 @@
 <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Logo "La Lámina Zen" - Favicon -->
-  <!-- Fondo Squircle - Rojo Arcilla -->
-  <rect x="2" y="2" width="60" height="60" rx="16" fill="#C0392B"/>
-  <rect x="2" y="2" width="60" height="60" rx="16" stroke="#922B21" stroke-width="1" fill="none"/>
+  <!-- Favicon "La Casita" - Pulpería Hondureña -->
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C0392B"/>
+      <stop offset="100%" stop-color="#922B21"/>
+    </linearGradient>
+  </defs>
 
-  <!-- Líneas "Lámina Zen" - 3 ondas suaves -->
-  <g transform="translate(12, 18)">
-    <path d="M0 10 C6 4, 14 16, 20 10 C26 4, 34 16, 40 10" stroke="#F4F1EA" stroke-width="5" stroke-linecap="round" fill="none"/>
-    <path d="M0 22 C6 16, 14 28, 20 22 C26 16, 34 28, 40 22" stroke="#F4F1EA" stroke-width="5" stroke-linecap="round" fill="none" opacity="0.9"/>
-    <path d="M0 34 C6 28, 14 40, 20 34 C26 28, 34 40, 40 34" stroke="#F4F1EA" stroke-width="5" stroke-linecap="round" fill="none" opacity="0.8"/>
+  <!-- Fondo Squircle -->
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bgGrad)"/>
+
+  <!-- Casita Monoline -->
+  <g transform="translate(12, 12)" stroke="#F4F1EA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Techo a dos aguas -->
+    <path d="M20 10 L4 22 L20 22"/>
+    <path d="M20 10 L36 22 L20 22"/>
+    <!-- Paredes -->
+    <rect x="6" y="22" width="28" height="18" rx="1"/>
+    <!-- Ventana con barrotes -->
+    <rect x="12" y="26" width="16" height="10"/>
+    <line x1="17" y1="26" x2="17" y2="36"/>
+    <line x1="23" y1="26" x2="23" y2="36"/>
+    <line x1="12" y1="31" x2="28" y2="31"/>
   </g>
 </svg>

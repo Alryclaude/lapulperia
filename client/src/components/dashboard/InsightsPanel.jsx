@@ -20,7 +20,7 @@ const InsightsPanel = ({ insights }) => {
         </div>
       ) : (
         <p className="text-gray-500 text-sm">
-          Las predicciones apareceran cuando tengas mas datos
+          Las predicciones aparecerán cuando tengas más datos
         </p>
       )}
     </div>

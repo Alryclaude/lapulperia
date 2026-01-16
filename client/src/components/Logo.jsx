@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 
-// Logo "La Lámina Zen" - Diseño aprobado por Claude + Gemini
-// Isotipo: 3 líneas zigzag suave (láminas acanaladas + wifi/conexión)
+// Logo "La Casita" - Pulpería Hondureña
+// Isotipo: Casita minimalista con ventana con barrotes (característica pulpería)
 // Paleta: Rojo Arcilla #C0392B + Blanco Hueso #F4F1EA
 
 export const Logo = ({ size = 'md', showText = true, className = '' }) => {
@@ -20,14 +20,14 @@ export const Logo = ({ size = 'md', showText = true, className = '' }) => {
       {showText && (
         <div className={`font-bold ${text} leading-none`}>
           <span className="text-white">La </span>
-          <span className="text-primary-500">Pulperia</span>
+          <span className="text-primary-500">Pulpería</span>
         </div>
       )}
     </div>
   );
 };
 
-// Isotipo "La Lámina Zen" - Squircle con líneas onduladas
+// Isotipo "La Casita" - Squircle con casita monoline
 export const LogoIcon = ({ size = 40, className = '', animated = true }) => {
   return (
     <div
@@ -40,9 +40,9 @@ export const LogoIcon = ({ size = 40, className = '', animated = true }) => {
         xmlns="http://www.w3.org/2000/svg"
         className="w-full h-full"
       >
-        {/* Gradientes */}
+        {/* Gradiente de fondo */}
         <defs>
-          <linearGradient id="bgGradientZen" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id="bgGradientCasita" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#C0392B" />
             <stop offset="100%" stopColor="#922B21" />
           </linearGradient>
@@ -55,55 +55,48 @@ export const LogoIcon = ({ size = 40, className = '', animated = true }) => {
           width="60"
           height="60"
           rx="16"
-          fill="url(#bgGradientZen)"
+          fill="url(#bgGradientCasita)"
         />
 
-        {/* Borde sutil */}
-        <rect
-          x="2"
-          y="2"
-          width="60"
-          height="60"
-          rx="16"
-          stroke="#922B21"
-          strokeWidth="1"
+        {/* Casita Monoline */}
+        <g
+          transform="translate(12, 12)"
+          stroke="#F4F1EA"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
           fill="none"
-        />
-
-        {/* Líneas "Lámina Zen" - 3 ondas suaves */}
-        <g transform="translate(12, 18)">
-          {/* Línea superior */}
+        >
+          {/* Techo a dos aguas */}
           <motion.path
-            d="M0 10 C6 4, 14 16, 20 10 C26 4, 34 16, 40 10"
-            stroke="#F4F1EA"
-            strokeWidth="5"
-            strokeLinecap="round"
-            fill="none"
-            animate={animated ? { pathLength: [0.8, 1, 0.8] } : {}}
+            d="M20 10 L4 22 L20 22"
+            animate={animated ? { pathLength: [0.9, 1, 0.9] } : {}}
             transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
           />
-          {/* Línea media */}
           <motion.path
-            d="M0 22 C6 16, 14 28, 20 22 C26 16, 34 28, 40 22"
-            stroke="#F4F1EA"
-            strokeWidth="5"
-            strokeLinecap="round"
-            fill="none"
-            opacity="0.9"
-            animate={animated ? { pathLength: [0.85, 1, 0.85] } : {}}
+            d="M20 10 L36 22 L20 22"
+            animate={animated ? { pathLength: [0.9, 1, 0.9] } : {}}
+            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.1 }}
+          />
+
+          {/* Paredes de la casa */}
+          <motion.rect
+            x="6"
+            y="22"
+            width="28"
+            height="18"
+            rx="1"
+            animate={animated ? { opacity: [0.95, 1, 0.95] } : {}}
             transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.2 }}
           />
-          {/* Línea inferior */}
-          <motion.path
-            d="M0 34 C6 28, 14 40, 20 34 C26 28, 34 40, 40 34"
-            stroke="#F4F1EA"
-            strokeWidth="5"
-            strokeLinecap="round"
-            fill="none"
-            opacity="0.8"
-            animate={animated ? { pathLength: [0.9, 1, 0.9] } : {}}
-            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }}
-          />
+
+          {/* Ventana con barrotes */}
+          <rect x="12" y="26" width="16" height="10" />
+          {/* Barrotes verticales */}
+          <line x1="17" y1="26" x2="17" y2="36" />
+          <line x1="23" y1="26" x2="23" y2="36" />
+          {/* Barrote horizontal */}
+          <line x1="12" y1="31" x2="28" y2="31" />
         </g>
       </svg>
 
@@ -138,7 +131,7 @@ export const LogoLarge = ({ className = '' }) => {
       <div className="text-center">
         <h1 className="text-4xl md:text-5xl font-bold">
           <span className="text-white">La </span>
-          <span className="text-primary-500">Pulperia</span>
+          <span className="text-primary-500">Pulpería</span>
         </h1>
         <motion.p
           className="text-gray-400 mt-3 text-lg"

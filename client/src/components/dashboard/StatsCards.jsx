@@ -107,10 +107,12 @@ const StatsCards = ({ stats, pulperia }) => {
             </div>
           </div>
           <p className="text-2xl font-bold text-white">
-            {pulperia?.rating?.toFixed(1) || '0.0'}
+            {pulperia?.reviewCount > 0 ? pulperia?.rating?.toFixed(1) : '—'}
           </p>
           <p className="text-sm text-gray-400 mt-1">
-            {pulperia?.reviewCount || 0} reseñas
+            {pulperia?.reviewCount > 0
+              ? `${pulperia.reviewCount} ${pulperia.reviewCount === 1 ? 'reseña' : 'reseñas'}`
+              : 'Sin reseñas aún'}
           </p>
         </div>
       </motion.div>
