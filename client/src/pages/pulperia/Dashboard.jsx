@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { statsApi, pulperiaApi } from '../../services/api';
 import { useAuthStore } from '../../stores/authStore';
 import { socketService } from '../../services/socket';
+import { playNotificationSound } from '../../services/notifications';
 import toast from 'react-hot-toast';
 import {
   LayoutDashboard,
@@ -60,11 +61,8 @@ const Dashboard = () => {
 
     // Escuchar nuevas órdenes
     const unsubNewOrder = socketService.subscribe('new-order', (data) => {
-      // Reproducir sonido
-      try {
-        const audio = new Audio('/sounds/notification.mp3');
-        audio.play().catch(() => {});
-      } catch { /* silenciar */ }
+      // Reproducir sonido (usa fallback a Web Audio API si no hay archivo)
+      playNotificationSound('order');
 
       // Toast de nueva orden
       toast.custom((t) => (

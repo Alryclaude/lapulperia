@@ -12,6 +12,7 @@ import {
   Store,
   LayoutDashboard,
   ChevronDown,
+  Hexagon,
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { useCartStore } from '../../stores/cartStore';
@@ -190,6 +191,17 @@ const Header = ({ isPulperia = false }) => {
                               <Heart className="w-4 h-4 text-pink-400" />
                             </div>
                             <span>Favoritos</span>
+                          </Link>
+
+                          <Link
+                            to="/passport"
+                            onClick={() => setMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:bg-white/[0.06] hover:text-white transition-colors"
+                          >
+                            <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                              <Hexagon className="w-4 h-4 text-amber-400" />
+                            </div>
+                            <span>Mi Pasaporte</span>
                           </Link>
 
                           <Link

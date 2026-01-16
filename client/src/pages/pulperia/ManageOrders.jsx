@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { orderApi } from '../../services/api';
 import toast from 'react-hot-toast';
-import { io } from 'socket.io-client';
+import { socketService } from '../../services/socket';
 import { playNotificationSound, vibrate } from '../../services/notifications';
 import { useAuthStore } from '../../stores/authStore';
 
@@ -47,17 +47,17 @@ const ManageOrders = () => {
   const orders = ordersData?.data?.orders || [];
   const statusCounts = ordersData?.data?.statusCounts || [];
 
-  // Real-time updates
+  // Real-time updates usando socketService singleton
   useEffect(() => {
-    const socket = io(import.meta.env.VITE_API_URL || window.location.origin);
+    if (!user?.id) return;
 
-    socket.on('connect', () => {
-      socket.emit('join', user.id);
-    });
+    // Conectar usando el servicio singleton
+    socketService.connect(user.id);
 
-    socket.on('new-order', (data) => {
+    // Suscribirse a nuevas órdenes
+    const unsubscribe = socketService.subscribe('new-order', (data) => {
       queryClient.invalidateQueries(['pulperia-orders']);
-      toast.success(data.message, {
+      toast.success(data.message || '¡Nueva orden recibida!', {
         icon: '🔔',
         duration: 5000,
       });
@@ -67,9 +67,9 @@ const ManageOrders = () => {
     });
 
     return () => {
-      socket.disconnect();
+      unsubscribe();
     };
-  }, [user.id, queryClient]);
+  }, [user?.id, queryClient]);
 
   // Update status mutation
   const updateStatusMutation = useMutation({
