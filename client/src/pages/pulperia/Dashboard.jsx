@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { statsApi, pulperiaApi } from '../../services/api';
 import { useAuthStore } from '../../stores/authStore';
+import { socketService } from '../../services/socket';
 import toast from 'react-hot-toast';
 import {
   LayoutDashboard,
@@ -10,6 +11,7 @@ import {
   Tag,
   Clock,
   MapPin,
+  ShoppingBag,
 } from 'lucide-react';
 import {
   StatusToggle,
@@ -35,6 +37,7 @@ const TABS = [
 
 const Dashboard = () => {
   const { user, refreshUser } = useAuthStore();
+  const queryClient = useQueryClient();
   const pulperia = user?.pulperia;
 
   const [activeTab, setActiveTab] = useState('resumen');
@@ -47,6 +50,56 @@ const Dashboard = () => {
       setIsOpen(pulperia.status === 'OPEN');
     }
   }, [pulperia?.status]);
+
+  // Socket Listener para Nuevas Órdenes en Tiempo Real
+  useEffect(() => {
+    if (!pulperia?.id) return;
+
+    // Conectar socket
+    socketService.connect(user?.id);
+
+    // Escuchar nuevas órdenes
+    const unsubNewOrder = socketService.subscribe('new-order', (data) => {
+      // Reproducir sonido
+      try {
+        const audio = new Audio('/sounds/notification.mp3');
+        audio.play().catch(() => {});
+      } catch { /* silenciar */ }
+
+      // Toast de nueva orden
+      toast.custom((t) => (
+        <motion.div
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: 20 }}
+          className="bg-dark-200/90 backdrop-blur-md border-l-4 border-primary-500 rounded-r-lg p-4 shadow-lg shadow-primary-500/20 flex items-center gap-4 min-w-[300px]"
+        >
+          <div className="bg-primary-500/20 p-2 rounded-full animate-pulse">
+            <ShoppingBag className="w-6 h-6 text-primary-400" />
+          </div>
+          <div>
+            <h4 className="font-bold text-white tracking-wide">¡Nueva Orden!</h4>
+            <p className="text-primary-300 font-mono text-sm">
+              #{data.order?.orderNumber?.slice(-6) || '----'} • L. {data.order?.total?.toFixed(2) || '0.00'}
+            </p>
+          </div>
+        </motion.div>
+      ), { duration: 6000, position: 'top-right' });
+
+      // Invalidar queries para refrescar datos
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+    });
+
+    // Escuchar cambios de estado de órdenes
+    const unsubOrderUpdate = socketService.subscribe('order-updated', () => {
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+    });
+
+    return () => {
+      unsubNewOrder();
+      unsubOrderUpdate();
+    };
+  }, [pulperia?.id, user?.id, queryClient]);
 
   // Fetch stats
   const { data: statsData, isLoading: statsLoading } = useQuery({

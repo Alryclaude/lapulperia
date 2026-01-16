@@ -72,6 +72,7 @@ model User {
   shoppingLists       ShoppingList[]
   productAlerts       ProductAlert[]
   loyaltyPoints       LoyaltyPoint[]
+  stamps              Stamp[]
 
   @@index([email])
   @@index([firebaseUid])
@@ -136,6 +137,7 @@ model Pulperia {
   businessHours       BusinessHours?
   promotions          Promotion[]
   services            PulperiaService[]
+  stamps              Stamp[]
 
   @@index([latitude, longitude])
   @@index([status])
@@ -507,4 +509,26 @@ model Event {
   createdAt           DateTime        @default(now())
 
   @@index([startDate])
+}
+
+// Pasaporte Digital - Sellos de visitas/compras
+enum StampRarity {
+  COMMON
+  RARE
+  LEGENDARY
+}
+
+model Stamp {
+  id                  String          @id @default(cuid())
+  userId              String
+  pulperiaId          String
+  icon                String          @default("🏪")
+  rarity              StampRarity     @default(COMMON)
+  collectedAt         DateTime        @default(now())
+
+  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pulperia            Pulperia        @relation(fields: [pulperiaId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([pulperiaId])
 }

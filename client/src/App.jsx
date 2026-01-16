@@ -28,6 +28,7 @@ import MyApplications from './pages/MyApplications';
 import NotificationSettings from './pages/NotificationSettings';
 import PrivacySettings from './pages/PrivacySettings';
 import Help from './pages/Help';
+import Passport from './pages/Passport';
 
 // Pulperia Pages
 import Dashboard from './pages/pulperia/Dashboard';
@@ -105,6 +106,7 @@ function App() {
           <Route path="/settings/notifications" element={<NotificationSettings />} />
           <Route path="/settings/privacy" element={<PrivacySettings />} />
           <Route path="/help" element={<Help />} />
+          <Route path="/passport" element={<Passport />} />
         </Route>
 
         {/* Pulperia Routes */}

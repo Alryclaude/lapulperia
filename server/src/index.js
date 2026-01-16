@@ -20,6 +20,7 @@ import uploadRoutes from './routes/upload.js';
 import businessHoursRoutes from './routes/business-hours.js';
 import promotionsRoutes from './routes/promotions.js';
 import pulperiaServicesRoutes from './routes/pulperia-services.js';
+import stampsRoutes from './routes/stamps.js';
 
 dotenv.config();
 
@@ -128,6 +129,7 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/business-hours', businessHoursRoutes);
 app.use('/api/promotions', promotionsRoutes);
 app.use('/api/pulperia-services', pulperiaServicesRoutes);
+app.use('/api/stamps', stampsRoutes);
 
 /* =========================
    SOCKET EVENTS
