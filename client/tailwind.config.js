@@ -8,19 +8,19 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Primary - Red theme (La Pulperia brand) - More vibrant
+        // Primary - Red theme (La Pulperia brand) - Paleta "Atardecer en el Barrio"
         primary: {
           50: '#fef2f2',
           100: '#fee2e2',
           200: '#fecaca',
           300: '#fca5a5',
-          400: '#f87171',
-          500: '#E53935',  // More vibrant red
-          600: '#D32F2F',
-          700: '#C62828',
-          800: '#B71C1C',
-          900: '#7f1d1d',
-          950: '#450a0a',
+          400: '#e74c3c',
+          500: '#C0392B',  // Rojo Arcilla - Techo quemado por sol
+          600: '#A93226',
+          700: '#922B21',  // Rojo Óxido - Metal envejecido
+          800: '#7B241C',
+          900: '#641E16',
+          950: '#4A1612',
         },
         // Accent - Golden (REVAMP: More vibrant)
         accent: {
@@ -63,15 +63,24 @@ export default {
           500: '#1E3A5F',
           600: '#1A2F4A',
         },
-        // Dark theme background colors - REVAMP: Better contrast
+        // Dark theme background colors - Paleta "Atardecer en el Barrio"
+        // Ajustado: Negro puro → Slate cálido para mejor apetito visual
         dark: {
-          DEFAULT: '#0F0F12',
-          50: '#3D3D42',    // Borders, dividers - MORE VISIBLE
-          100: '#2A2A2F',   // Cards elevated - MUCH LIGHTER
-          200: '#222226',   // Cards base
-          300: '#1A1A1E',   // Secondary background
-          400: '#0F0F12',   // Primary background
-          500: '#0A0A0D',   // Deepest black
+          DEFAULT: '#1E293B',  // Slate-800 - más cálido que negro puro
+          50: '#475569',    // Slate-500 - Borders, dividers
+          100: '#334155',   // Slate-700 - Cards elevated
+          200: '#2D3748',   // Cards base - gris azulado
+          300: '#1E293B',   // Slate-800 - Secondary background
+          400: '#0F172A',   // Slate-900 - Primary background
+          500: '#0D1425',   // Deepest - casi negro pero con tinte azul
+        },
+        // Paleta "Atardecer en el Barrio" - Light mode surfaces
+        barrio: {
+          hueso: '#F4F1EA',     // Blanco Hueso - Masa de maíz
+          pizarra: '#2C3E50',   // Gris Pizarra - Texto moderno
+          arcilla: '#C0392B',   // Rojo Arcilla - Primary
+          oxido: '#922B21',     // Rojo Óxido - Accent
+          frescura: '#27AE60',  // Verde Frescura - Success
         },
         // REVAMP: New vibrant accent colors
         cyan: {

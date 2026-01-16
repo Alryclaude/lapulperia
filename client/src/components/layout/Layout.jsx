@@ -4,6 +4,7 @@ import PullToRefresh from 'react-simple-pull-to-refresh';
 import { Loader2 } from 'lucide-react';
 import Header from './Header';
 import BottomNav from './BottomNav';
+import Footer from './Footer';
 import { useAuthStore } from '../../stores/authStore';
 
 // Custom refresh indicator
@@ -50,6 +51,8 @@ const Layout = ({ isPulperia = false }) => {
             <Outlet key={location.pathname} />
           </div>
         </main>
+        {/* Footer solo visible cuando no hay BottomNav (usuarios no autenticados) */}
+        {!showBottomNav && <Footer />}
       </PullToRefresh>
 
       {showBottomNav && <BottomNav isPulperia={showPulperiaNav} />}

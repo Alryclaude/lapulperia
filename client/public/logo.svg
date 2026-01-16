@@ -1,0 +1,11 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo Squircle - Rojo Arcilla -->
+  <rect x="0" y="0" width="512" height="512" rx="120" fill="#C0392B"/>
+  <path d="M40 120C40 75.8172 75.8172 40 120 40H392C436.183 40 472 75.8172 472 120V392C472 436.183 436.183 472 392 472H120C75.8172 472 40 436.183 40 392V120Z" stroke="#922B21" stroke-width="4"/>
+  <!-- Líneas 'Lámina Zen' - Zigzag suave representando techos de lámina + conexión wifi -->
+  <g transform="translate(106, 156)">
+    <path d="M0 50 C50 0, 100 100, 150 50 C200 0, 250 100, 300 50" stroke="#F4F1EA" stroke-width="45" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M0 130 C50 80, 100 180, 150 130 C200 80, 250 180, 300 130" stroke="#F4F1EA" stroke-width="45" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+    <path d="M0 210 C50 160, 100 260, 150 210 C200 160, 250 260, 300 210" stroke="#F4F1EA" stroke-width="45" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+  </g>
+</svg>

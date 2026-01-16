@@ -1,10 +1,48 @@
 import { motion } from 'framer-motion';
-import { MapPin, ChevronRight, Expand } from 'lucide-react';
+import { MapPin, ChevronRight, Expand, Store, Plus } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { FadeInView } from '@/components/ui';
 import MiniMap from '../map/MiniMap';
 
-// REVAMP: Larger map (300px), no collapse, floating counter
+// Ilustración SVG para estado vacío - Estilo "La Lámina Zen"
+const EmptyMapIllustration = () => (
+  <svg viewBox="0 0 200 160" fill="none" className="w-48 h-40 mx-auto">
+    {/* Fondo de mapa estilizado */}
+    <rect x="20" y="30" width="160" height="100" rx="12" fill="#334155" opacity="0.3" />
+
+    {/* Líneas de calles */}
+    <path d="M40 80 H160" stroke="#475569" strokeWidth="2" strokeDasharray="8 4" />
+    <path d="M100 50 V110" stroke="#475569" strokeWidth="2" strokeDasharray="8 4" />
+
+    {/* Pin de ubicación animado */}
+    <motion.g
+      animate={{ y: [0, -5, 0] }}
+      transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+    >
+      <path d="M100 45 C100 35, 115 35, 115 45 C115 55, 100 70, 100 70 C100 70, 85 55, 85 45 C85 35, 100 35, 100 45" fill="#C0392B" />
+      <circle cx="100" cy="45" r="5" fill="#F4F1EA" />
+    </motion.g>
+
+    {/* Círculos de búsqueda */}
+    <motion.circle
+      cx="100"
+      cy="80"
+      r="30"
+      stroke="#C0392B"
+      strokeWidth="2"
+      fill="none"
+      opacity="0.3"
+      animate={{ r: [30, 50, 30], opacity: [0.3, 0, 0.3] }}
+      transition={{ duration: 3, repeat: Infinity }}
+    />
+  </svg>
+);
+
+// REVAMP: Larger map (300px), no collapse, floating counter + empty state
 const MapSection = ({ location, pulperias, openCount = 0, onOpenFullMap }) => {
+  // Si hay ubicación pero no hay pulperías abiertas, mostrar estado vacío amigable
+  const showEmptyState = location && openCount === 0;
+
   return (
     <FadeInView>
       <section className="space-y-4">
@@ -16,21 +54,56 @@ const MapSection = ({ location, pulperias, openCount = 0, onOpenFullMap }) => {
             </div>
             <div>
               <h2 className="text-lg font-bold text-white">Cerca de ti</h2>
-              <p className="text-sm text-gray-500">Pulper&iacute;as en tu zona</p>
+              <p className="text-sm text-gray-500">Pulperías en tu zona</p>
             </div>
           </div>
-          <button
-            onClick={onOpenFullMap}
-            className="flex items-center gap-2 px-4 py-2 bg-dark-100 hover:bg-dark-50 border border-dark-50 hover:border-primary-500/30 rounded-xl text-sm font-medium text-gray-300 hover:text-white transition-all duration-200"
-          >
-            <Expand className="w-4 h-4" />
-            <span className="hidden sm:inline">Mapa completo</span>
-            <ChevronRight className="w-4 h-4 sm:hidden" />
-          </button>
+          {!showEmptyState && (
+            <button
+              onClick={onOpenFullMap}
+              className="flex items-center gap-2 px-4 py-2 bg-dark-100 hover:bg-dark-50 border border-dark-50 hover:border-primary-500/30 rounded-xl text-sm font-medium text-gray-300 hover:text-white transition-all duration-200"
+            >
+              <Expand className="w-4 h-4" />
+              <span className="hidden sm:inline">Mapa completo</span>
+              <ChevronRight className="w-4 h-4 sm:hidden" />
+            </button>
+          )}
         </div>
 
-        {/* Map Container - REVAMP: Fixed 300px height */}
-        {location && (
+        {/* Empty State - Cuando no hay pulperías abiertas */}
+        {showEmptyState && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl bg-dark-100 border border-dark-50 p-8 text-center"
+          >
+            <EmptyMapIllustration />
+            <h3 className="text-lg font-semibold text-white mt-4 mb-2">
+              No hay pulperías abiertas cerca
+            </h3>
+            <p className="text-sm text-gray-400 mb-6 max-w-xs mx-auto">
+              Parece que las pulperías de tu zona aún no han abierto. ¡Vuelve más tarde o explora otras áreas!
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                onClick={onOpenFullMap}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-dark-200 hover:bg-dark-50 border border-dark-50 rounded-xl text-sm font-medium text-gray-300 hover:text-white transition-all"
+              >
+                <Expand className="w-4 h-4" />
+                Explorar mapa
+              </button>
+              <Link
+                to="/auth"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 rounded-xl text-sm font-medium text-white transition-all"
+              >
+                <Store className="w-4 h-4" />
+                Registrar mi pulpería
+              </Link>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Map Container - Solo si hay pulperías */}
+        {location && !showEmptyState && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -76,7 +149,7 @@ const MapSection = ({ location, pulperias, openCount = 0, onOpenFullMap }) => {
           <div className="h-[300px] rounded-2xl bg-dark-100 border border-white/10 flex items-center justify-center">
             <div className="flex flex-col items-center gap-3">
               <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
-              <p className="text-sm text-gray-500">Obteniendo ubicaci&oacute;n...</p>
+              <p className="text-sm text-gray-500">Obteniendo ubicación...</p>
             </div>
           </div>
         )}
