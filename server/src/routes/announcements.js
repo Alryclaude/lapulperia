@@ -170,6 +170,50 @@ router.get('/mine', authenticate, requirePulperia, async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════
+// PÚBLICO: Anuncios de una pulpería específica
+// GET /api/announcements/pulperia/:pulperiaId
+// ═══════════════════════════════════════════════════════════════
+
+router.get('/pulperia/:pulperiaId', optionalAuth, async (req, res) => {
+  try {
+    const { pulperiaId } = req.params;
+    const now = new Date();
+
+    // Obtener anuncios activos y no expirados de esta pulpería
+    const announcements = await prisma.announcement.findMany({
+      where: {
+        pulperiaId,
+        isActive: true,
+        expiresAt: { gt: now }
+      },
+      include: {
+        pulperia: {
+          select: {
+            id: true,
+            name: true,
+            logo: true,
+            whatsapp: true,
+            phone: true
+          }
+        }
+      },
+      orderBy: [
+        { isFeatured: 'desc' },
+        { createdAt: 'desc' }
+      ]
+    });
+
+    res.json({
+      announcements,
+      total: announcements.length
+    });
+  } catch (error) {
+    console.error('Error fetching pulperia announcements:', error);
+    res.status(500).json({ error: { message: 'Error al cargar anuncios de la pulpería' } });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
 // PÚBLICO: Detalle de un anuncio
 // GET /api/announcements/:id
 // ═══════════════════════════════════════════════════════════════

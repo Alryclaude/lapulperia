@@ -4,8 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   MapPin, Phone, Star, Heart, Share2, Clock, MessageCircle,
-  Package, MessageSquare, Store, Info, ShoppingBag, Navigation, Maximize2, Minimize2,
-  CheckCircle, Calendar, Globe, Tag,
+  Package, MessageSquare, Store, ShoppingBag, Navigation, Maximize2, Minimize2,
+  CheckCircle, Calendar, Globe, Tag, Megaphone, BookOpen, Quote,
 } from 'lucide-react';
 import SocialButtons from '../components/profile/SocialButtons';
 import PaymentMethodsDisplay from '../components/profile/PaymentMethodsDisplay';
@@ -17,9 +17,12 @@ const CATEGORY_CONFIG = {
   SERVICIOS: { label: 'Servicios', emoji: '🔧', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
 };
 import { pulperiaApi, productApi } from '../services/api';
+import { announcementsApi } from '../api/announcements';
 import { useAuthStore } from '../stores/authStore';
 import ProductCard from '../components/products/ProductCard';
 import ProductDetailModal from '../components/products/ProductDetailModal';
+import AnnouncementPoster from '../components/announcements/AnnouncementPoster';
+import AnnouncementDetailModal from '../components/announcements/AnnouncementDetailModal';
 import MiniMap from '../components/map/MiniMap';
 import ReviewForm from '../components/ReviewForm';
 import { ShareButtons } from '../components/share';
@@ -51,10 +54,17 @@ const PulperiaProfile = () => {
   const [isMapExpanded, setIsMapExpanded] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [productModalOpen, setProductModalOpen] = useState(false);
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
+  const [announcementModalOpen, setAnnouncementModalOpen] = useState(false);
 
   const handleProductClick = (product) => {
     setSelectedProduct(product);
     setProductModalOpen(true);
+  };
+
+  const handleAnnouncementClick = (announcement) => {
+    setSelectedAnnouncement(announcement);
+    setAnnouncementModalOpen(true);
   };
 
   const { data: pulperiaData, isLoading, error } = useQuery({
@@ -80,6 +90,15 @@ const PulperiaProfile = () => {
 
   const products = productsData?.data?.products || [];
   const categories = productsData?.data?.categories || [];
+
+  // Query para anuncios de la pulpería
+  const { data: announcementsData, isLoading: loadingAnnouncements } = useQuery({
+    queryKey: ['pulperia-announcements', id],
+    queryFn: () => announcementsApi.getByPulperia(id),
+    enabled: !!id,
+  });
+
+  const announcements = announcementsData?.data?.announcements || [];
 
   const favoriteMutation = useMutation({
     mutationFn: () => pulperiaApi.toggleFavorite(id, { notifyOnOpen: true }),
@@ -370,19 +389,42 @@ const PulperiaProfile = () => {
             </motion.p>
           )}
 
-          {/* Story */}
+          {/* Story - Diseño tipo storytelling */}
           {pulperia.story && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="mt-4 p-4 bg-dark-100/40 rounded-xl border border-white/5"
+              className="mt-6 relative"
             >
-              <div className="flex items-center gap-2 mb-2">
-                <Info className="w-4 h-4 text-purple-400" />
-                <span className="text-sm font-medium text-purple-400">Nuestra Historia</span>
+              {/* Fondo decorativo con gradiente cálido */}
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-900/10 via-transparent to-amber-800/5 rounded-2xl" />
+
+              {/* Contenedor principal con borde izquierdo decorativo */}
+              <div className="relative p-5 rounded-2xl border border-amber-500/10 border-l-4 border-l-amber-500/50">
+                {/* Comilla decorativa */}
+                <Quote className="absolute top-3 right-4 w-12 h-12 text-amber-500/10" />
+
+                {/* Header */}
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-2 rounded-lg bg-amber-500/20">
+                    <BookOpen className="w-4 h-4 text-amber-400" />
+                  </div>
+                  <span className="text-sm font-semibold text-amber-400 tracking-wide uppercase">
+                    Nuestra Historia
+                  </span>
+                  {pulperia.foundedYear && (
+                    <span className="ml-auto text-xs text-amber-500/60 font-medium">
+                      Desde {pulperia.foundedYear}
+                    </span>
+                  )}
+                </div>
+
+                {/* Contenido con estilo de cita */}
+                <p className="text-base text-gray-300 leading-relaxed italic pl-1">
+                  "{pulperia.story}"
+                </p>
               </div>
-              <p className="text-sm text-gray-400 leading-relaxed">{pulperia.story}</p>
             </motion.div>
           )}
 
@@ -500,6 +542,26 @@ const PulperiaProfile = () => {
                 )}
               </span>
               {activeTab === 'reviews' && (
+                <motion.div
+                  layoutId="tabIndicator"
+                  className="absolute bottom-0 left-0 right-0 h-1 bg-primary-500 rounded-full"
+                />
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('announcements')}
+              className={`relative flex-1 py-4 text-center font-medium transition-colors ${
+                activeTab === 'announcements' ? 'text-white' : 'text-gray-500 hover:text-gray-300'
+              }`}
+            >
+              <span className="flex items-center justify-center gap-2">
+                <Megaphone className="w-4 h-4" />
+                Anuncios
+                {announcements.length > 0 && (
+                  <span className="px-2 py-0.5 text-xs rounded-full bg-white/10">{announcements.length}</span>
+                )}
+              </span>
+              {activeTab === 'announcements' && (
                 <motion.div
                   layoutId="tabIndicator"
                   className="absolute bottom-0 left-0 right-0 h-1 bg-primary-500 rounded-full"
@@ -663,6 +725,50 @@ const PulperiaProfile = () => {
               )}
             </motion.div>
           )}
+
+          {activeTab === 'announcements' && (
+            <motion.div
+              key="announcements"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="pt-6"
+            >
+              {loadingAnnouncements ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="bg-dark-100/60 rounded-xl overflow-hidden">
+                      <div className="aspect-square bg-dark-200 animate-pulse" />
+                    </div>
+                  ))}
+                </div>
+              ) : announcements.length > 0 ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {announcements.map((announcement, index) => (
+                    <motion.div
+                      key={announcement.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <AnnouncementPoster
+                        announcement={announcement}
+                        onClick={() => handleAnnouncementClick(announcement)}
+                      />
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-16">
+                  <div className="w-16 h-16 bg-dark-100/60 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Megaphone className="w-8 h-8 text-gray-500" />
+                  </div>
+                  <p className="font-medium text-white mb-1">Sin anuncios activos</p>
+                  <p className="text-sm text-gray-400">Esta pulperia no tiene anuncios en este momento</p>
+                </div>
+              )}
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
 
@@ -687,6 +793,13 @@ const PulperiaProfile = () => {
         pulperia={pulperia}
         open={productModalOpen}
         onOpenChange={setProductModalOpen}
+      />
+
+      {/* Announcement Detail Modal */}
+      <AnnouncementDetailModal
+        announcement={selectedAnnouncement}
+        open={announcementModalOpen}
+        onOpenChange={setAnnouncementModalOpen}
       />
     </div>
   );

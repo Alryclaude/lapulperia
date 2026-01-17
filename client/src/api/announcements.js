@@ -7,6 +7,9 @@ export const announcementsApi = {
   // Detalle de un anuncio
   getById: (id) => api.get(`/announcements/${id}`),
 
+  // Anuncios de una pulpería específica
+  getByPulperia: (pulperiaId, params) => api.get(`/announcements/pulperia/${pulperiaId}`, { params }),
+
   // Mis anuncios (pulpería)
   getMine: (params) => api.get('/announcements/mine', { params }),
 
