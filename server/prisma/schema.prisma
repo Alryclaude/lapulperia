@@ -78,9 +78,11 @@ model User {
   shoppingLists       ShoppingList[]
   productAlerts       ProductAlert[]
   productFavorites    ProductFavorite[]
-  loyaltyPoints       LoyaltyPoint[]
-  stamps              Stamp[]
   fiadoAccounts       FiadoAccount[]
+  chambas             Chamba[]
+  chambaResponses     ChambaResponse[]
+  appointments        Appointment[]
+  quotes              Quote[]
 
   @@index([email])
   @@index([firebaseUid])
@@ -135,6 +137,14 @@ model Pulperia {
   // Categorías del negocio (múltiples permitidas)
   categories          PulperiaCategory[]  @default([])
 
+  // Tipo de negocio (para onboarding adaptativo)
+  businessType        BusinessType    @default(TIENDA)
+
+  // Ubicación en vivo (para ambulantes)
+  isLocationLive      Boolean         @default(false)
+  lastLocationAt      DateTime?
+  locationNote        String?         // "Hoy en col. Kennedy"
+
   // Redes sociales
   socialLinks         Json?           // { facebook, instagram, tiktok, twitter, youtube, telegram }
 
@@ -148,15 +158,17 @@ model Pulperia {
   reviews             Review[]
   favorites           Favorite[]
   achievements        Achievement[]
-  loyaltyProgram      LoyaltyProgram?
   dailyStats          DailyStat[]
   businessHours       BusinessHours?
   promotions          Promotion[]
   services            PulperiaService[]
-  stamps              Stamp[]
   shippingMethods     ShippingMethod[]
   paymentMethods      PaymentMethod[]
   fiadoAccounts       FiadoAccount[]
+  chambas             Chamba[]
+  appointments        Appointment[]
+  quotes              Quote[]
+  expenses            Expense[]
 
   @@index([latitude, longitude])
   @@index([status])
@@ -264,6 +276,11 @@ model Product {
   imageUrl            String
   imagePublicId       String
 
+  // Tipo de producto (inventario híbrido)
+  type                ProductType     @default(PHYSICAL)
+  priceUnit           String?         // "hora", "unidad", "lb", "kg"
+  allowFraction       Boolean         @default(false)
+
   isAvailable         Boolean         @default(true)
   isFeatured          Boolean         @default(false)      // Producto del dia
   featuredUntil       DateTime?
@@ -312,6 +329,7 @@ model Order {
   deliveredAt         DateTime?
   cancelledAt         DateTime?
   cancelReason        String?
+  isQuickSale         Boolean         @default(false)    // Venta rápida (sin productos)
 
   user                User            @relation(fields: [userId], references: [id])
   pulperia            Pulperia        @relation(fields: [pulperiaId], references: [id])
@@ -321,6 +339,7 @@ model Order {
   @@index([pulperiaId])
   @@index([status])
   @@index([createdAt])
+  @@index([isQuickSale])
 }
 
 model OrderItem {
@@ -508,37 +527,6 @@ model Achievement {
   @@unique([pulperiaId, type])
 }
 
-// Programa de lealtad
-model LoyaltyProgram {
-  id                  String          @id @default(cuid())
-  pulperiaId          String          @unique
-  pointsPerPurchase   Int             @default(1)
-  rewardThreshold     Int             @default(10)
-  rewardDescription   String          @default("Un regalo especial")
-  isActive            Boolean         @default(true)
-
-  createdAt           DateTime        @default(now())
-  updatedAt           DateTime        @updatedAt
-
-  pulperia            Pulperia        @relation(fields: [pulperiaId], references: [id], onDelete: Cascade)
-  points              LoyaltyPoint[]
-}
-
-model LoyaltyPoint {
-  id                  String          @id @default(cuid())
-  loyaltyProgramId    String
-  userId              String
-  points              Int             @default(0)
-
-  createdAt           DateTime        @default(now())
-  updatedAt           DateTime        @updatedAt
-
-  loyaltyProgram      LoyaltyProgram  @relation(fields: [loyaltyProgramId], references: [id], onDelete: Cascade)
-  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([loyaltyProgramId, userId])
-  @@index([userId])  // Para queries de puntos por usuario
-}
 
 // Estadisticas diarias
 model DailyStat {
@@ -623,38 +611,300 @@ model PulperiaService {
   @@index([isAvailable])
 }
 
-// Eventos y fiestas
-model Event {
-  id                  String          @id @default(cuid())
-  name                String
-  description         String?
-  startDate           DateTime
-  endDate             DateTime?
-  location            String?
+// ═══════════════════════════════════════════════════════════════
+// SISTEMA UNIFICADO: CHAMBA
+// (Término hondureño para trabajo/servicio)
+// ═══════════════════════════════════════════════════════════════
 
-  createdAt           DateTime        @default(now())
-
-  @@index([startDate])
+enum ChambaType {
+  EMPLOYMENT    // "Busco empleado" (era Job)
+  SERVICE       // "Ofrezco servicio" (era PulperiaService + ServiceCatalog)
+  REQUEST       // "Necesito servicio" (NUEVO - conecta demanda)
 }
 
-// Pasaporte Digital - Sellos de visitas/compras
-enum StampRarity {
-  COMMON
-  RARE
-  LEGENDARY
+enum ChambaCategory {
+  // Técnicos/Reparaciones
+  MECANICA
+  PLOMERIA
+  ELECTRICIDAD
+  CARPINTERIA
+  CELULARES
+  ELECTRODOMESTICOS
+
+  // Belleza/Cuidado
+  BARBERIA
+  SALON_BELLEZA
+  MASAJES
+
+  // Hogar
+  LIMPIEZA
+  JARDINERIA
+  PINTURA
+  MUDANZAS
+
+  // Comida
+  COCINA
+  REPOSTERIA
+  CATERING
+
+  // Comercio
+  VENTAS
+  ATENCION_CLIENTE
+
+  // Otros
+  TRANSPORTE
+  DELIVERY
+  TUTORIA
+  FOTOGRAFIA
+  OTRO
 }
 
-model Stamp {
-  id                  String          @id @default(cuid())
-  userId              String
-  pulperiaId          String
-  icon                String          @default("🏪")
-  rarity              StampRarity     @default(COMMON)
-  collectedAt         DateTime        @default(now())
+model Chamba {
+  id              String          @id @default(cuid())
 
-  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  pulperia            Pulperia        @relation(fields: [pulperiaId], references: [id], onDelete: Cascade)
+  // Quien publica
+  pulperiaId      String?         // Opcional - si es negocio
+  userId          String          // Siempre requerido
 
-  @@index([userId])
+  // Tipo y categoría
+  type            ChambaType
+  category        ChambaCategory
+
+  // Información básica
+  title           String
+  description     String?
+
+  // Precio (flexible para todos los casos)
+  priceType       PriceType       @default(NEGOTIABLE)
+  priceMin        Float?
+  priceMax        Float?
+
+  // Para EMPLOYMENT
+  isPartTime      Boolean         @default(false)
+  isUrgent        Boolean         @default(false)
+  requirements    String?
+  salary          String?
+
+  // Para SERVICE
+  duration        String?
+  serviceArea     String?
+
+  // Media (portafolio)
+  images          String[]
+  imagePublicIds  String[]
+
+  // Ubicación
+  latitude        Float?
+  longitude       Float?
+
+  // Contacto
+  contactPhone    String?
+  contactWhatsapp String?
+
+  // Estado
+  isActive        Boolean         @default(true)
+  expiresAt       DateTime?
+  viewCount       Int             @default(0)
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  pulperia        Pulperia?       @relation(fields: [pulperiaId], references: [id], onDelete: Cascade)
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  responses       ChambaResponse[]
+  appointments    Appointment[]
+
+  @@index([type, category, isActive])
   @@index([pulperiaId])
+  @@index([userId])
 }
+
+enum ChambaResponseStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COMPLETED
+}
+
+model ChambaResponse {
+  id              String                @id @default(cuid())
+  chambaId        String
+  userId          String
+
+  message         String?
+  proposedPrice   Float?                // Para cotizaciones
+  estimatedTime   String?
+  cvUrl           String?               // Para empleos
+  cvPublicId      String?
+
+  status          ChambaResponseStatus  @default(PENDING)
+  responseNote    String?
+
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  chamba          Chamba                @relation(fields: [chambaId], references: [id], onDelete: Cascade)
+  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([chambaId, userId])
+  @@index([chambaId])
+  @@index([userId])
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AGENDA DE CITAS
+// ═══════════════════════════════════════════════════════════════
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+model Appointment {
+  id              String            @id @default(cuid())
+  chambaId        String?           // Ligada a chamba de servicio
+  pulperiaId      String?           // O directamente a pulpería
+
+  clientId        String
+  clientName      String
+  clientPhone     String?
+
+  serviceName     String
+  date            DateTime
+  timeSlot        String            // "09:00"
+  duration        Int               @default(60)
+  agreedPrice     Float?
+
+  status          AppointmentStatus @default(SCHEDULED)
+  notes           String?
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  chamba          Chamba?           @relation(fields: [chambaId], references: [id], onDelete: SetNull)
+  pulperia        Pulperia?         @relation(fields: [pulperiaId], references: [id], onDelete: Cascade)
+  client          User              @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([pulperiaId, date])
+  @@index([clientId])
+  @@index([chambaId])
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COTIZACIONES (Técnicos/Artesanos)
+// ═══════════════════════════════════════════════════════════════
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  COMPLETED
+}
+
+model Quote {
+  id              String        @id @default(cuid())
+  quoteNumber     String        @unique
+
+  pulperiaId      String?
+  userId          String
+
+  clientName      String
+  clientPhone     String?
+  clientWhatsapp  String?
+
+  title           String
+  description     String?
+
+  items           Json          // [{name, qty, unitPrice, total}]
+  laborCost       Float         @default(0)
+  materialsCost   Float         @default(0)
+  subtotal        Float
+  discount        Float         @default(0)
+  total           Float
+
+  validUntil      DateTime?
+  estimatedTime   String?
+  warranty        String?
+  paymentTerms    String?
+  notes           String?
+
+  status          QuoteStatus   @default(DRAFT)
+  sentAt          DateTime?
+  acceptedAt      DateTime?
+  completedAt     DateTime?
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  pulperia        Pulperia?     @relation(fields: [pulperiaId], references: [id], onDelete: Cascade)
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([pulperiaId])
+  @@index([userId])
+  @@index([status])
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CONTROL DE GASTOS
+// ═══════════════════════════════════════════════════════════════
+
+enum ExpenseCategory {
+  SUPPLIES      // Insumos
+  TRANSPORT     // Transporte
+  FOOD          // Comida
+  UTILITIES     // Servicios
+  RENT          // Alquiler
+  SALARIES      // Sueldos
+  MAINTENANCE   // Mantenimiento
+  MARKETING     // Publicidad
+  OTHER         // Otros
+}
+
+model Expense {
+  id              String          @id @default(cuid())
+  pulperiaId      String
+
+  amount          Float
+  category        ExpenseCategory
+  description     String?
+  receiptUrl      String?
+  receiptPublicId String?
+
+  date            DateTime        @default(now())
+  createdAt       DateTime        @default(now())
+
+  pulperia        Pulperia        @relation(fields: [pulperiaId], references: [id], onDelete: Cascade)
+
+  @@index([pulperiaId, date])
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TIPOS DE NEGOCIO (Onboarding Adaptativo)
+// ═══════════════════════════════════════════════════════════════
+
+enum BusinessType {
+  TIENDA        // Pulpería tradicional
+  AMBULANTE     // Vendedor móvil
+  SERVICIOS     // Barbería, salón
+  TALLER        // Mecánico, técnico
+  COMIDA        // Producción casera
+  FREELANCE     // Sin local físico
+  OTRO
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TIPOS DE PRODUCTO (Inventario Híbrido)
+// ═══════════════════════════════════════════════════════════════
+
+enum ProductType {
+  PHYSICAL      // Producto con stock (actual)
+  SERVICE       // Servicio por hora/unidad
+  BULK          // Producto fraccionable
+}
+

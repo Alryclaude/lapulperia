@@ -15,8 +15,7 @@ import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
 import Orders from './pages/Orders';
 import OrderDetail from './pages/OrderDetail';
-import Jobs from './pages/Jobs';
-import JobDetail from './pages/JobDetail';
+// Jobs y JobDetail son ahora legacy - redirigen a Chambas
 import Services from './pages/Services';
 import ServiceCatalog from './pages/ServiceCatalog';
 import Profile from './pages/Profile';
@@ -28,15 +27,19 @@ import MyApplications from './pages/MyApplications';
 import NotificationSettings from './pages/NotificationSettings';
 import PrivacySettings from './pages/PrivacySettings';
 import Help from './pages/Help';
-import Passport from './pages/Passport';
+import Chambas from './pages/Chambas';
+import ChambaDetail from './pages/ChambaDetail';
 
 // Pulperia Pages
 import Dashboard from './pages/pulperia/Dashboard';
 import ManageProducts from './pages/pulperia/ManageProducts';
 import ManageOrders from './pages/pulperia/ManageOrders';
-import ManageJobs from './pages/pulperia/ManageJobs';
-import ManageServices from './pages/pulperia/ManageServices';
+import ManageChambas from './pages/pulperia/ManageChambas';
 import ManagePromotions from './pages/pulperia/ManagePromotions';
+import ManageAppointments from './pages/pulperia/ManageAppointments';
+import ManageQuotes from './pages/pulperia/ManageQuotes';
+import DailyExpenses from './pages/pulperia/DailyExpenses';
+import QuickSale from './pages/pulperia/QuickSale';
 import PulperiaSettings from './pages/pulperia/PulperiaSettings';
 import PaymentSettings from './pages/pulperia/PaymentSettings';
 import FiadoDashboard from './pages/pulperia/FiadoDashboard';
@@ -114,10 +117,13 @@ function App() {
           <Route path="/search" element={<Search />} />
           <Route path="/pulperia/:id" element={<PulperiaProfile />} />
           <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/jobs" element={<Jobs />} />
-          <Route path="/job/:id" element={<JobDetail />} />
+          <Route path="/chambas" element={<Chambas />} />
+          <Route path="/chamba/:id" element={<ChambaDetail />} />
           <Route path="/services" element={<Services />} />
           <Route path="/service/:id" element={<ServiceCatalog />} />
+          {/* Legacy redirects */}
+          <Route path="/jobs" element={<Chambas />} />
+          <Route path="/job/:id" element={<ChambaDetail />} />
         </Route>
 
         {/* Auth Routes */}
@@ -142,7 +148,6 @@ function App() {
           <Route path="/settings/notifications" element={<NotificationSettings />} />
           <Route path="/settings/privacy" element={<PrivacySettings />} />
           <Route path="/help" element={<Help />} />
-          <Route path="/passport" element={<Passport />} />
         </Route>
 
         {/* Pulperia Routes */}
@@ -150,13 +155,19 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/manage/products" element={<ManageProducts />} />
           <Route path="/manage/orders" element={<ManageOrders />} />
-          <Route path="/manage/jobs" element={<ManageJobs />} />
-          <Route path="/manage/services" element={<ManageServices />} />
+          <Route path="/manage/chambas" element={<ManageChambas />} />
+          <Route path="/manage/appointments" element={<ManageAppointments />} />
+          <Route path="/manage/quotes" element={<ManageQuotes />} />
           <Route path="/manage/promotions" element={<ManagePromotions />} />
+          <Route path="/manage/expenses" element={<DailyExpenses />} />
+          <Route path="/manage/quick-sale" element={<QuickSale />} />
           <Route path="/pulperia/settings" element={<PulperiaSettings />} />
           <Route path="/pulperia/payments" element={<PaymentSettings />} />
           <Route path="/pulperia/fiado" element={<FiadoDashboard />} />
           <Route path="/pulperia/shipping" element={<ShippingSettings />} />
+          {/* Legacy redirects */}
+          <Route path="/manage/jobs" element={<ManageChambas />} />
+          <Route path="/manage/services" element={<ManageChambas />} />
         </Route>
 
         {/* 404 */}

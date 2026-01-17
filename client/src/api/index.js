@@ -13,3 +13,7 @@ export { statsApi } from './stats';
 export { businessHoursApi } from './business-hours';
 export { promotionsApi } from './promotions';
 export { pulperiaServicesApi } from './pulperia-services';
+export { chambasApi } from './chambas';
+export { appointmentsApi } from './appointments';
+export { quotesApi } from './quotes';
+export { expensesApi } from './expenses';

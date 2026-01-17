@@ -582,4 +582,165 @@ async function checkAchievements(pulperiaId) {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════
+// VENTA RÁPIDA (Sin productos - modo calculadora)
+// ═══════════════════════════════════════════════════════════════
+
+router.post('/quick-sale', authenticate, requirePulperia, async (req, res) => {
+  try {
+    const { amount, description, paymentMethod = 'CASH' } = req.body;
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ error: { message: 'El monto debe ser mayor a 0' } });
+    }
+
+    const pulperiaId = req.user.pulperia.id;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Crear orden rápida (sin items)
+    const order = await prisma.order.create({
+      data: {
+        orderNumber: `QS-${uuidv4().slice(0, 8).toUpperCase()}`,
+        userId: req.user.id, // El dueño es también el "cliente" en venta rápida
+        pulperiaId,
+        total: parseFloat(amount),
+        notes: description || 'Venta rápida',
+        status: 'DELIVERED',
+        deliveredAt: new Date(),
+        isQuickSale: true,
+      }
+    });
+
+    // Actualizar DailyStat
+    await prisma.dailyStat.upsert({
+      where: {
+        pulperiaId_date: {
+          pulperiaId,
+          date: today
+        }
+      },
+      update: {
+        totalSales: { increment: parseFloat(amount) },
+        totalOrders: { increment: 1 }
+      },
+      create: {
+        pulperiaId,
+        date: today,
+        totalSales: parseFloat(amount),
+        totalOrders: 1
+      }
+    });
+
+    // Actualizar totales de pulpería
+    await prisma.pulperia.update({
+      where: { id: pulperiaId },
+      data: {
+        totalOrders: { increment: 1 },
+        totalSales: { increment: 1 }
+      }
+    });
+
+    res.status(201).json({
+      success: true,
+      order,
+      message: `Venta de L ${amount.toFixed(2)} registrada`
+    });
+  } catch (error) {
+    console.error('Quick sale error:', error);
+    res.status(500).json({ error: { message: 'Error al registrar venta' } });
+  }
+});
+
+// Obtener ventas rápidas del día
+router.get('/quick-sales/today', authenticate, requirePulperia, async (req, res) => {
+  try {
+    const pulperiaId = req.user.pulperia.id;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const quickSales = await prisma.order.findMany({
+      where: {
+        pulperiaId,
+        isQuickSale: true,
+        createdAt: {
+          gte: today,
+          lt: tomorrow
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const total = quickSales.reduce((sum, sale) => sum + sale.total, 0);
+
+    res.json({
+      sales: quickSales,
+      total,
+      count: quickSales.length
+    });
+  } catch (error) {
+    console.error('Get quick sales error:', error);
+    res.status(500).json({ error: { message: 'Error al obtener ventas' } });
+  }
+});
+
+// Eliminar venta rápida (solo del día actual)
+router.delete('/quick-sale/:id', authenticate, requirePulperia, async (req, res) => {
+  try {
+    const pulperiaId = req.user.pulperia.id;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const order = await prisma.order.findFirst({
+      where: {
+        id: req.params.id,
+        pulperiaId,
+        isQuickSale: true,
+        createdAt: { gte: today }
+      }
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        error: { message: 'Venta no encontrada o no puede ser eliminada' }
+      });
+    }
+
+    // Revertir DailyStat
+    await prisma.dailyStat.update({
+      where: {
+        pulperiaId_date: {
+          pulperiaId,
+          date: today
+        }
+      },
+      data: {
+        totalSales: { decrement: order.total },
+        totalOrders: { decrement: 1 }
+      }
+    });
+
+    // Revertir totales de pulpería
+    await prisma.pulperia.update({
+      where: { id: pulperiaId },
+      data: {
+        totalOrders: { decrement: 1 },
+        totalSales: { decrement: 1 }
+      }
+    });
+
+    // Eliminar orden
+    await prisma.order.delete({
+      where: { id: req.params.id }
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Delete quick sale error:', error);
+    res.status(500).json({ error: { message: 'Error al eliminar venta' } });
+  }
+});
+
 export default router;
