@@ -59,6 +59,8 @@ const PulperiaProfile = () => {
   const { data: pulperiaData, isLoading } = useQuery({
     queryKey: ['pulperia', id],
     queryFn: () => pulperiaApi.getById(id),
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 
   const pulperia = pulperiaData?.data?.pulperia;
