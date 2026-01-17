@@ -191,7 +191,6 @@ router.get('/me', authenticate, requirePulperia, async (req, res) => {
           select: { name: true, avatar: true, email: true },
         },
         achievements: true,
-        loyaltyProgram: true,
         _count: {
           select: { products: true, reviews: true, orders: true },
         },
@@ -226,7 +225,6 @@ router.get('/:id', optionalAuth, async (req, res) => {
           take: 10,
         },
         achievements: true,
-        loyaltyProgram: true,
         businessHours: true,
         promotions: {
           where: {
