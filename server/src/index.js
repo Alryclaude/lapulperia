@@ -6,6 +6,8 @@ import rateLimit from 'express-rate-limit';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
+import { verifyToken } from './services/firebase.js';
+import prisma from './services/prisma.js';
 
 // Routes
 import authRoutes from './routes/auth.js';
@@ -148,19 +150,52 @@ app.use('/api/client', clientFeaturesRoutes);
 app.use('/api/announcements', announcementsRoutes);
 
 /* =========================
+   SOCKET AUTHENTICATION
+========================= */
+
+io.use(async (socket, next) => {
+  try {
+    const token = socket.handshake.auth?.token;
+
+    if (!token) {
+      return next(new Error('Token no proporcionado'));
+    }
+
+    const decodedToken = await verifyToken(token);
+    const user = await prisma.user.findUnique({
+      where: { firebaseUid: decodedToken.uid },
+      select: { id: true, role: true },
+    });
+
+    if (!user) {
+      return next(new Error('Usuario no encontrado'));
+    }
+
+    socket.userId = user.id;
+    socket.userRole = user.role;
+    next();
+  } catch (error) {
+    next(new Error('Token inválido'));
+  }
+});
+
+/* =========================
    SOCKET EVENTS
 ========================= */
 
 io.on('connection', (socket) => {
-  console.log('Client connected:', socket.id);
+  // Auto-join user's personal room for notifications
+  socket.join(socket.userId);
 
   socket.on('join', (roomId) => {
-    socket.join(roomId);
-    console.log(`Socket ${socket.id} joined room ${roomId}`);
+    // Solo permitir unirse a su propio room
+    if (roomId === socket.userId) {
+      socket.join(roomId);
+    }
   });
 
   socket.on('disconnect', () => {
-    console.log('Client disconnected:', socket.id);
+    // Cleanup silencioso
   });
 });
 

@@ -366,30 +366,6 @@ router.patch('/:id/status', authenticate, requirePulperia, async (req, res) => {
           },
         });
 
-        // Add loyalty points if program exists
-        const loyaltyProgram = await tx.loyaltyProgram.findUnique({
-          where: { pulperiaId: req.user.pulperia.id },
-        });
-
-        if (loyaltyProgram && loyaltyProgram.isActive) {
-          await tx.loyaltyPoint.upsert({
-            where: {
-              loyaltyProgramId_userId: {
-                loyaltyProgramId: loyaltyProgram.id,
-                userId: order.userId,
-              },
-            },
-            update: {
-              points: { increment: loyaltyProgram.pointsPerPurchase },
-            },
-            create: {
-              loyaltyProgramId: loyaltyProgram.id,
-              userId: order.userId,
-              points: loyaltyProgram.pointsPerPurchase,
-            },
-          });
-        }
-
         return updated;
       });
 

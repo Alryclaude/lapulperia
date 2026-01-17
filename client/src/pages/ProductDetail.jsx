@@ -22,7 +22,7 @@ import 'react-medium-image-zoom/dist/styles.css';
 import { productApi } from '../services/api';
 import { useCartStore } from '../stores/cartStore';
 import { useAuthStore } from '../stores/authStore';
-import ShareButtons from '../components/ShareButtons';
+import { ShareButtons } from '../components/share';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';

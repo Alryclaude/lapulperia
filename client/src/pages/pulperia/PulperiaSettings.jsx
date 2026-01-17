@@ -7,13 +7,7 @@ import {
   Calendar, MessageCircle, Globe, CreditCard, Receipt, Truck,
   ChevronRight, Tag, Facebook, Instagram, Music2, Twitter, Youtube, Send
 } from 'lucide-react';
-
-// Categorías disponibles para negocios
-const BUSINESS_CATEGORIES = [
-  { id: 'COMER', label: 'Comer', emoji: '🍽️', description: 'Restaurantes, comida, baleadas' },
-  { id: 'COMPRAR', label: 'Comprar', emoji: '🛒', description: 'Abarrotes, mercados, tiendas' },
-  { id: 'SERVICIOS', label: 'Servicios', emoji: '🔧', description: 'Talleres, recargas, pagos' },
-];
+import { BUSINESS_CATEGORIES } from '../../constants/categories';
 
 // Configuración de redes sociales
 const SOCIAL_NETWORKS = [

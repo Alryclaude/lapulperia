@@ -265,6 +265,7 @@ model FiadoTransaction {
   items       FiadoTransactionItem[]
 
   @@index([accountId])
+  @@index([accountId, createdAt])  // Índice compuesto para transacciones por cuenta y fecha
 }
 
 // Items detallados de una transacción de fiado
@@ -323,6 +324,7 @@ model Product {
 
   @@index([pulperiaId])
   @@index([category])
+  @@index([pulperiaId, category])  // Índice compuesto para filtrar productos por pulpería y categoría
   @@index([isAvailable, outOfStock])
   @@index([name])  // Index for text searches
 }
@@ -354,6 +356,8 @@ model Order {
   @@index([pulperiaId])
   @@index([status])
   @@index([createdAt])
+  @@index([pulperiaId, createdAt])  // Índice compuesto para órdenes por pulpería y fecha
+  @@index([pulperiaId, status])     // Índice compuesto para órdenes por pulpería y estado
   @@index([isQuickSale])
 }
 
@@ -556,6 +560,7 @@ model DailyStat {
 
   @@unique([pulperiaId, date])
   @@index([date])
+  @@index([pulperiaId, date])  // Índice compuesto para stats por pulpería y fecha
 }
 
 // Horarios de apertura

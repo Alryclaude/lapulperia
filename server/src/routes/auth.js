@@ -87,7 +87,6 @@ router.get('/me', authenticate, async (req, res) => {
         pulperia: {
           include: {
             achievements: true,
-            loyaltyProgram: true,
           },
         },
         serviceCatalogs: true,

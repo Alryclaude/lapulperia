@@ -22,7 +22,7 @@ import ProductCard from '../components/products/ProductCard';
 import ProductDetailModal from '../components/products/ProductDetailModal';
 import MiniMap from '../components/map/MiniMap';
 import ReviewForm from '../components/ReviewForm';
-import ShareButtons from '../components/ShareButtons';
+import { ShareButtons } from '../components/share';
 import toast from 'react-hot-toast';
 import {
   Sheet,

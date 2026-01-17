@@ -4,6 +4,7 @@ import { X, Check, Tag, Calendar, Percent, DollarSign, Package, Gift } from 'luc
 import { useQuery } from '@tanstack/react-query';
 import { productApi } from '@/api';
 import toast from 'react-hot-toast';
+import { PRODUCT_CATEGORIES as CATEGORIES } from '../../constants/categories';
 
 const PROMOTION_TYPES = [
   { value: 'PERCENTAGE', label: 'Porcentaje', icon: Percent, description: 'Descuento % sobre el precio' },
@@ -15,19 +16,6 @@ const APPLY_TO_OPTIONS = [
   { value: 'ALL', label: 'Todos los productos' },
   { value: 'CATEGORY', label: 'Categoria especifica' },
   { value: 'PRODUCTS', label: 'Productos especificos' },
-];
-
-const CATEGORIES = [
-  'Bebidas',
-  'Lacteos',
-  'Carnes',
-  'Panaderia',
-  'Abarrotes',
-  'Snacks',
-  'Frutas y Verduras',
-  'Limpieza',
-  'Cuidado Personal',
-  'Otros',
 ];
 
 const initialFormData = {

@@ -500,33 +500,4 @@ router.post('/me/close', authenticate, requirePulperia, async (req, res) => {
   }
 });
 
-// Setup loyalty program
-router.post('/me/loyalty', authenticate, requirePulperia, async (req, res) => {
-  try {
-    const { pointsPerPurchase, rewardThreshold, rewardDescription, isActive } = req.body;
-
-    const loyaltyProgram = await prisma.loyaltyProgram.upsert({
-      where: { pulperiaId: req.user.pulperia.id },
-      update: {
-        pointsPerPurchase,
-        rewardThreshold,
-        rewardDescription,
-        isActive,
-      },
-      create: {
-        pulperiaId: req.user.pulperia.id,
-        pointsPerPurchase: pointsPerPurchase || 1,
-        rewardThreshold: rewardThreshold || 10,
-        rewardDescription: rewardDescription || 'Un regalo especial',
-        isActive: isActive !== false,
-      },
-    });
-
-    res.json({ loyaltyProgram });
-  } catch (error) {
-    console.error('Setup loyalty error:', error);
-    res.status(500).json({ error: { message: 'Error al configurar programa de lealtad' } });
-  }
-});
-
 export default router;

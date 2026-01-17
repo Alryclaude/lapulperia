@@ -5,25 +5,13 @@ import { Plus, Search, Package, Filter, CheckCircle, AlertTriangle, XCircle, Che
 import { productApi } from '../../services/api';
 import toast from 'react-hot-toast';
 import { ManageProductCard, ProductFormModal, DeleteConfirmModal } from '../../components/products';
+import { PRODUCT_CATEGORIES as CATEGORIES } from '../../constants/categories';
 
 const STOCK_FILTERS = [
   { id: 'all', label: 'Todos', icon: Package },
   { id: 'in_stock', label: 'En Stock', icon: CheckCircle, color: 'green' },
   { id: 'low_stock', label: 'Stock Bajo', icon: AlertTriangle, color: 'yellow' },
   { id: 'out_of_stock', label: 'Agotado', icon: XCircle, color: 'red' },
-];
-
-const CATEGORIES = [
-  'Bebidas',
-  'Lacteos',
-  'Carnes',
-  'Panaderia',
-  'Abarrotes',
-  'Snacks',
-  'Frutas y Verduras',
-  'Limpieza',
-  'Cuidado Personal',
-  'Otros',
 ];
 
 const ManageProducts = () => {

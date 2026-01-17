@@ -245,6 +245,8 @@ export default {
         'section': '2rem',
         'section-lg': '3rem',
         'safe-bottom': 'env(safe-area-inset-bottom, 0px)',
+        // Nav offset: BottomNav (4rem) + safe-area + respiro (1rem)
+        'nav-offset': 'calc(4rem + env(safe-area-inset-bottom, 0px) + 1rem)',
       },
 
       borderRadius: {

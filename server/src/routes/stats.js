@@ -265,14 +265,23 @@ router.get('/insights', authenticate, requirePulperia, async (req, res) => {
     const pulperiaId = req.user.pulperia.id;
     const insights = [];
 
-    // Day of week analysis
-    const allOrders = await prisma.order.findMany({
-      where: { pulperiaId, status: 'DELIVERED' },
+    // Limitar análisis a últimos 90 días para evitar cargar histórico completo
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+    // Day of week analysis con límite temporal
+    const recentOrders = await prisma.order.findMany({
+      where: {
+        pulperiaId,
+        status: 'DELIVERED',
+        createdAt: { gte: ninetyDaysAgo },
+      },
       select: { createdAt: true, total: true },
+      take: 5000, // Límite absoluto de seguridad
     });
 
     const dayStats = {};
-    allOrders.forEach((order) => {
+    recentOrders.forEach((order) => {
       const day = order.createdAt.getDay();
       if (!dayStats[day]) {
         dayStats[day] = { count: 0, total: 0 };
@@ -282,14 +291,15 @@ router.get('/insights', authenticate, requirePulperia, async (req, res) => {
     });
 
     const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    const weeksInPeriod = 13; // ~90 días / 7
     const avgByDay = Object.entries(dayStats).map(([day, stats]) => ({
       day: days[parseInt(day)],
-      avgOrders: Math.round(stats.count / 4), // Approximate weekly average
-      avgRevenue: Math.round(stats.total / 4),
+      avgOrders: Math.round(stats.count / weeksInPeriod),
+      avgRevenue: Math.round(stats.total / weeksInPeriod),
     }));
 
     const bestDay = avgByDay.sort((a, b) => b.avgOrders - a.avgOrders)[0];
-    if (bestDay) {
+    if (bestDay && bestDay.avgOrders > 0) {
       insights.push({
         type: 'BEST_DAY',
         message: `Los ${bestDay.day} vendes ${bestDay.avgOrders}x más en promedio`,

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Edit2, X, Check, Image as ImageIcon, Star, Calendar, Sparkles, Package, AlertTriangle, Hash } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { PRODUCT_CATEGORIES as CATEGORIES } from '../../constants/categories';
 
 const initialFormData = {
   name: '',
@@ -15,19 +16,6 @@ const initialFormData = {
   lowStockAlert: '5',
   sku: '',
 };
-
-const CATEGORIES = [
-  'Bebidas',
-  'Lacteos',
-  'Carnes',
-  'Panaderia',
-  'Abarrotes',
-  'Snacks',
-  'Frutas y Verduras',
-  'Limpieza',
-  'Cuidado Personal',
-  'Otros',
-];
 
 const ProductFormModal = ({
   isOpen,
