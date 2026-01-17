@@ -169,6 +169,7 @@ model Pulperia {
   appointments        Appointment[]
   quotes              Quote[]
   expenses            Expense[]
+  announcements       Announcement[]
 
   @@index([latitude, longitude])
   @@index([status])
@@ -261,8 +262,22 @@ model FiadoTransaction {
   createdAt   DateTime    @default(now())
 
   account     FiadoAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  items       FiadoTransactionItem[]
 
   @@index([accountId])
+}
+
+// Items detallados de una transacción de fiado
+model FiadoTransactionItem {
+  id            String            @id @default(cuid())
+  transactionId String
+  productName   String            // Nombre del producto (snapshot)
+  quantity      Int               @default(1)
+  unitPrice     Float             // Precio unitario al momento
+
+  transaction   FiadoTransaction  @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  @@index([transactionId])
 }
 
 // Productos
@@ -906,5 +921,41 @@ enum ProductType {
   PHYSICAL      // Producto con stock (actual)
   SERVICE       // Servicio por hora/unidad
   BULK          // Producto fraccionable
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ANUNCIOS (Sistema de Ofertas Locales)
+// ═══════════════════════════════════════════════════════════════
+
+model Announcement {
+  id                String    @id @default(cuid())
+  pulperiaId        String
+
+  // Contenido
+  title             String    @db.VarChar(60)
+  description       String?   @db.VarChar(200)
+  price             Float?
+  imageUrl          String
+  imagePublicId     String
+  imageAspectRatio  Float     @default(1.0)  // width/height para Masonry grid
+
+  // Estado
+  isActive          Boolean   @default(true)
+  isFeatured        Boolean   @default(false)  // Futuro: pagado/destacado
+
+  // Expiración
+  expiresAt         DateTime  // Default: now + 7 días
+
+  // Métricas
+  viewCount         Int       @default(0)
+  contactCount      Int       @default(0)  // Clicks en WhatsApp
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  pulperia          Pulperia  @relation(fields: [pulperiaId], references: [id], onDelete: Cascade)
+
+  @@index([pulperiaId])
+  @@index([isActive, expiresAt])
 }
 

@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   CreditCard,
   Plus,
@@ -15,12 +16,19 @@ import {
   Loader2,
   X,
   Check,
+  ShoppingBag,
+  Minus,
+  Trash2,
+  Eye,
+  Package,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../api/client';
+import LempiraIcon from '../../components/icons/LempiraIcon';
 
 const FiadoDashboard = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [showTransactionModal, setShowTransactionModal] = useState(false);
@@ -230,7 +238,7 @@ const FiadoDashboard = () => {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <motion.button
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
@@ -243,13 +251,23 @@ const FiadoDashboard = () => {
                     <motion.button
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
+                      onClick={() => navigate(`/pulperia/fiado/${account.id}`)}
+                      className="p-2 text-gray-400 hover:text-blue-400 transition-colors"
+                      title="Ver historial completo"
+                    >
+                      <Eye className="w-5 h-5" />
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
                       onClick={() => {
                         setSelectedAccount(account);
                         setShowTransactionModal(true);
                       }}
-                      className="p-2 text-gray-400 hover:text-white transition-colors"
+                      className="p-2 text-gray-400 hover:text-primary-400 transition-colors"
+                      title="Registrar movimiento"
                     >
-                      <ChevronRight className="w-5 h-5" />
+                      <Plus className="w-5 h-5" />
                     </motion.button>
                   </div>
                 </div>
@@ -410,19 +428,88 @@ const FiadoDashboard = () => {
   );
 };
 
-// Transaction Modal Component
+// Transaction Modal Component - Mejorado con selector de productos
 const TransactionModal = ({ account, onClose, onSubmit, isLoading }) => {
   const [type, setType] = useState('PAYMENT');
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [productSearch, setProductSearch] = useState('');
+
+  // Fetch productos de la pulpería
+  const { data: productsData } = useQuery({
+    queryKey: ['fiado-products', productSearch],
+    queryFn: () => api.get(`/fiado/products${productSearch ? `?q=${productSearch}` : ''}`),
+    enabled: type === 'CREDIT',
+  });
+
+  // Fetch productos frecuentes
+  const { data: frequentData } = useQuery({
+    queryKey: ['fiado-frequent-products'],
+    queryFn: () => api.get('/fiado/frequent-products'),
+    enabled: type === 'CREDIT',
+  });
+
+  const products = productsData?.data?.products || [];
+  const frequentProducts = frequentData?.data?.products || [];
+
+  // Calcular total de productos seleccionados
+  const productsTotal = useMemo(() => {
+    return selectedProducts.reduce((sum, p) => sum + (p.unitPrice * p.quantity), 0);
+  }, [selectedProducts]);
+
+  // Auto-actualizar monto cuando cambian productos
+  useEffect(() => {
+    if (type === 'CREDIT' && selectedProducts.length > 0) {
+      setAmount(productsTotal.toFixed(2));
+    }
+  }, [productsTotal, type, selectedProducts.length]);
+
+  const handleAddProduct = (product) => {
+    const existing = selectedProducts.find(p => p.id === product.id);
+    if (existing) {
+      setSelectedProducts(prev => prev.map(p =>
+        p.id === product.id ? { ...p, quantity: p.quantity + 1 } : p
+      ));
+    } else {
+      setSelectedProducts(prev => [...prev, {
+        id: product.id,
+        productName: product.name,
+        unitPrice: product.price,
+        quantity: 1,
+        imageUrl: product.imageUrl,
+      }]);
+    }
+  };
+
+  const handleUpdateQuantity = (productId, delta) => {
+    setSelectedProducts(prev => prev.map(p => {
+      if (p.id === productId) {
+        const newQty = Math.max(1, p.quantity + delta);
+        return { ...p, quantity: newQty };
+      }
+      return p;
+    }));
+  };
+
+  const handleRemoveProduct = (productId) => {
+    setSelectedProducts(prev => prev.filter(p => p.id !== productId));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const items = type === 'CREDIT' ? selectedProducts.map(p => ({
+      productName: p.productName,
+      quantity: p.quantity,
+      unitPrice: p.unitPrice,
+    })) : undefined;
+
     onSubmit({
       accountId: account.id,
       type,
       amount: parseFloat(amount),
       note: note || undefined,
+      items,
     });
   };
 
@@ -440,7 +527,7 @@ const TransactionModal = ({ account, onClose, onSubmit, isLoading }) => {
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className="bg-dark-100 rounded-2xl border border-white/10 p-6 w-full max-w-md"
+        className="bg-dark-100 rounded-2xl border border-white/10 p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
@@ -460,62 +547,194 @@ const TransactionModal = ({ account, onClose, onSubmit, isLoading }) => {
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => setType('PAYMENT')}
-              className={`flex-1 py-3 rounded-xl font-medium transition-colors ${
+              onClick={() => {
+                setType('PAYMENT');
+                setSelectedProducts([]);
+              }}
+              className={`flex-1 py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 ${
                 type === 'PAYMENT'
                   ? 'bg-green-500 text-white'
                   : 'bg-dark-200 text-gray-400 hover:text-white'
               }`}
             >
+              <DollarSign className="w-5 h-5" />
               Abono
             </button>
             <button
               type="button"
               onClick={() => setType('CREDIT')}
-              className={`flex-1 py-3 rounded-xl font-medium transition-colors ${
+              className={`flex-1 py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 ${
                 type === 'CREDIT'
                   ? 'bg-red-500 text-white'
                   : 'bg-dark-200 text-gray-400 hover:text-white'
               }`}
             >
+              <ShoppingBag className="w-5 h-5" />
               Fiado
             </button>
           </div>
 
           {type === 'CREDIT' && (
-            <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
-              <p className="text-sm text-yellow-400">
-                Crédito disponible: <span className="font-semibold">L. {availableCredit.toFixed(2)}</span>
-              </p>
-            </div>
+            <>
+              <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
+                <p className="text-sm text-yellow-400">
+                  Crédito disponible: <span className="font-semibold">L. {availableCredit.toFixed(2)}</span>
+                </p>
+              </div>
+
+              {/* Selector de productos */}
+              <div className="space-y-3">
+                <label className="block text-sm text-gray-400">Productos</label>
+
+                {/* Productos frecuentes como chips */}
+                {frequentProducts.length > 0 && selectedProducts.length === 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {frequentProducts.slice(0, 6).map(product => (
+                      <motion.button
+                        key={product.id}
+                        type="button"
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handleAddProduct(product)}
+                        className="px-3 py-1.5 bg-primary-500/20 text-primary-400 rounded-full text-sm hover:bg-primary-500/30 transition-colors flex items-center gap-1"
+                      >
+                        <Plus className="w-3 h-3" />
+                        {product.name}
+                      </motion.button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Buscador de productos */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                  <input
+                    type="text"
+                    value={productSearch}
+                    onChange={(e) => setProductSearch(e.target.value)}
+                    placeholder="Buscar producto..."
+                    className="w-full pl-10 pr-4 py-2 bg-dark-200 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:border-primary-500 focus:outline-none"
+                  />
+                </div>
+
+                {/* Lista de productos disponibles */}
+                {productSearch && products.length > 0 && (
+                  <div className="max-h-32 overflow-y-auto space-y-1 bg-dark-200/50 rounded-xl p-2">
+                    {products.map(product => (
+                      <button
+                        key={product.id}
+                        type="button"
+                        onClick={() => {
+                          handleAddProduct(product);
+                          setProductSearch('');
+                        }}
+                        className="w-full flex items-center gap-3 p-2 hover:bg-dark-300 rounded-lg transition-colors text-left"
+                      >
+                        {product.imageUrl ? (
+                          <img src={product.imageUrl} alt="" className="w-8 h-8 rounded object-cover" />
+                        ) : (
+                          <div className="w-8 h-8 rounded bg-dark-400 flex items-center justify-center">
+                            <Package className="w-4 h-4 text-gray-500" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-white truncate">{product.name}</p>
+                          <p className="text-xs text-gray-500">L. {product.price.toFixed(2)}</p>
+                        </div>
+                        <Plus className="w-4 h-4 text-primary-400" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Productos seleccionados */}
+                {selectedProducts.length > 0 && (
+                  <div className="space-y-2 bg-dark-200/30 rounded-xl p-3">
+                    <p className="text-xs text-gray-500 mb-2">Productos a fiar:</p>
+                    {selectedProducts.map(product => (
+                      <div key={product.id} className="flex items-center gap-2 bg-dark-200 rounded-lg p-2">
+                        {product.imageUrl ? (
+                          <img src={product.imageUrl} alt="" className="w-10 h-10 rounded object-cover" />
+                        ) : (
+                          <div className="w-10 h-10 rounded bg-dark-400 flex items-center justify-center">
+                            <Package className="w-5 h-5 text-gray-500" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-white truncate">{product.productName}</p>
+                          <p className="text-xs text-gray-400">
+                            L. {product.unitPrice.toFixed(2)} x {product.quantity} = L. {(product.unitPrice * product.quantity).toFixed(2)}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateQuantity(product.id, -1)}
+                            className="p-1 text-gray-400 hover:text-white transition-colors"
+                          >
+                            <Minus className="w-4 h-4" />
+                          </button>
+                          <span className="w-6 text-center text-white text-sm">{product.quantity}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateQuantity(product.id, 1)}
+                            className="p-1 text-gray-400 hover:text-white transition-colors"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveProduct(product.id)}
+                            className="p-1 text-gray-400 hover:text-red-400 transition-colors ml-1"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    <div className="flex justify-between items-center pt-2 border-t border-white/10">
+                      <span className="text-sm text-gray-400">Subtotal:</span>
+                      <span className="text-lg font-bold text-white flex items-center gap-1">
+                        <LempiraIcon className="w-4 h-4" />
+                        {productsTotal.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
           )}
 
           {/* Amount */}
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Monto (L.)</label>
-            <input
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="0.00"
-              step="0.01"
-              min="0.01"
-              max={type === 'CREDIT' ? availableCredit : undefined}
-              className="w-full px-4 py-3 bg-dark-200 border border-white/10 rounded-xl text-white text-xl font-bold text-center placeholder-gray-500 focus:border-primary-500 focus:outline-none"
-              required
-              autoFocus
-            />
+            <label className="block text-sm text-gray-400 mb-2">
+              {type === 'CREDIT' && selectedProducts.length > 0 ? 'Total (calculado)' : 'Monto (L.)'}
+            </label>
+            <div className="relative">
+              <LempiraIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" />
+              <input
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="0.00"
+                step="0.01"
+                min="0.01"
+                max={type === 'CREDIT' ? availableCredit : undefined}
+                className="w-full pl-12 pr-4 py-3 bg-dark-200 border border-white/10 rounded-xl text-white text-xl font-bold text-center placeholder-gray-500 focus:border-primary-500 focus:outline-none"
+                required
+                readOnly={type === 'CREDIT' && selectedProducts.length > 0}
+              />
+            </div>
           </div>
 
           {/* Note */}
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Nota (opcional)</label>
-            <input
-              type="text"
+            <label className="block text-sm text-gray-400 mb-2">Nota adicional (opcional)</label>
+            <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="Descripción del movimiento..."
-              className="w-full px-4 py-3 bg-dark-200 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-primary-500 focus:outline-none"
+              placeholder="Comentarios adicionales..."
+              rows={2}
+              className="w-full px-4 py-3 bg-dark-200 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-primary-500 focus:outline-none resize-none"
             />
           </div>
 
@@ -523,10 +742,10 @@ const TransactionModal = ({ account, onClose, onSubmit, isLoading }) => {
           <button
             type="submit"
             disabled={isLoading || !amount || parseFloat(amount) <= 0}
-            className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-medium transition-colors disabled:opacity-50 ${
+            className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-medium transition-all disabled:opacity-50 ${
               type === 'PAYMENT'
-                ? 'bg-green-500 hover:bg-green-600 text-white'
-                : 'bg-red-500 hover:bg-red-600 text-white'
+                ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white shadow-lg shadow-green-500/30'
+                : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-white shadow-lg shadow-red-500/30'
             }`}
           >
             {isLoading ? (
@@ -537,7 +756,7 @@ const TransactionModal = ({ account, onClose, onSubmit, isLoading }) => {
             ) : (
               <>
                 <Check className="w-5 h-5" />
-                {type === 'PAYMENT' ? 'Registrar abono' : 'Registrar fiado'}
+                {type === 'PAYMENT' ? 'Registrar abono' : `Registrar fiado - L. ${parseFloat(amount || 0).toFixed(2)}`}
               </>
             )}
           </button>

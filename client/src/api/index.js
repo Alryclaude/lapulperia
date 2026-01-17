@@ -17,3 +17,4 @@ export { chambasApi } from './chambas';
 export { appointmentsApi } from './appointments';
 export { quotesApi } from './quotes';
 export { expensesApi } from './expenses';
+export { announcementsApi } from './announcements';

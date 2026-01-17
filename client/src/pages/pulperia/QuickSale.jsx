@@ -3,22 +3,32 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DollarSign, Delete, CheckCircle, Trash2, Clock, X,
-  Calculator, Plus, History, TrendingUp
+  Calculator, Plus, History, TrendingUp, TrendingDown, ArrowUp, ArrowDown
 } from 'lucide-react';
 import { orderApi } from '../../services/api';
 import toast from 'react-hot-toast';
+import LempiraIcon from '../../components/icons/LempiraIcon';
+import CelebrationAnimation, { useCelebration } from '../../components/feedback/CelebrationAnimation';
 
 const QuickSale = () => {
   const queryClient = useQueryClient();
   const [amount, setAmount] = useState('0');
   const [description, setDescription] = useState('');
   const [showHistory, setShowHistory] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const { celebrate, CelebrationComponent } = useCelebration();
 
   // Query para ventas del día
   const { data: todayData, isLoading } = useQuery({
     queryKey: ['quick-sales-today'],
     queryFn: () => orderApi.getQuickSalesToday(),
     refetchInterval: 30000, // Refetch cada 30 segundos
+  });
+
+  // Query para ventas de ayer (comparación)
+  const { data: yesterdayData } = useQuery({
+    queryKey: ['quick-sales-yesterday'],
+    queryFn: () => orderApi.getQuickSalesYesterday?.() || Promise.resolve({ data: { total: 0, sales: [] } }),
   });
 
   // Mutation para crear venta
@@ -30,6 +40,10 @@ const QuickSale = () => {
       toast.success(response.data.message || 'Venta registrada');
       setAmount('0');
       setDescription('');
+      // Celebración visual
+      setShowSuccess(true);
+      celebrate('checkmark');
+      setTimeout(() => setShowSuccess(false), 1500);
     },
     onError: (error) => {
       toast.error(error.response?.data?.error?.message || 'Error al registrar venta');
@@ -118,9 +132,15 @@ const QuickSale = () => {
 
   const sales = todayData?.data?.sales || [];
   const totalToday = todayData?.data?.total || 0;
+  const totalYesterday = yesterdayData?.data?.total || 0;
+  const comparison = totalYesterday > 0 ? ((totalToday - totalYesterday) / totalYesterday) * 100 : 0;
+  const isUp = comparison >= 0;
 
   return (
     <div className="max-w-lg mx-auto space-y-6">
+      {/* Componente de celebración */}
+      <CelebrationComponent />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -130,7 +150,9 @@ const QuickSale = () => {
           </h1>
           <p className="text-gray-400">Registra ventas sin crear productos</p>
         </div>
-        <button
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => setShowHistory(!showHistory)}
           className={`p-2 rounded-lg transition-colors ${
             showHistory
@@ -139,11 +161,15 @@ const QuickSale = () => {
           }`}
         >
           <History className="w-5 h-5" />
-        </button>
+        </motion.button>
       </div>
 
-      {/* Resumen del día */}
-      <div className="bg-gradient-to-br from-primary/20 to-primary/5 rounded-xl p-4 border border-primary/30">
+      {/* Resumen del día mejorado */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-gradient-to-br from-primary/20 to-primary/5 rounded-xl p-4 border border-primary/30"
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/30 rounded-lg">
@@ -151,9 +177,19 @@ const QuickSale = () => {
             </div>
             <div>
               <p className="text-sm text-gray-400">Ventas de hoy</p>
-              <p className="text-2xl font-bold text-white">
-                L {totalToday.toLocaleString()}
-              </p>
+              <div className="flex items-center gap-2">
+                <LempiraIcon className="w-5 h-5 text-white" />
+                <p className="text-2xl font-bold text-white">
+                  {totalToday.toLocaleString()}
+                </p>
+              </div>
+              {/* Comparativa vs ayer */}
+              {totalYesterday > 0 && (
+                <div className={`flex items-center gap-1 text-xs mt-1 ${isUp ? 'text-green-400' : 'text-red-400'}`}>
+                  {isUp ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
+                  <span>{Math.abs(comparison).toFixed(0)}% vs ayer</span>
+                </div>
+              )}
             </div>
           </div>
           <div className="text-right">
@@ -161,21 +197,27 @@ const QuickSale = () => {
             <p className="text-sm text-gray-400">transacciones</p>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Calculadora */}
       <div className="bg-dark-card rounded-xl border border-dark-border overflow-hidden">
-        {/* Display */}
-        <div className="p-6 bg-dark-lighter">
-          <div className="text-right">
-            <span className="text-gray-500 text-lg">L</span>
-            <span className="text-4xl font-bold text-white ml-2">
+        {/* Display mejorado */}
+        <div className="p-6 bg-gradient-to-br from-dark-lighter to-dark-card">
+          <motion.div
+            key={amount}
+            initial={{ scale: 1.05, opacity: 0.8 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.15 }}
+            className="text-right flex items-center justify-end gap-2"
+          >
+            <LempiraIcon className="w-10 h-10 text-primary" strokeWidth={2.5} />
+            <span className="text-6xl font-bold text-white tracking-tight">
               {parseFloat(amount).toLocaleString('es-HN', {
                 minimumFractionDigits: amount.includes('.') ? amount.split('.')[1]?.length || 0 : 0,
                 maximumFractionDigits: 2
               })}
             </span>
-          </div>
+          </motion.div>
         </div>
 
         {/* Descripción opcional */}
@@ -185,64 +227,81 @@ const QuickSale = () => {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Descripción (opcional)"
-            className="w-full px-4 py-2 bg-dark-lighter border border-dark-border rounded-lg text-white placeholder-gray-500 focus:border-primary focus:outline-none"
+            className="w-full px-4 py-2 bg-dark-lighter border border-dark-border rounded-lg text-white placeholder-gray-500 focus:border-primary focus:outline-none transition-colors"
           />
         </div>
 
-        {/* Teclado numérico */}
+        {/* Teclado numérico con animaciones */}
         <div className="p-4 grid grid-cols-4 gap-2">
           {['7', '8', '9', 'C'].map((key) => (
-            <button
+            <motion.button
               key={key}
+              whileTap={{ scale: 0.95 }}
+              whileHover={{ brightness: 1.1 }}
               onClick={() => handleKeyPress(key)}
-              className={`p-4 rounded-xl text-xl font-semibold transition-colors ${
+              className={`p-4 rounded-xl text-xl font-semibold transition-all ${
                 key === 'C'
-                  ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
-                  : 'bg-dark-lighter text-white hover:bg-dark-border'
+                  ? 'bg-red-500/30 text-red-400 hover:bg-red-500/40 border border-red-500/20'
+                  : 'bg-dark-lighter text-white hover:bg-primary/20 hover:text-primary'
               }`}
             >
               {key}
-            </button>
+            </motion.button>
           ))}
           {['4', '5', '6', 'backspace'].map((key) => (
-            <button
+            <motion.button
               key={key}
+              whileTap={{ scale: 0.95 }}
               onClick={() => handleKeyPress(key)}
-              className={`p-4 rounded-xl text-xl font-semibold transition-colors ${
+              className={`p-4 rounded-xl text-xl font-semibold transition-all ${
                 key === 'backspace'
-                  ? 'bg-amber-500/20 text-amber-400 hover:bg-amber-500/30'
-                  : 'bg-dark-lighter text-white hover:bg-dark-border'
+                  ? 'bg-amber-500/30 text-amber-400 hover:bg-amber-500/40 border border-amber-500/20'
+                  : 'bg-dark-lighter text-white hover:bg-primary/20 hover:text-primary'
               }`}
             >
               {key === 'backspace' ? <Delete className="w-6 h-6 mx-auto" /> : key}
-            </button>
+            </motion.button>
           ))}
           {['1', '2', '3'].map((key) => (
-            <button
+            <motion.button
               key={key}
+              whileTap={{ scale: 0.95 }}
               onClick={() => handleKeyPress(key)}
-              className="p-4 rounded-xl text-xl font-semibold bg-dark-lighter text-white hover:bg-dark-border transition-colors"
+              className="p-4 rounded-xl text-xl font-semibold bg-dark-lighter text-white hover:bg-primary/20 hover:text-primary transition-all"
             >
               {key}
-            </button>
+            </motion.button>
           ))}
-          <button
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02 }}
             onClick={handleSubmit}
             disabled={createMutation.isPending || parseFloat(amount) <= 0}
-            className="p-4 rounded-xl bg-green-500 text-white hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors row-span-2"
+            className="p-4 rounded-xl bg-gradient-to-br from-green-500 to-green-600 text-white hover:from-green-400 hover:to-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all row-span-2 shadow-lg shadow-green-500/30 hover:shadow-green-500/50"
           >
-            <CheckCircle className="w-8 h-8 mx-auto" />
-          </button>
+            {showSuccess ? (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="w-8 h-8 mx-auto"
+              >
+                <CheckCircle className="w-8 h-8" />
+              </motion.div>
+            ) : (
+              <CheckCircle className="w-8 h-8 mx-auto" />
+            )}
+          </motion.button>
           {['0', '.'].map((key) => (
-            <button
+            <motion.button
               key={key}
+              whileTap={{ scale: 0.95 }}
               onClick={() => handleKeyPress(key)}
-              className={`p-4 rounded-xl text-xl font-semibold bg-dark-lighter text-white hover:bg-dark-border transition-colors ${
+              className={`p-4 rounded-xl text-xl font-semibold bg-dark-lighter text-white hover:bg-primary/20 hover:text-primary transition-all ${
                 key === '0' ? 'col-span-2' : ''
               }`}
             >
               {key}
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>

@@ -28,6 +28,7 @@ import expensesRoutes from './routes/expenses.js';
 import fiadoRoutes from './routes/fiado.js';
 import shippingRoutes from './routes/shipping.js';
 import clientFeaturesRoutes from './routes/client-features.js';
+import announcementsRoutes from './routes/announcements.js';
 
 dotenv.config();
 
@@ -144,6 +145,7 @@ app.use('/api/quotes', quotesRoutes);
 app.use('/api/expenses', expensesRoutes);
 app.use('/api/shipping', shippingRoutes);
 app.use('/api/client', clientFeaturesRoutes);
+app.use('/api/announcements', announcementsRoutes);
 
 /* =========================
    SOCKET EVENTS

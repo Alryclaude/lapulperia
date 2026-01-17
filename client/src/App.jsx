@@ -28,6 +28,7 @@ import PrivacySettings from './pages/PrivacySettings';
 import Help from './pages/Help';
 import Chambas from './pages/Chambas';
 import ChambaDetail from './pages/ChambaDetail';
+import Announcements from './pages/Announcements';
 
 // Pulperia Pages
 import Dashboard from './pages/pulperia/Dashboard';
@@ -42,7 +43,9 @@ import QuickSale from './pages/pulperia/QuickSale';
 import PulperiaSettings from './pages/pulperia/PulperiaSettings';
 import PaymentSettings from './pages/pulperia/PaymentSettings';
 import FiadoDashboard from './pages/pulperia/FiadoDashboard';
+import FiadoClientDetail from './pages/pulperia/FiadoClientDetail';
 import ShippingSettings from './pages/pulperia/ShippingSettings';
+import ManageAnnouncements from './pages/pulperia/ManageAnnouncements';
 
 // Components
 import StarField from './components/layout/StarField';
@@ -118,6 +121,7 @@ function App() {
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/chambas" element={<Chambas />} />
           <Route path="/chamba/:id" element={<ChambaDetail />} />
+          <Route path="/announcements" element={<Announcements />} />
           <Route path="/service/:id" element={<ServiceCatalog />} />
           {/* Legacy redirects - todo unificado en Chambas */}
           <Route path="/jobs" element={<Chambas />} />
@@ -155,6 +159,7 @@ function App() {
           <Route path="/manage/products" element={<ManageProducts />} />
           <Route path="/manage/orders" element={<ManageOrders />} />
           <Route path="/manage/chambas" element={<ManageChambas />} />
+          <Route path="/manage/announcements" element={<ManageAnnouncements />} />
           <Route path="/manage/appointments" element={<ManageAppointments />} />
           <Route path="/manage/quotes" element={<ManageQuotes />} />
           <Route path="/manage/promotions" element={<ManagePromotions />} />
@@ -163,6 +168,7 @@ function App() {
           <Route path="/pulperia/settings" element={<PulperiaSettings />} />
           <Route path="/pulperia/payments" element={<PaymentSettings />} />
           <Route path="/pulperia/fiado" element={<FiadoDashboard />} />
+          <Route path="/pulperia/fiado/:accountId" element={<FiadoClientDetail />} />
           <Route path="/pulperia/shipping" element={<ShippingSettings />} />
           {/* Legacy redirects */}
           <Route path="/manage/jobs" element={<ManageChambas />} />

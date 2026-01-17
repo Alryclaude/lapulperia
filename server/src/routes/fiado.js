@@ -16,6 +16,9 @@ router.get('/accounts', authenticate, requirePulperia, async (req, res) => {
         transactions: {
           orderBy: { createdAt: 'desc' },
           take: 5,
+          include: {
+            items: true,
+          },
         },
       },
       orderBy: [
@@ -78,6 +81,9 @@ router.get('/accounts/:id', authenticate, requirePulperia, async (req, res) => {
         },
         transactions: {
           orderBy: { createdAt: 'desc' },
+          include: {
+            items: true,
+          },
         },
       },
     });
@@ -86,7 +92,23 @@ router.get('/accounts/:id', authenticate, requirePulperia, async (req, res) => {
       return res.status(404).json({ error: { message: 'Cuenta de fiado no encontrada' } });
     }
 
-    res.json({ account });
+    // Calcular balance acumulado para cada transacción (para timeline)
+    let runningBalance = 0;
+    const transactionsWithBalance = [...account.transactions].reverse().map(tx => {
+      if (tx.type === 'CREDIT') {
+        runningBalance += tx.amount;
+      } else {
+        runningBalance -= tx.amount;
+      }
+      return { ...tx, balanceAfter: runningBalance };
+    }).reverse();
+
+    res.json({
+      account: {
+        ...account,
+        transactions: transactionsWithBalance,
+      }
+    });
   } catch (error) {
     console.error('Get fiado account error:', error);
     res.status(500).json({ error: { message: 'Error al obtener cuenta de fiado' } });
@@ -204,7 +226,7 @@ router.patch('/accounts/:id', authenticate, requirePulperia, async (req, res) =>
 // Add transaction (credit or payment)
 router.post('/accounts/:id/transactions', authenticate, requirePulperia, async (req, res) => {
   try {
-    const { type, amount, orderId, note } = req.body;
+    const { type, amount, orderId, note, items } = req.body;
 
     if (!type || !amount || amount <= 0) {
       return res.status(400).json({
@@ -256,6 +278,19 @@ router.post('/accounts/:id/transactions', authenticate, requirePulperia, async (
           amount,
           orderId,
           note,
+          // Crear items si se proporcionan (para CREDIT principalmente)
+          ...(items && items.length > 0 && {
+            items: {
+              create: items.map(item => ({
+                productName: item.productName,
+                quantity: item.quantity || 1,
+                unitPrice: item.unitPrice,
+              })),
+            },
+          }),
+        },
+        include: {
+          items: true,
         },
       });
 
@@ -331,6 +366,71 @@ router.get('/search-clients', authenticate, requirePulperia, async (req, res) =>
   } catch (error) {
     console.error('Search clients error:', error);
     res.status(500).json({ error: { message: 'Error al buscar clientes' } });
+  }
+});
+
+// Get products for fiado selector (quick access)
+router.get('/products', authenticate, requirePulperia, async (req, res) => {
+  try {
+    const { q } = req.query;
+
+    const products = await prisma.product.findMany({
+      where: {
+        pulperiaId: req.user.pulperia.id,
+        isAvailable: true,
+        ...(q && q.length >= 2 && {
+          name: { contains: q, mode: 'insensitive' },
+        }),
+      },
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        imageUrl: true,
+        category: true,
+      },
+      orderBy: { name: 'asc' },
+      take: 20,
+    });
+
+    res.json({ products });
+  } catch (error) {
+    console.error('Get fiado products error:', error);
+    res.status(500).json({ error: { message: 'Error al obtener productos' } });
+  }
+});
+
+// Get frequent products (top sold/fiadoed)
+router.get('/frequent-products', authenticate, requirePulperia, async (req, res) => {
+  try {
+    // Get products that appear most in fiado transactions
+    const frequentItems = await prisma.fiadoTransactionItem.groupBy({
+      by: ['productName'],
+      _count: { productName: true },
+      orderBy: { _count: { productName: 'desc' } },
+      take: 8,
+    });
+
+    // Match with actual products to get current prices
+    const productNames = frequentItems.map(f => f.productName);
+    const products = await prisma.product.findMany({
+      where: {
+        pulperiaId: req.user.pulperia.id,
+        name: { in: productNames },
+        isAvailable: true,
+      },
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        imageUrl: true,
+      },
+    });
+
+    res.json({ products });
+  } catch (error) {
+    console.error('Get frequent products error:', error);
+    res.status(500).json({ error: { message: 'Error al obtener productos frecuentes' } });
   }
 });
 

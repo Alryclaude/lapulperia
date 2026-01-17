@@ -9,6 +9,7 @@ import {
   Package,
   ShoppingBag,
   Settings,
+  Megaphone,
 } from 'lucide-react';
 
 // REVAMP: Enhanced BottomNav with vibrant active states
@@ -16,6 +17,7 @@ const BottomNav = ({ isPulperia = false }) => {
   const clientLinks = [
     { to: '/', icon: Home, label: 'Inicio', color: 'primary' },
     { to: '/search', icon: Search, label: 'Buscar', color: 'cyan' },
+    { to: '/announcements', icon: Megaphone, label: 'Anuncios', color: 'orange' },
     { to: '/chambas', icon: Briefcase, label: 'Chambas', color: 'purple' },
     { to: '/profile', icon: User, label: 'Perfil', color: 'accent' },
   ];
@@ -24,7 +26,7 @@ const BottomNav = ({ isPulperia = false }) => {
     { to: '/dashboard', icon: LayoutDashboard, label: 'Panel', color: 'primary' },
     { to: '/manage/orders', icon: ShoppingBag, label: 'Órdenes', color: 'green' },
     { to: '/manage/products', icon: Package, label: 'Productos', color: 'cyan' },
-    { to: '/manage/chambas', icon: Briefcase, label: 'Chambas', color: 'purple' },
+    { to: '/manage/announcements', icon: Megaphone, label: 'Anuncios', color: 'orange' },
     { to: '/pulperia/settings', icon: Settings, label: 'Config', color: 'gray' },
   ];
 
@@ -51,6 +53,11 @@ const BottomNav = ({ isPulperia = false }) => {
       text: 'text-lime-400',
       bg: 'bg-lime-500/20',
       glow: 'shadow-[0_0_12px_rgba(132,204,22,0.4)]',
+    },
+    orange: {
+      text: 'text-orange-400',
+      bg: 'bg-orange-500/20',
+      glow: 'shadow-[0_0_12px_rgba(249,115,22,0.4)]',
     },
     accent: {
       text: 'text-accent-400',
