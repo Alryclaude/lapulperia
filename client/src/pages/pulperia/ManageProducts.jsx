@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Plus, Search, Package, Filter, CheckCircle, AlertTriangle, XCircle, ChevronDown } from 'lucide-react';
 import { productApi } from '../../services/api';
 import toast from 'react-hot-toast';
-import { ManageProductCard, ProductFormModal, DeleteConfirmModal } from '../../components/products';
+import { ManageProductCard, ProductFormModal, DeleteConfirmModal, StickyActionBar, BulkImageUpload } from '../../components/products';
 import { PRODUCT_CATEGORIES as CATEGORIES } from '../../constants/categories';
 
 const STOCK_FILTERS = [
@@ -23,6 +23,7 @@ const ManageProducts = () => {
   const [showModal, setShowModal] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
   const [deleteProduct, setDeleteProduct] = useState(null);
+  const [showBulkImport, setShowBulkImport] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ['my-products', search],
@@ -185,7 +186,7 @@ const ManageProducts = () => {
   };
 
   return (
-    <div className="space-y-6 pb-24">
+    <div className="space-y-6 pb-40 md:pb-24">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -205,10 +206,10 @@ const ManageProducts = () => {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => openModal()}
-          className="flex items-center gap-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-medium transition-colors"
+          className="hidden md:flex items-center gap-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-medium transition-colors"
         >
           <Plus className="w-5 h-5" />
-          <span className="hidden sm:inline">Agregar</span>
+          <span>Agregar</span>
         </motion.button>
       </motion.div>
 
@@ -406,6 +407,22 @@ const ManageProducts = () => {
         onClose={() => setDeleteProduct(null)}
         onConfirm={confirmDelete}
         isDeleting={deleteMutation.isPending}
+      />
+
+      {/* Bulk Import Modal */}
+      <BulkImageUpload
+        isOpen={showBulkImport}
+        onClose={() => setShowBulkImport(false)}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['my-products'] });
+          setShowBulkImport(false);
+        }}
+      />
+
+      {/* Sticky Action Bar (Mobile) */}
+      <StickyActionBar
+        onAddProduct={() => openModal()}
+        onBulkImport={() => setShowBulkImport(true)}
       />
     </div>
   );

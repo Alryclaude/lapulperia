@@ -566,6 +566,98 @@ router.delete('/:id', authenticate, requirePulperia, async (req, res) => {
   }
 });
 
+// Bulk create products with images
+router.post('/bulk-create-with-images', authenticate, requirePulperia, uploadProduct.array('images', 20), async (req, res) => {
+  try {
+    const { products: productsJson } = req.body;
+
+    if (!productsJson) {
+      return res.status(400).json({ error: { message: 'Se requiere lista de productos' } });
+    }
+
+    let products;
+    try {
+      products = JSON.parse(productsJson);
+    } catch {
+      return res.status(400).json({ error: { message: 'JSON de productos inválido' } });
+    }
+
+    if (!Array.isArray(products) || products.length === 0) {
+      return res.status(400).json({ error: { message: 'Se requiere al menos un producto' } });
+    }
+
+    if (products.length > 20) {
+      return res.status(400).json({ error: { message: 'Máximo 20 productos por carga' } });
+    }
+
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: { message: 'Se requieren imágenes' } });
+    }
+
+    if (req.files.length !== products.length) {
+      return res.status(400).json({
+        error: { message: `Cantidad de imágenes (${req.files.length}) no coincide con productos (${products.length})` }
+      });
+    }
+
+    const createdProducts = [];
+    const errors = [];
+
+    for (let i = 0; i < products.length; i++) {
+      const product = products[i];
+      const file = req.files[i];
+
+      // Validate required fields
+      if (!product.name || product.name.trim().length === 0) {
+        errors.push({ index: i, message: 'Nombre requerido' });
+        continue;
+      }
+
+      const parsedPrice = parseFloat(product.price);
+      if (isNaN(parsedPrice) || parsedPrice <= 0) {
+        errors.push({ index: i, message: 'Precio inválido' });
+        continue;
+      }
+
+      try {
+        const created = await prisma.product.create({
+          data: {
+            pulperiaId: req.user.pulperia.id,
+            name: product.name.trim(),
+            description: product.description?.trim() || '',
+            price: parsedPrice,
+            category: product.category || null,
+            imageUrl: file.path,
+            imagePublicId: file.filename,
+          },
+        });
+
+        createdProducts.push({
+          id: created.id,
+          name: created.name,
+          imageUrl: created.imageUrl,
+        });
+      } catch (err) {
+        console.error(`Error creating product ${i}:`, err);
+        errors.push({ index: i, message: 'Error al crear producto' });
+        // Delete uploaded image on error
+        if (file.filename) {
+          await deleteImage(file.filename).catch(() => {});
+        }
+      }
+    }
+
+    res.status(201).json({
+      created: createdProducts.length,
+      products: createdProducts,
+      errors,
+    });
+  } catch (error) {
+    console.error('Bulk create products error:', error);
+    res.status(500).json({ error: { message: 'Error al crear productos masivamente' } });
+  }
+});
+
 // Create product alert (avisame cuando llegue)
 router.post('/:id/alert', authenticate, async (req, res) => {
   try {
