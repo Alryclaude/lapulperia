@@ -8,152 +8,156 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Primary - Red theme (La Pulperia brand) - Paleta "Atardecer en el Barrio"
+        // ========================================
+        // PALETA "CONSTELACIÓN DE BARRIO" 2.0
+        // ========================================
+
+        // Primary - Rojo Vibrante (más saturado para dark mode)
         primary: {
           50: '#fef2f2',
           100: '#fee2e2',
           200: '#fecaca',
           300: '#fca5a5',
-          400: '#e74c3c',
-          500: '#C0392B',  // Rojo Arcilla - Techo quemado por sol
-          600: '#A93226',
-          700: '#922B21',  // Rojo Óxido - Metal envejecido
-          800: '#7B241C',
-          900: '#641E16',
-          950: '#4A1612',
+          400: '#FF6B6B',  // Hover
+          500: '#FA5252',  // Principal
+          600: '#F03E3E',  // Pressed
+          700: '#DC2626',
+          800: '#B91C1C',
+          900: '#991B1B',
+          950: '#7F1D1D',
         },
-        // Accent - Golden (REVAMP: More vibrant)
+
+        // Accent - Dorado Miel (cálido y acogedor)
         accent: {
-          50: '#FEFCE8',
-          100: '#FEF9C3',
-          200: '#FEF08A',
-          300: '#FDE047',
-          400: '#FACC15',  // Vibrant yellow-gold
-          500: '#EAB308',
-          600: '#CA8A04',
-          700: '#A16207',
-          800: '#854D0E',
-          900: '#713F12',
+          50: '#FFFBEB',
+          100: '#FEF3C7',
+          200: '#FDE68A',
+          300: '#FCD34D',
+          400: '#FBBF24',  // Principal
+          500: '#F59E0B',  // Texto/iconos
+          600: '#D97706',
+          700: '#B45309',
+          800: '#92400E',
+          900: '#78350F',
         },
-        // Golden for special highlights - Brighter
-        gold: {
-          DEFAULT: '#FFD700',
-          light: '#FFEA00',
-          dark: '#FFC107',
+
+        // Surface - Fondos oscuros neutros (sin tinte púrpura)
+        surface: {
+          0: '#0F0F14',    // Background principal
+          1: '#1A1A22',    // Cards base
+          2: '#252530',    // Cards elevated / inputs
+          3: '#32323E',    // Borders activos
+          4: '#3F3F4D',    // Borders hover
         },
-        // Cream colors (from the house walls)
-        cream: {
-          50: '#FFFDF7',
-          100: '#FEF7ED',
-          200: '#FEF3C7',
-          300: '#FDE68A',
-          400: '#F5E6C8',
-          500: '#E8D5B7',
-        },
-        // Brown colors (from the door)
-        brown: {
-          400: '#B45309',
-          500: '#92400E',
-          600: '#78350F',
-          700: '#5C3D2E',
-        },
-        // Navy (from windows)
-        navy: {
-          400: '#2D4A6F',
-          500: '#1E3A5F',
-          600: '#1A2F4A',
-        },
-        // Dark theme background colors - Paleta "Atardecer en el Barrio"
-        // Ajustado: Negro puro → Slate cálido para mejor apetito visual
+
+        // Dark theme (alias para compatibilidad)
         dark: {
-          DEFAULT: '#1E293B',  // Slate-800 - más cálido que negro puro
-          50: '#475569',    // Slate-500 - Borders, dividers
-          100: '#334155',   // Slate-700 - Cards elevated
-          200: '#2D3748',   // Cards base - gris azulado
-          300: '#1E293B',   // Slate-800 - Secondary background
-          400: '#0F172A',   // Slate-900 - Primary background
-          500: '#0D1425',   // Deepest - casi negro pero con tinte azul
+          DEFAULT: '#0F0F14',
+          50: '#3F3F4D',    // Borders
+          100: '#32323E',   // Cards elevated
+          200: '#252530',   // Cards base
+          300: '#1A1A22',   // Secondary bg
+          400: '#0F0F14',   // Primary bg
+          500: '#09090D',   // Deepest
         },
-        // Paleta "Atardecer en el Barrio" - Light mode surfaces
-        barrio: {
-          hueso: '#F4F1EA',     // Blanco Hueso - Masa de maíz
-          pizarra: '#2C3E50',   // Gris Pizarra - Texto moderno
-          arcilla: '#C0392B',   // Rojo Arcilla - Primary
-          oxido: '#922B21',     // Rojo Óxido - Accent
-          frescura: '#27AE60',  // Verde Frescura - Success
+
+        // Categorías del mapa (vibrantes para visibilidad)
+        category: {
+          food: '#F59E0B',      // Comida - Ámbar
+          market: '#22D3EE',    // Mercado - Cyan
+          services: '#818CF8',  // Servicios - Indigo
+          offer: '#F472B6',     // Ofertas - Rosa
         },
-        // REVAMP: New vibrant accent colors
+
+        // Colores vibrantes para acentos
         cyan: {
+          300: '#67E8F9',
           400: '#22D3EE',
           500: '#06B6D4',
           600: '#0891B2',
         },
         purple: {
+          300: '#C4B5FD',
           400: '#A78BFA',
           500: '#8B5CF6',
           600: '#7C3AED',
         },
-        lime: {
-          400: '#A3E635',
-          500: '#84CC16',
-          600: '#65A30D',
+        indigo: {
+          300: '#A5B4FC',
+          400: '#818CF8',
+          500: '#6366F1',
+          600: '#4F46E5',
         },
-        // Semantic colors
+        pink: {
+          300: '#F9A8D4',
+          400: '#F472B6',
+          500: '#EC4899',
+          600: '#DB2777',
+        },
+
+        // Estados semánticos
         success: {
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          500: '#22c55e',
-          600: '#16a34a',
-          700: '#15803d',
+          50: '#ECFDF5',
+          100: '#D1FAE5',
+          200: '#A7F3D0',
+          300: '#6EE7B7',
+          400: '#34D399',
+          500: '#22C55E',
+          600: '#16A34A',
+          700: '#15803D',
         },
         warning: {
-          50: '#fffbeb',
-          100: '#fef3c7',
-          200: '#fde68a',
-          500: '#f59e0b',
-          600: '#d97706',
-          700: '#b45309',
+          50: '#FFFBEB',
+          100: '#FEF3C7',
+          200: '#FDE68A',
+          400: '#FBBF24',
+          500: '#F59E0B',
+          600: '#D97706',
+          700: '#B45309',
         },
         error: {
-          50: '#fef2f2',
-          100: '#fee2e2',
-          200: '#fecaca',
-          500: '#ef4444',
-          600: '#dc2626',
-          700: '#b91c1c',
+          50: '#FEF2F2',
+          100: '#FEE2E2',
+          200: '#FECACA',
+          400: '#F87171',
+          500: '#EF4444',
+          600: '#DC2626',
+          700: '#B91C1C',
         },
         info: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
+          50: '#EFF6FF',
+          100: '#DBEAFE',
+          200: '#BFDBFE',
+          400: '#60A5FA',
+          500: '#3B82F6',
+          600: '#2563EB',
+          700: '#1D4ED8',
         },
-        // Status colors (for orders and pulperias)
+
+        // Status colors para pulperías y órdenes
         status: {
-          open: '#22c55e',
-          closing: '#f59e0b',
-          closed: '#9ca3af',
-          vacation: '#3b82f6',
-          pending: '#f59e0b',
-          accepted: '#3b82f6',
-          preparing: '#8b5cf6',
-          ready: '#22c55e',
-          delivered: '#6b7280',
-          cancelled: '#ef4444',
+          open: '#22C55E',
+          closing: '#F59E0B',
+          closed: '#6B7280',
+          vacation: '#3B82F6',
+          pending: '#F59E0B',
+          accepted: '#3B82F6',
+          preparing: '#8B5CF6',
+          ready: '#22C55E',
+          delivered: '#6B7280',
+          cancelled: '#EF4444',
         },
-        // Surface colors
-        surface: {
-          primary: '#ffffff',
-          secondary: '#fafafa',
-          elevated: '#ffffff',
-          // Dark mode surfaces
-          dark: '#1F1B2E',
-          'dark-elevated': '#2A2735',
+
+        // Colores de barrio (legacy)
+        barrio: {
+          hueso: '#F4F1EA',
+          pizarra: '#2C3E50',
+          arcilla: '#FA5252',
+          oxido: '#F03E3E',
+          frescura: '#22C55E',
         },
-        // shadcn/ui CSS variable colors
+
+        // shadcn/ui CSS variables
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
@@ -187,75 +191,90 @@ export default {
           5: 'hsl(var(--chart-5))',
         },
       },
+
       fontFamily: {
         sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
       },
+
       boxShadow: {
+        // Base shadows
         'xs': '0 1px 2px rgba(0, 0, 0, 0.05)',
         'sm': '0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)',
         'md': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
         'lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
         'xl': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
         '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+
         // Dark mode shadows
-        'dark-sm': '0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3)',
-        'dark-md': '0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3)',
-        'dark-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3)',
-        // Glows
-        'glow': '0 0 0 3px rgba(34, 197, 94, 0.15)',
-        'glow-accent': '0 0 0 3px rgba(251, 191, 36, 0.15)',
-        'glow-gold': '0 0 20px rgba(255, 215, 0, 0.3)',
-        'glow-red': '0 0 20px rgba(239, 68, 68, 0.3)',
-        // Colored shadows
-        'primary': '0 4px 14px 0 rgba(239, 68, 68, 0.3)',
-        'success': '0 4px 14px 0 rgba(34, 197, 94, 0.3)',
-        'accent': '0 4px 14px 0 rgba(245, 158, 11, 0.3)',
-        'gold': '0 4px 14px 0 rgba(255, 215, 0, 0.3)',
-        // Focus rings
-        'ring-primary': '0 0 0 3px rgba(239, 68, 68, 0.2)',
-        'ring-success': '0 0 0 3px rgba(34, 197, 94, 0.2)',
-        'ring-accent': '0 0 0 3px rgba(245, 158, 11, 0.2)',
-        'ring-gold': '0 0 0 3px rgba(255, 215, 0, 0.2)',
-        // Card hover
-        'card-hover': '0 8px 25px -5px rgba(0, 0, 0, 0.15), 0 0 10px rgba(239, 68, 68, 0.1)',
-        'card-hover-dark': '0 8px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(239, 68, 68, 0.15)',
-        // REVAMP: Enhanced glow effects
-        'glow-primary': '0 0 20px rgba(220, 38, 38, 0.4), 0 0 40px rgba(220, 38, 38, 0.2)',
-        'glow-cyan': '0 0 20px rgba(6, 182, 212, 0.4), 0 0 40px rgba(6, 182, 212, 0.2)',
+        'dark-sm': '0 1px 3px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4)',
+        'dark-md': '0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.4)',
+        'dark-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -2px rgba(0, 0, 0, 0.4)',
+
+        // Glow effects - Constelación
+        'glow-primary': '0 0 20px rgba(250, 82, 82, 0.4), 0 0 40px rgba(250, 82, 82, 0.2)',
+        'glow-primary-lg': '0 0 30px rgba(250, 82, 82, 0.5), 0 0 60px rgba(250, 82, 82, 0.25)',
+        'glow-accent': '0 0 20px rgba(251, 191, 36, 0.4), 0 0 40px rgba(251, 191, 36, 0.2)',
+        'glow-success': '0 0 20px rgba(34, 197, 94, 0.4), 0 0 40px rgba(34, 197, 94, 0.2)',
+        'glow-cyan': '0 0 20px rgba(34, 211, 238, 0.4), 0 0 40px rgba(34, 211, 238, 0.2)',
         'glow-purple': '0 0 20px rgba(139, 92, 246, 0.4), 0 0 40px rgba(139, 92, 246, 0.2)',
-        'glow-lime': '0 0 20px rgba(132, 204, 22, 0.4), 0 0 40px rgba(132, 204, 22, 0.2)',
-        'glow-status-open': '0 0 12px rgba(34, 197, 94, 0.5)',
+        'glow-pink': '0 0 20px rgba(244, 114, 182, 0.4), 0 0 40px rgba(244, 114, 182, 0.2)',
+
+        // Status glows (para cards abiertas/cerradas)
+        'glow-open': '0 0 20px rgba(34, 197, 94, 0.3), 0 0 40px rgba(34, 197, 94, 0.15)',
+        'glow-closing': '0 0 20px rgba(245, 158, 11, 0.3), 0 0 40px rgba(245, 158, 11, 0.15)',
+
+        // Button shadows con color
+        'btn-primary': '0 4px 14px rgba(250, 82, 82, 0.4)',
+        'btn-primary-hover': '0 6px 20px rgba(250, 82, 82, 0.5)',
+        'btn-success': '0 4px 14px rgba(34, 197, 94, 0.4)',
+        'btn-accent': '0 4px 14px rgba(251, 191, 36, 0.4)',
+
+        // Card hovers
+        'card-hover': '0 8px 30px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(250, 82, 82, 0.1)',
+        'card-glow-open': '0 8px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(34, 197, 94, 0.15)',
+
+        // Focus rings
+        'ring-primary': '0 0 0 3px rgba(250, 82, 82, 0.25)',
+        'ring-success': '0 0 0 3px rgba(34, 197, 94, 0.25)',
+        'ring-accent': '0 0 0 3px rgba(251, 191, 36, 0.25)',
       },
+
       spacing: {
-        // Semantic spacing for layout
-        'header': '4rem',        // 64px - header height
-        'bottom-nav': '4rem',    // 64px - bottom nav (h-16)
-        'section': '2rem',       // 32px - section spacing
-        'section-lg': '3rem',    // 48px - large section spacing
+        'header': '4rem',
+        'bottom-nav': '4rem',
+        'section': '2rem',
+        'section-lg': '3rem',
+        'safe-bottom': 'env(safe-area-inset-bottom, 0px)',
       },
+
       borderRadius: {
         'none': '0',
-        'sm': '0.375rem',    // 6px - small elements
-        'DEFAULT': '0.5rem', // 8px - default
-        'md': '0.5rem',      // 8px - buttons, inputs
-        'lg': '0.75rem',     // 12px - cards
-        'xl': '1rem',        // 16px - large cards
-        '2xl': '1.5rem',     // 24px - modals, sheets
-        '3xl': '2rem',       // 32px - hero sections
-        'full': '9999px',    // pills, avatars
+        'sm': '0.375rem',
+        'DEFAULT': '0.5rem',
+        'md': '0.5rem',
+        'lg': '0.75rem',
+        'xl': '1rem',
+        '2xl': '1.5rem',
+        '3xl': '2rem',
+        'full': '9999px',
       },
+
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out',
         'slide-up': 'slideUp 0.3s ease-out',
         'slide-down': 'slideDown 0.3s ease-out',
         'scale-in': 'scaleIn 0.2s ease-out',
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
         'twinkle': 'twinkle 3s ease-in-out infinite',
+        'twinkle-delay': 'twinkle 3s ease-in-out 1.5s infinite',
         'float': 'float 6s ease-in-out infinite',
         'shimmer': 'shimmer 2s linear infinite',
-        'confetti': 'confetti 0.5s ease-out forwards',
         'ping-slow': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
+        'breathe': 'breathe 3s ease-in-out infinite',
+        'star-pulse': 'starPulse 2s ease-in-out infinite',
       },
+
       keyframes: {
         fadeIn: {
           '0%': { opacity: '0' },
@@ -274,8 +293,8 @@ export default {
           '100%': { opacity: '1', transform: 'scale(1)' },
         },
         twinkle: {
-          '0%, 100%': { opacity: '0.3' },
-          '50%': { opacity: '0.8' },
+          '0%, 100%': { opacity: '0.2', transform: 'scale(1)' },
+          '50%': { opacity: '0.8', transform: 'scale(1.2)' },
         },
         float: {
           '0%, 100%': { transform: 'translateY(0)' },
@@ -285,15 +304,34 @@ export default {
           '0%': { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
         },
-        confetti: {
-          '0%': { transform: 'translateY(0) rotate(0deg)', opacity: '1' },
-          '100%': { transform: 'translateY(-100px) rotate(720deg)', opacity: '0' },
+        pulseGlow: {
+          '0%, 100%': { boxShadow: '0 0 8px rgba(34, 197, 94, 0.4)' },
+          '50%': { boxShadow: '0 0 20px rgba(34, 197, 94, 0.6), 0 0 30px rgba(34, 197, 94, 0.3)' },
+        },
+        breathe: {
+          '0%, 100%': { transform: 'scale(1)', opacity: '1' },
+          '50%': { transform: 'scale(1.02)', opacity: '0.9' },
+        },
+        starPulse: {
+          '0%, 100%': {
+            boxShadow: '0 0 4px rgba(250, 82, 82, 0.4)',
+            transform: 'scale(1)',
+          },
+          '50%': {
+            boxShadow: '0 0 12px rgba(250, 82, 82, 0.6), 0 0 20px rgba(250, 82, 82, 0.3)',
+            transform: 'scale(1.05)',
+          },
         },
       },
+
       transitionTimingFunction: {
         'out-expo': 'cubic-bezier(0.16, 1, 0.3, 1)',
         'in-out-expo': 'cubic-bezier(0.65, 0, 0.35, 1)',
         'spring': 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+      },
+
+      backdropBlur: {
+        xs: '2px',
       },
     },
   },

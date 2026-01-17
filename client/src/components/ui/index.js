@@ -2,7 +2,7 @@
 // Re-export all UI components
 
 // P0 - Core components
-export { Button, buttonVariants } from './button';
+export { Button, buttonVariants, IconButton, FAB } from './button';
 export {
   Card,
   CardHeader,
@@ -11,9 +11,12 @@ export {
   CardDescription,
   CardContent,
   CardInteractive,
+  CardGlow,
+  CardImage,
+  StatCard,
 } from './card';
 export { Input, SearchInput, Textarea } from './input';
-export { Badge, StatusBadge, badgeVariants } from './badge';
+export { Badge, StatusBadge, CategoryBadge, CountBadge, badgeVariants } from './badge';
 
 // P1 - Interactive components
 export {
