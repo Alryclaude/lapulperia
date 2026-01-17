@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { statsApi, pulperiaApi } from '../../services/api';
@@ -43,6 +44,7 @@ const TABS = [
 const Dashboard = () => {
   const { user, refreshUser } = useAuthStore();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const pulperia = user?.pulperia;
 
   const [activeTab, setActiveTab] = useState('resumen');
@@ -155,7 +157,7 @@ const Dashboard = () => {
   // Handle create promotion click
   const handleCreatePromotion = () => {
     // Navigate to promotions management page
-    window.location.href = '/manage/promotions?create=true';
+    navigate('/manage/promotions?create=true');
   };
 
   return (
@@ -243,8 +245,8 @@ const Dashboard = () => {
               {/* Smart Actions Hub - Pulso del Negocio */}
               <SmartActionsHub
                 stats={stats}
-                onQuickSale={() => window.location.href = '/manage/quick-sale'}
-                onRegisterFiado={() => window.location.href = '/manage/fiado/new'}
+                onQuickSale={() => navigate('/manage/quick-sale')}
+                onRegisterFiado={() => navigate('/pulperia/fiado')}
               />
 
               {/* Export */}
