@@ -8,9 +8,14 @@ import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import {
   InstallPrompt,
   HeroSection,
+  ValueProposition,
+  HowItWorks,
+  FeaturesSection,
   MapSection,
+  StatsSection,
+  TestimonialsSection,
   OpenPulperiasSection,
-  AllPulperiasSection,
+  FAQSection,
   CTASection,
 } from '../components/home';
 import FullscreenMap from '../components/map/FullscreenMap';
@@ -65,16 +70,37 @@ const Home = () => {
   const pulperias = pulperiasData?.data?.pulperias || [];
   const openPulperias = pulperias.filter((p) => p.status === 'OPEN');
 
+  // Calculate total products count (approximate)
+  const totalProducts = pulperias.reduce(
+    (acc, p) => acc + (p._count?.products || 0),
+    0
+  );
+
   return (
     <div className="space-y-8">
+      {/* 1. Install Prompt */}
       <InstallPrompt
         isInstallable={isInstallable}
         promptInstall={promptInstall}
         dismissPrompt={dismissPrompt}
       />
 
-      <HeroSection />
+      {/* 2. Hero Section */}
+      <HeroSection
+        pulperiasCount={pulperias.length}
+        productsCount={totalProducts}
+      />
 
+      {/* 3. Value Proposition */}
+      <ValueProposition />
+
+      {/* 4. How It Works */}
+      <HowItWorks />
+
+      {/* 5. Features Section */}
+      <FeaturesSection />
+
+      {/* 6. Map Section */}
       <MapSection
         location={location}
         pulperias={pulperias}
@@ -82,12 +108,22 @@ const Home = () => {
         onOpenFullMap={() => setIsFullMapOpen(true)}
       />
 
+      {/* 7. Stats Section */}
+      <StatsSection />
+
+      {/* 8. Testimonials Section */}
+      <TestimonialsSection />
+
+      {/* 9. Open Pulperias Section */}
       <OpenPulperiasSection pulperias={openPulperias} />
 
-      <AllPulperiasSection pulperias={pulperias} isLoading={isLoading} />
+      {/* 10. FAQ Section */}
+      <FAQSection />
 
+      {/* 11. CTA Section */}
       <CTASection isAuthenticated={isAuthenticated} />
 
+      {/* Fullscreen Map Modal */}
       <FullscreenMap
         isOpen={isFullMapOpen}
         onClose={() => setIsFullMapOpen(false)}

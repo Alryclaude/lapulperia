@@ -1,7 +1,12 @@
 export { default as InstallPrompt } from './InstallPrompt';
 export { default as HeroSection } from './HeroSection';
-// CategoryFilter removed in REVAMP
+export { default as ValueProposition } from './ValueProposition';
+export { default as HowItWorks } from './HowItWorks';
+export { default as FeaturesSection } from './FeaturesSection';
 export { default as MapSection } from './MapSection';
+export { default as StatsSection } from './StatsSection';
+export { default as TestimonialsSection } from './TestimonialsSection';
 export { default as OpenPulperiasSection } from './OpenPulperiasSection';
 export { default as AllPulperiasSection } from './AllPulperiasSection';
+export { default as FAQSection } from './FAQSection';
 export { default as CTASection } from './CTASection';
