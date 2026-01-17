@@ -49,15 +49,29 @@ const MapSection = ({ location, pulperias, openCount = 0, onOpenFullMap }) => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const showEmptyState = location && openCount === 0;
 
-  // Calcular conteos por categoría
+  // Calcular conteos por categoría - IDs alineados con enum BD
   const getCategoryCounts = () => {
-    const counts = { all: pulperias.length, comida: 0, mercado: 0, servicios: 0, oferta: 0 };
+    const counts = { all: pulperias.length, COMER: 0, COMPRAR: 0, SERVICIOS: 0, oferta: 0 };
     pulperias.forEach(p => {
+      // Primero verificar promociones
+      if (p.hasActivePromotion) {
+        counts.oferta++;
+        return;
+      }
+
+      // Usar categorías de BD si existen
+      if (p.categories && p.categories.length > 0) {
+        p.categories.forEach(cat => {
+          if (counts[cat] !== undefined) counts[cat]++;
+        });
+        return;
+      }
+
+      // Fallback: inferir de nombre
       const name = (p.name || '').toLowerCase();
-      if (p.hasActivePromotion) counts.oferta++;
-      else if (name.includes('baleada') || name.includes('comida')) counts.comida++;
-      else if (name.includes('mercado') || name.includes('super')) counts.mercado++;
-      else if (name.includes('servicio') || name.includes('taller')) counts.servicios++;
+      if (name.includes('baleada') || name.includes('comida')) counts.COMER++;
+      else if (name.includes('mercado') || name.includes('super')) counts.COMPRAR++;
+      else if (name.includes('servicio') || name.includes('taller')) counts.SERVICIOS++;
     });
     return counts;
   };

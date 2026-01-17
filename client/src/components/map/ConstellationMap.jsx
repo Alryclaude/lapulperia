@@ -3,24 +3,30 @@ import { useEffect, useState } from 'react';
 import L from 'leaflet';
 import BusinessPreviewCard from './BusinessPreviewCard';
 
-// Colores de categoría para las "estrellas"
+// Colores de categoría para las "estrellas" - IDs alineados con enum BD
 const CATEGORY_COLORS = {
-  comida: { color: '#F59E0B', glow: 'rgba(245, 158, 11, 0.6)' }, // Ámbar/Naranja
-  mercado: { color: '#06B6D4', glow: 'rgba(6, 182, 212, 0.6)' }, // Verde Cian
-  servicios: { color: '#3B82F6', glow: 'rgba(59, 130, 246, 0.6)' }, // Blanco/Azul
+  COMER: { color: '#F59E0B', glow: 'rgba(245, 158, 11, 0.6)' }, // Ámbar/Naranja
+  COMPRAR: { color: '#06B6D4', glow: 'rgba(6, 182, 212, 0.6)' }, // Verde Cian
+  SERVICIOS: { color: '#3B82F6', glow: 'rgba(59, 130, 246, 0.6)' }, // Blanco/Azul
   oferta: { color: '#EC4899', glow: 'rgba(236, 72, 153, 0.8)' }, // Magenta
   default: { color: '#F4F1EA', glow: 'rgba(244, 241, 234, 0.5)' }, // Blanco Hueso
 };
 
-// Determinar categoría por nombre/tipo de negocio
+// Determinar categoría usando campo de BD (categories[]) o fallback a nombre
 const getCategoryFromPulperia = (pulperia) => {
-  const name = (pulperia.name || '').toLowerCase();
-  const hasPromo = pulperia.hasActivePromotion;
+  // Promoción activa siempre tiene prioridad
+  if (pulperia.hasActivePromotion) return 'oferta';
 
-  if (hasPromo) return 'oferta';
-  if (name.includes('baleada') || name.includes('comida') || name.includes('pupusa') || name.includes('soda')) return 'comida';
-  if (name.includes('mercado') || name.includes('super') || name.includes('abarrote')) return 'mercado';
-  if (name.includes('servicio') || name.includes('mecanica') || name.includes('taller')) return 'servicios';
+  // Usar categoría de BD si existe
+  if (pulperia.categories && pulperia.categories.length > 0) {
+    return pulperia.categories[0]; // Primera categoría asignada
+  }
+
+  // Fallback: inferir de nombre (compatibilidad con datos existentes)
+  const name = (pulperia.name || '').toLowerCase();
+  if (name.includes('baleada') || name.includes('comida') || name.includes('pupusa') || name.includes('soda')) return 'COMER';
+  if (name.includes('mercado') || name.includes('super') || name.includes('abarrote')) return 'COMPRAR';
+  if (name.includes('servicio') || name.includes('mecanica') || name.includes('taller')) return 'SERVICIOS';
   return 'default';
 };
 

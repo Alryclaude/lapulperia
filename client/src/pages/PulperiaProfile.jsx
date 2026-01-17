@@ -5,8 +5,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   MapPin, Phone, Star, Heart, Share2, Clock, MessageCircle,
   Package, MessageSquare, Store, Info, ShoppingBag, Navigation, Maximize2, Minimize2,
-  CheckCircle, Calendar,
+  CheckCircle, Calendar, Globe, Tag,
 } from 'lucide-react';
+import SocialButtons from '../components/profile/SocialButtons';
+
+// Configuración de categorías para badges
+const CATEGORY_CONFIG = {
+  COMER: { label: 'Comer', emoji: '🍽️', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
+  COMPRAR: { label: 'Comprar', emoji: '🛒', color: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30' },
+  SERVICIOS: { label: 'Servicios', emoji: '🔧', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
+};
 import { pulperiaApi, productApi } from '../services/api';
 import { useAuthStore } from '../stores/authStore';
 import ProductCard from '../components/products/ProductCard';
@@ -258,8 +266,45 @@ const PulperiaProfile = () => {
               )}
             </div>
 
+            {/* Badges de tipo y categorías */}
+            <div className="flex flex-wrap items-center gap-2 mt-2">
+              {/* Badge Físico/Online */}
+              <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
+                pulperia.isOnlineOnly
+                  ? 'bg-purple-500/20 text-purple-400 border-purple-500/30'
+                  : 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30'
+              }`}>
+                {pulperia.isOnlineOnly ? (
+                  <>
+                    <Globe className="w-3.5 h-3.5" />
+                    Tienda Online
+                  </>
+                ) : (
+                  <>
+                    <Store className="w-3.5 h-3.5" />
+                    Tienda Física
+                  </>
+                )}
+              </div>
+
+              {/* Badges de categoría */}
+              {pulperia.categories?.map((cat) => {
+                const config = CATEGORY_CONFIG[cat];
+                if (!config) return null;
+                return (
+                  <div
+                    key={cat}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${config.color}`}
+                  >
+                    <span>{config.emoji}</span>
+                    <span>{config.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+
             {/* Meta Info Row */}
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2 text-gray-400">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-3 text-gray-400">
               {/* Rating */}
               {pulperia.rating > 0 && (
                 <div className="flex items-center gap-1.5">
@@ -330,6 +375,18 @@ const PulperiaProfile = () => {
                 <span className="text-sm font-medium text-purple-400">Nuestra Historia</span>
               </div>
               <p className="text-sm text-gray-400 leading-relaxed">{pulperia.story}</p>
+            </motion.div>
+          )}
+
+          {/* Social Links */}
+          {pulperia.socialLinks && Object.keys(pulperia.socialLinks).length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.55 }}
+              className="mt-4"
+            >
+              <SocialButtons socialLinks={pulperia.socialLinks} />
             </motion.div>
           )}
 

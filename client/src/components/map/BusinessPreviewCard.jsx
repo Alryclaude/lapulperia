@@ -65,15 +65,27 @@ const BusinessPreviewCard = ({ pulperia, onClose }) => {
             <X className="w-4 h-4 text-gray-400" />
           </button>
 
-          {/* Badge de estado */}
-          <div className={`absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-medium ${
-            isOpen
-              ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-              : 'bg-red-500/20 text-red-400 border border-red-500/30'
-          }`}>
-            <div className="flex items-center gap-1.5">
-              <div className={`w-1.5 h-1.5 rounded-full ${isOpen ? 'bg-green-400' : 'bg-red-400'}`} />
-              {isOpen ? 'Abierto' : 'Cerrado'}
+          {/* Badges de estado y tipo */}
+          <div className="absolute top-2 left-2 flex items-center gap-2">
+            {/* Badge estado */}
+            <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+              isOpen
+                ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                : 'bg-red-500/20 text-red-400 border border-red-500/30'
+            }`}>
+              <div className="flex items-center gap-1.5">
+                <div className={`w-1.5 h-1.5 rounded-full ${isOpen ? 'bg-green-400' : 'bg-red-400'}`} />
+                {isOpen ? 'Abierto' : 'Cerrado'}
+              </div>
+            </div>
+
+            {/* Badge físico/online */}
+            <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+              pulperia.isOnlineOnly
+                ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                : 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+            }`}>
+              {pulperia.isOnlineOnly ? '🌐 Online' : '🏪 Físico'}
             </div>
           </div>
         </div>

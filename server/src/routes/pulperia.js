@@ -61,6 +61,13 @@ router.get('/', optionalAuth, async (req, res) => {
       where.status = status;
     }
 
+    // Filtro por categoría (COMER, COMPRAR, SERVICIOS)
+    if (category && category !== 'all') {
+      where.categories = {
+        has: category.toUpperCase(),
+      };
+    }
+
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
@@ -82,6 +89,18 @@ router.get('/', optionalAuth, async (req, res) => {
           where: { isActive: true },
           select: { id: true, name: true, coverageArea: true, estimatedDays: true, baseCost: true },
         },
+        promotions: {
+          where: {
+            isActive: true,
+            startDate: { lte: new Date() },
+            OR: [
+              { endDate: null },
+              { endDate: { gte: new Date() } },
+            ],
+          },
+          select: { id: true },
+          take: 1,
+        },
         _count: {
           select: { products: true, reviews: true },
         },
@@ -91,8 +110,15 @@ router.get('/', optionalAuth, async (req, res) => {
       orderBy: { rating: 'desc' },
     });
 
-    // Enriquecer cada pulpería con su estado calculado basado en horario
-    pulperias = pulperias.map(enrichPulperiaWithStatus);
+    // Enriquecer cada pulpería con estado calculado y hasActivePromotion
+    pulperias = pulperias.map((p) => {
+      const enriched = enrichPulperiaWithStatus(p);
+      return {
+        ...enriched,
+        hasActivePromotion: p.promotions?.length > 0,
+        promotions: undefined, // No exponer detalles de promociones en listado
+      };
+    });
 
     // Filter by distance if coordinates provided (solo para negocios locales)
     if (hasCoordinates) {
@@ -202,6 +228,17 @@ router.get('/:id', optionalAuth, async (req, res) => {
         achievements: true,
         loyaltyProgram: true,
         businessHours: true,
+        promotions: {
+          where: {
+            isActive: true,
+            startDate: { lte: new Date() },
+            OR: [
+              { endDate: null },
+              { endDate: { gte: new Date() } },
+            ],
+          },
+          select: { id: true, name: true, type: true, value: true },
+        },
         _count: {
           select: { products: true, reviews: true, orders: true },
         },
@@ -212,8 +249,12 @@ router.get('/:id', optionalAuth, async (req, res) => {
       return res.status(404).json({ error: { message: 'Pulpería no encontrada' } });
     }
 
-    // Calcular estado basado en horario
-    pulperia = enrichPulperiaWithStatus(pulperia);
+    // Calcular estado basado en horario y agregar hasActivePromotion
+    const enriched = enrichPulperiaWithStatus(pulperia);
+    pulperia = {
+      ...enriched,
+      hasActivePromotion: pulperia.promotions?.length > 0,
+    };
 
     // Check if user has favorited
     let isFavorite = false;
@@ -253,6 +294,8 @@ router.patch('/me', authenticate, requirePulperia, async (req, res) => {
       foundedYear,
       story,
       isOnlineOnly,
+      categories,
+      socialLinks,
     } = req.body;
 
     const pulperia = await prisma.pulperia.update({
@@ -271,6 +314,8 @@ router.patch('/me', authenticate, requirePulperia, async (req, res) => {
         ...(foundedYear !== undefined && { foundedYear }),
         ...(story !== undefined && { story }),
         ...(isOnlineOnly !== undefined && { isOnlineOnly }),
+        ...(categories !== undefined && { categories }),
+        ...(socialLinks !== undefined && { socialLinks }),
       },
     });
 

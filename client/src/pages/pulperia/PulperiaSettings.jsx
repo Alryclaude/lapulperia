@@ -5,8 +5,25 @@ import {
   Store, MapPin, Phone, Camera, Save, Trash2, Download,
   AlertTriangle, Palmtree, X, Loader2, Settings, BookOpen,
   Calendar, MessageCircle, Globe, CreditCard, Receipt, Truck,
-  ChevronRight
+  ChevronRight, Tag, Facebook, Instagram, Music2, Twitter, Youtube, Send
 } from 'lucide-react';
+
+// Categorías disponibles para negocios
+const BUSINESS_CATEGORIES = [
+  { id: 'COMER', label: 'Comer', emoji: '🍽️', description: 'Restaurantes, comida, baleadas' },
+  { id: 'COMPRAR', label: 'Comprar', emoji: '🛒', description: 'Abarrotes, mercados, tiendas' },
+  { id: 'SERVICIOS', label: 'Servicios', emoji: '🔧', description: 'Talleres, recargas, pagos' },
+];
+
+// Configuración de redes sociales
+const SOCIAL_NETWORKS = [
+  { id: 'facebook', label: 'Facebook', icon: Facebook, placeholder: 'facebook.com/tu-pagina', color: 'text-blue-400' },
+  { id: 'instagram', label: 'Instagram', icon: Instagram, placeholder: '@tu_usuario', color: 'text-pink-400' },
+  { id: 'tiktok', label: 'TikTok', icon: Music2, placeholder: '@tu_usuario', color: 'text-gray-300' },
+  { id: 'twitter', label: 'X (Twitter)', icon: Twitter, placeholder: '@tu_usuario', color: 'text-sky-400' },
+  { id: 'youtube', label: 'YouTube', icon: Youtube, placeholder: 'youtube.com/@tu-canal', color: 'text-red-400' },
+  { id: 'telegram', label: 'Telegram', icon: Send, placeholder: '@tu_usuario', color: 'text-sky-300' },
+];
 import { Link } from 'react-router-dom';
 import { pulperiaApi, userApi } from '../../services/api';
 import { reverseGeocode } from '../../services/geocoding';
@@ -38,6 +55,8 @@ const PulperiaSettings = () => {
     foundedYear: '',
     latitude: null,
     longitude: null,
+    categories: [],
+    socialLinks: {},
   });
 
   const [isGettingLocation, setIsGettingLocation] = useState(false);
@@ -60,6 +79,8 @@ const PulperiaSettings = () => {
         foundedYear: pulperia.foundedYear || '',
         latitude: pulperia.latitude || null,
         longitude: pulperia.longitude || null,
+        categories: pulperia.categories || [],
+        socialLinks: pulperia.socialLinks || {},
       });
       setLogoPreview(pulperia.logo);
       setBannerPreview(pulperia.banner);
@@ -199,7 +220,30 @@ const PulperiaSettings = () => {
     updateMutation.mutate({
       ...formData,
       foundedYear: formData.foundedYear ? parseInt(formData.foundedYear) : undefined,
+      categories: formData.categories,
+      socialLinks: formData.socialLinks,
     });
+  };
+
+  // Toggle categoría
+  const toggleCategory = (categoryId) => {
+    setFormData(prev => {
+      const categories = prev.categories.includes(categoryId)
+        ? prev.categories.filter(c => c !== categoryId)
+        : [...prev.categories, categoryId];
+      return { ...prev, categories };
+    });
+  };
+
+  // Actualizar red social
+  const updateSocialLink = (networkId, value) => {
+    setFormData(prev => ({
+      ...prev,
+      socialLinks: {
+        ...prev.socialLinks,
+        [networkId]: value || undefined, // undefined para eliminar campos vacíos
+      },
+    }));
   };
 
   const handleVacation = () => {
@@ -409,6 +453,97 @@ const PulperiaSettings = () => {
             placeholder="1990"
             className="w-32 px-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/20 transition-all"
           />
+        </div>
+      </motion.div>
+
+      {/* Categories Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25 }}
+        className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-6 space-y-4"
+      >
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+            <Tag className="w-4 h-4 text-amber-400" />
+          </div>
+          <div>
+            <h2 className="font-semibold text-white">Categorías de tu Negocio</h2>
+            <p className="text-xs text-gray-500">Ayuda a los clientes a encontrarte</p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          {BUSINESS_CATEGORIES.map((category) => {
+            const isSelected = formData.categories.includes(category.id);
+            return (
+              <motion.button
+                key={category.id}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => toggleCategory(category.id)}
+                className={`
+                  flex items-center gap-2 px-4 py-3 rounded-xl border-2 transition-all
+                  ${isSelected
+                    ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'
+                    : 'bg-dark-200/50 border-white/10 text-gray-400 hover:text-white hover:border-white/20'
+                  }
+                `}
+              >
+                <span className="text-xl">{category.emoji}</span>
+                <div className="text-left">
+                  <span className="font-medium block">{category.label}</span>
+                  <span className="text-xs opacity-70">{category.description}</span>
+                </div>
+                {isSelected && (
+                  <div className="ml-2 w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center">
+                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                )}
+              </motion.button>
+            );
+          })}
+        </div>
+        <p className="text-xs text-gray-500">Puedes seleccionar múltiples categorías</p>
+      </motion.div>
+
+      {/* Social Networks Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.28 }}
+        className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-6 space-y-4"
+      >
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-8 h-8 rounded-lg bg-pink-500/20 flex items-center justify-center">
+            <Instagram className="w-4 h-4 text-pink-400" />
+          </div>
+          <div>
+            <h2 className="font-semibold text-white">Redes Sociales</h2>
+            <p className="text-xs text-gray-500">Conecta con tus clientes</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {SOCIAL_NETWORKS.map((network) => {
+            const Icon = network.icon;
+            return (
+              <div key={network.id}>
+                <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
+                  <Icon className={`w-4 h-4 ${network.color}`} />
+                  {network.label}
+                </label>
+                <input
+                  type="text"
+                  value={formData.socialLinks[network.id] || ''}
+                  onChange={(e) => updateSocialLink(network.id, e.target.value)}
+                  placeholder={network.placeholder}
+                  className="w-full px-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/20 transition-all text-sm"
+                />
+              </div>
+            );
+          })}
         </div>
       </motion.div>
 

@@ -90,22 +90,31 @@ const PulperiaCard = ({ pulperia, className }) => {
             {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-surface-0 via-surface-0/40 to-transparent" />
 
-            {/* Status badge - Top left */}
+            {/* Status badges - Top left */}
             <motion.div
               initial={{ opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="absolute top-3 left-3 flex gap-1.5"
+              className="absolute top-3 left-3 flex flex-wrap gap-1.5"
             >
+              {/* Badge de estado (solo para físicas) */}
+              {!isOnlineOnly && (
+                <StatusBadge status={status.variant} className="shadow-lg backdrop-blur-sm">
+                  {status.label}
+                </StatusBadge>
+              )}
+
+              {/* Badge de tipo físico/online */}
               {isOnlineOnly ? (
                 <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 gap-1 shadow-lg backdrop-blur-sm">
                   <Globe className="w-3 h-3" />
                   Online
                 </Badge>
               ) : (
-                <StatusBadge status={status.variant} className="shadow-lg backdrop-blur-sm">
-                  {status.label}
-                </StatusBadge>
+                <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-500/30 gap-1 shadow-lg backdrop-blur-sm">
+                  <Store className="w-3 h-3" />
+                  Físico
+                </Badge>
               )}
             </motion.div>
 

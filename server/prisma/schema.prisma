@@ -35,6 +35,12 @@ enum PulperiaStatus {
   VACATION
 }
 
+enum PulperiaCategory {
+  COMER       // Restaurantes, baleadas, comida
+  COMPRAR     // Abarrotes, mercados, tiendas
+  SERVICIOS   // Talleres, recargas, pagos
+}
+
 enum PromotionType {
   PERCENTAGE
   FIXED_AMOUNT
@@ -125,6 +131,12 @@ model Pulperia {
   isOnlineOnly        Boolean         @default(false)
   originCity          String?         // Ciudad de origen para envios (negocios online)
   shippingScope       String          @default("LOCAL")  // LOCAL, NACIONAL, DIGITAL
+
+  // Categorías del negocio (múltiples permitidas)
+  categories          PulperiaCategory[]  @default([])
+
+  // Redes sociales
+  socialLinks         Json?           // { facebook, instagram, tiktok, twitter, youtube, telegram }
 
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
