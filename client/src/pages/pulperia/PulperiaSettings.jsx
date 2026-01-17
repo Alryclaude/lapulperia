@@ -40,6 +40,8 @@ const PulperiaSettings = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['my-pulperia'],
     queryFn: () => pulperiaApi.getMine(),
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 
   const pulperia = data?.data?.pulperia;

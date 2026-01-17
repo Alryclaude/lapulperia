@@ -15,8 +15,7 @@ import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
 import Orders from './pages/Orders';
 import OrderDetail from './pages/OrderDetail';
-// Jobs y JobDetail son ahora legacy - redirigen a Chambas
-import Services from './pages/Services';
+// Jobs, Services y sus páginas de gestión son ahora legacy - todo unificado en Chambas
 import ServiceCatalog from './pages/ServiceCatalog';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
@@ -119,11 +118,11 @@ function App() {
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/chambas" element={<Chambas />} />
           <Route path="/chamba/:id" element={<ChambaDetail />} />
-          <Route path="/services" element={<Services />} />
           <Route path="/service/:id" element={<ServiceCatalog />} />
-          {/* Legacy redirects */}
+          {/* Legacy redirects - todo unificado en Chambas */}
           <Route path="/jobs" element={<Chambas />} />
           <Route path="/job/:id" element={<ChambaDetail />} />
+          <Route path="/services" element={<Chambas />} />
         </Route>
 
         {/* Auth Routes */}

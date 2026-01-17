@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Package, ShoppingBag, Users, Target, ArrowRight, Wrench, Tag } from 'lucide-react';
+import { Package, ShoppingBag, Users, Target, ArrowRight, Tag } from 'lucide-react';
 
 // REVAMP: Enhanced QuickActions with vibrant gradients
 const QuickActions = () => {
@@ -30,28 +30,16 @@ const QuickActions = () => {
       glow: 'shadow-[0_0_20px_rgba(6,182,212,0.15)]',
     },
     {
-      to: '/manage/jobs',
+      to: '/manage/chambas',
       icon: Users,
-      title: 'Empleos',
-      description: 'Publica vacantes',
+      title: 'Chambas',
+      description: 'Empleos y servicios',
       color: 'purple',
       gradient: 'from-purple-500/20 to-purple-600/10',
       iconBg: 'from-purple-500/30 to-purple-600/20',
       hoverBorder: 'hover:border-purple-500/40',
       textColor: 'text-purple-400',
       glow: 'shadow-[0_0_20px_rgba(139,92,246,0.15)]',
-    },
-    {
-      to: '/manage/services',
-      icon: Wrench,
-      title: 'Servicios',
-      description: 'Ofrece servicios',
-      color: 'amber',
-      gradient: 'from-amber-500/20 to-amber-600/10',
-      iconBg: 'from-amber-500/30 to-amber-600/20',
-      hoverBorder: 'hover:border-amber-500/40',
-      textColor: 'text-amber-400',
-      glow: 'shadow-[0_0_20px_rgba(245,158,11,0.15)]',
     },
     {
       to: '/manage/promotions',

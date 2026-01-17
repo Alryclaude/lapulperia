@@ -9,7 +9,6 @@ import {
   Package,
   ShoppingBag,
   Settings,
-  Wrench,
 } from 'lucide-react';
 
 // REVAMP: Enhanced BottomNav with vibrant active states
@@ -17,8 +16,7 @@ const BottomNav = ({ isPulperia = false }) => {
   const clientLinks = [
     { to: '/', icon: Home, label: 'Inicio', color: 'primary' },
     { to: '/search', icon: Search, label: 'Buscar', color: 'cyan' },
-    { to: '/jobs', icon: Briefcase, label: 'Empleos', color: 'purple' },
-    { to: '/services', icon: Wrench, label: 'Servicios', color: 'lime' },
+    { to: '/chambas', icon: Briefcase, label: 'Chambas', color: 'purple' },
     { to: '/profile', icon: User, label: 'Perfil', color: 'accent' },
   ];
 
@@ -26,7 +24,7 @@ const BottomNav = ({ isPulperia = false }) => {
     { to: '/dashboard', icon: LayoutDashboard, label: 'Panel', color: 'primary' },
     { to: '/manage/orders', icon: ShoppingBag, label: 'Órdenes', color: 'green' },
     { to: '/manage/products', icon: Package, label: 'Productos', color: 'cyan' },
-    { to: '/manage/jobs', icon: Briefcase, label: 'Empleos', color: 'purple' },
+    { to: '/manage/chambas', icon: Briefcase, label: 'Chambas', color: 'purple' },
     { to: '/pulperia/settings', icon: Settings, label: 'Config', color: 'gray' },
   ];
 
