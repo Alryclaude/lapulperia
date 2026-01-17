@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Edit2, X, Check, Image as ImageIcon, Star, Calendar, Sparkles, Package, AlertTriangle, Hash } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -92,7 +93,8 @@ const ProductFormModal = ({
 
   if (!isOpen) return null;
 
-  return (
+  // Usar Portal para renderizar fuera del PullToRefresh y evitar problemas de stacking context
+  return createPortal(
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
@@ -437,7 +439,8 @@ const ProductFormModal = ({
           </form>
         </motion.div>
       </motion.div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
 
