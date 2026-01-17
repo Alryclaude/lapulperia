@@ -47,7 +47,7 @@ const Layout = ({ isPulperia = false }) => {
         className="flex-1 overflow-auto overscroll-contain bg-background"
       >
         <main className={`pt-16 ${showBottomNav ? 'pb-nav-offset' : 'pb-8'}`}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
             <Outlet key={location.pathname} />
           </div>
         </main>
