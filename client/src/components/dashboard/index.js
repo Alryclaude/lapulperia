@@ -2,8 +2,15 @@ export { default as StatusToggle } from './StatusToggle';
 export { default as StatsCards } from './StatsCards';
 export { default as AchievementsBadges } from './AchievementsBadges';
 export { default as QuickActions } from './QuickActions';
+export { default as SmartActionsHub } from './SmartActionsHub';
+export { default as DashboardHeader } from './DashboardHeader';
 export { default as TopProducts } from './TopProducts';
 export { default as ExportSection } from './ExportSection';
+
+// Finance
+export { default as FinancePanel } from './FinancePanel';
+export { default as PaymentMethodsWidget } from './PaymentMethodsWidget';
+export { default as FiadoSummaryWidget } from './FiadoSummaryWidget';
 
 // Charts
 export { default as SalesChart } from './SalesChart';

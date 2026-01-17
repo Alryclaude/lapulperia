@@ -19,9 +19,11 @@ import toast from 'react-hot-toast';
 import api from '../../api/client';
 
 const SHIPPING_SCOPES = {
-  LOCAL: { name: 'Local', description: 'Solo tu ciudad', icon: MapPin },
+  PICKUP: { name: 'Recoger', description: 'Solo recoger en tienda', icon: Package },
+  LOCAL: { name: 'Local', description: 'Delivery en tu zona (< 3 km)', icon: MapPin },
+  CIUDAD: { name: 'Ciudad', description: 'Toda la ciudad', icon: MapPin },
   NACIONAL: { name: 'Nacional', description: 'Todo Honduras', icon: Globe },
-  DIGITAL: { name: 'Digital', description: 'Productos digitales (sin envío físico)', icon: Package },
+  DIGITAL: { name: 'Digital', description: 'Productos digitales', icon: Package },
 };
 
 const ShippingSettings = () => {
@@ -161,8 +163,8 @@ const ShippingSettings = () => {
             <Truck className="w-6 h-6 text-purple-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white">Configuración de Envíos</h1>
-            <p className="text-gray-400 text-sm">Configura tus métodos de envío para tiendas online</p>
+            <h1 className="text-2xl font-bold text-white">Configuración de Entregas</h1>
+            <p className="text-gray-400 text-sm">Configura cómo tus clientes reciben sus pedidos</p>
           </div>
         </div>
       </motion.div>
@@ -174,8 +176,8 @@ const ShippingSettings = () => {
         transition={{ delay: 0.1 }}
         className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-6"
       >
-        <h2 className="text-lg font-semibold text-white mb-4">Alcance de envíos</h2>
-        <p className="text-sm text-gray-400 mb-4">Define hasta dónde puedes enviar tus productos</p>
+        <h2 className="text-lg font-semibold text-white mb-4">Alcance de Entregas</h2>
+        <p className="text-sm text-gray-400 mb-4">Define cómo pueden recibir sus pedidos tus clientes</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {Object.entries(SHIPPING_SCOPES).map(([key, scope]) => {

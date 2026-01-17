@@ -11,16 +11,16 @@ import {
   Package,
   Tag,
   Clock,
-  MapPin,
   ShoppingBag,
   AlertCircle,
   RefreshCw,
+  Wallet,
 } from 'lucide-react';
 import {
-  StatusToggle,
   StatsCards,
   AchievementsBadges,
-  QuickActions,
+  SmartActionsHub,
+  DashboardHeader,
   ExportSection,
   SalesChart,
   TopProductsChart,
@@ -29,11 +29,13 @@ import {
   StockUpdateModal,
   BusinessHoursEditor,
   PromotionsPanel,
+  FinancePanel,
 } from '../../components/dashboard';
 
 const TABS = [
   { id: 'resumen', label: 'Resumen', icon: LayoutDashboard },
   { id: 'inventario', label: 'Inventario', icon: Package },
+  { id: 'finanzas', label: 'Finanzas', icon: Wallet },
   { id: 'promociones', label: 'Promociones', icon: Tag },
   { id: 'horarios', label: 'Horarios', icon: Clock },
 ];
@@ -158,17 +160,14 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6 pb-24">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">{pulperia?.name || 'Mi Pulpería'}</h1>
-          <div className="flex items-center gap-2 mt-1 text-gray-400 text-sm">
-            <MapPin className="w-4 h-4" />
-            <span>{pulperia?.address || 'Sin ubicación'}</span>
-          </div>
-        </div>
-        <StatusToggle isOpen={isOpen} onToggle={handleToggleStatus} />
-      </div>
+      {/* Enhanced Dashboard Header */}
+      <DashboardHeader
+        pulperia={pulperia}
+        isOpen={isOpen}
+        onToggleStatus={handleToggleStatus}
+        streak={stats.streak || 0}
+        stats={stats}
+      />
 
       {/* Error Banner */}
       {isError && (
@@ -241,8 +240,12 @@ const Dashboard = () => {
               {/* Achievements */}
               <AchievementsBadges achievements={stats.achievements} />
 
-              {/* Quick Actions */}
-              <QuickActions />
+              {/* Smart Actions Hub - Pulso del Negocio */}
+              <SmartActionsHub
+                stats={stats}
+                onQuickSale={() => window.location.href = '/manage/quick-sale'}
+                onRegisterFiado={() => window.location.href = '/manage/fiado/new'}
+              />
 
               {/* Export */}
               <ExportSection onExport={handleExport} />
@@ -344,6 +347,16 @@ const Dashboard = () => {
                   </div>
                 </motion.div>
               )}
+            </div>
+          )}
+
+          {/* FINANZAS TAB */}
+          {activeTab === 'finanzas' && (
+            <div className="space-y-6">
+              <FinancePanel
+                paymentMethods={pulperia?.paymentMethods || []}
+                fiado={stats.fiado || {}}
+              />
             </div>
           )}
 

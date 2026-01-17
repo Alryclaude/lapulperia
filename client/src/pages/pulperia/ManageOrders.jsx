@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -14,13 +14,13 @@ import {
   Bell,
   ShoppingBag,
   MessageSquare,
-  DollarSign,
 } from 'lucide-react';
 import { orderApi } from '../../services/api';
 import toast from 'react-hot-toast';
 import { socketService } from '../../services/socket';
 import { playNotificationSound, vibrate } from '../../services/notifications';
 import { useAuthStore } from '../../stores/authStore';
+import { OrderCardEnhanced } from '../../components/orders';
 
 const statusConfig = {
   PENDING: { label: 'Nueva', color: 'yellow', icon: Bell },
@@ -36,6 +36,8 @@ const ManageOrders = () => {
   const { user } = useAuthStore();
   const [filter, setFilter] = useState('all');
   const [expandedOrder, setExpandedOrder] = useState(null);
+  const [newOrderIds, setNewOrderIds] = useState(new Set());
+  const prevOrdersRef = useRef([]);
 
   // Fetch orders
   const { data: ordersData, isLoading } = useQuery({
@@ -224,184 +226,15 @@ const ManageOrders = () => {
         <div className="space-y-4">
           <AnimatePresence>
             {orders.map((order, index) => (
-              <motion.div
+              <OrderCardEnhanced
                 key={order.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, x: -100 }}
-                transition={{ delay: index * 0.05 }}
-                className={`bg-dark-100/60 backdrop-blur-sm rounded-2xl border overflow-hidden transition-all ${
-                  order.status === 'PENDING'
-                    ? 'border-yellow-500/50 ring-1 ring-yellow-500/20'
-                    : 'border-white/5 hover:border-white/10'
-                }`}
-              >
-                {/* Order Header */}
-                <div
-                  className="p-4 cursor-pointer hover:bg-white/[0.02] transition-colors"
-                  onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-3 h-3 rounded-full ${getStatusDotColor(order.status)} ${
-                        order.status === 'PENDING' ? 'animate-pulse' : ''
-                      }`} />
-                      <div>
-                        <p className="font-semibold text-white">
-                          {order.orderNumber}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {new Date(order.createdAt).toLocaleString('es-HN')}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <p className="font-bold text-white flex items-center gap-1 justify-end">
-                          <DollarSign className="w-4 h-4 text-green-400" />
-                          L. {order.total.toFixed(2)}
-                        </p>
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-medium border ${getStatusColorClasses(order.status)}`}>
-                          {statusConfig[order.status].label}
-                        </span>
-                      </div>
-                      <motion.div
-                        animate={{ rotate: expandedOrder === order.id ? 180 : 0 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <ChevronDown className="w-5 h-5 text-gray-500" />
-                      </motion.div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Expanded Content */}
-                <AnimatePresence>
-                  {expandedOrder === order.id && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="px-4 pb-4 border-t border-white/5 pt-4 space-y-4">
-                        {/* Customer Info */}
-                        <div className="flex items-center gap-3 p-3 bg-dark-200/50 rounded-xl border border-white/5">
-                          {order.user.avatar ? (
-                            <img
-                              src={order.user.avatar}
-                              alt={order.user.name}
-                              className="w-10 h-10 rounded-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 rounded-full bg-primary-500/20 flex items-center justify-center">
-                              <User className="w-5 h-5 text-primary-400" />
-                            </div>
-                          )}
-                          <div className="flex-1">
-                            <p className="font-medium text-white">{order.user.name}</p>
-                            {order.user.phone && (
-                              <a
-                                href={`tel:${order.user.phone}`}
-                                className="text-sm text-gray-400 flex items-center gap-1 hover:text-primary-400 transition-colors"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <Phone className="w-3 h-3" />
-                                {order.user.phone}
-                              </a>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Order Items */}
-                        <div className="space-y-2">
-                          {order.items.map((item) => (
-                            <div key={item.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/[0.02] transition-colors">
-                              <img
-                                src={item.productImage}
-                                alt={item.productName}
-                                className="w-12 h-12 rounded-lg object-cover border border-white/10"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <p className="font-medium text-white truncate">{item.productName}</p>
-                                <p className="text-sm text-gray-500">
-                                  {item.quantity} x L. {item.priceAtTime.toFixed(2)}
-                                </p>
-                              </div>
-                              <p className="font-medium text-green-400">
-                                L. {(item.quantity * item.priceAtTime).toFixed(2)}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Notes */}
-                        {order.notes && (
-                          <div className="flex items-start gap-3 p-3 bg-yellow-500/10 rounded-xl border border-yellow-500/20">
-                            <div className="w-8 h-8 rounded-lg bg-yellow-500/20 flex items-center justify-center flex-shrink-0">
-                              <MessageSquare className="w-4 h-4 text-yellow-400" />
-                            </div>
-                            <div>
-                              <p className="text-xs text-yellow-400 font-medium mb-1">Nota del cliente</p>
-                              <p className="text-sm text-yellow-200">{order.notes}</p>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Action Buttons */}
-                        <div className="flex flex-wrap gap-2 pt-2">
-                          {order.status === 'PENDING' && (
-                            <>
-                              <motion.button
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                onClick={() => handleStatusChange(order.id, 'ACCEPTED')}
-                                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium transition-colors"
-                              >
-                                <CheckCircle className="w-4 h-4" />
-                                Aceptar
-                              </motion.button>
-                              <motion.button
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                onClick={() => handleCancel(order.id)}
-                                className="flex items-center justify-center gap-2 px-4 py-3 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-xl font-medium border border-red-500/30 transition-colors"
-                              >
-                                <XCircle className="w-4 h-4" />
-                                Rechazar
-                              </motion.button>
-                            </>
-                          )}
-                          {order.status === 'ACCEPTED' && (
-                            <motion.button
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              onClick={() => handleStatusChange(order.id, 'READY')}
-                              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-medium transition-colors"
-                            >
-                              <Package className="w-4 h-4" />
-                              Marcar como Lista
-                            </motion.button>
-                          )}
-                          {order.status === 'READY' && (
-                            <motion.button
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              onClick={() => handleStatusChange(order.id, 'DELIVERED')}
-                              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium transition-colors"
-                            >
-                              <Truck className="w-4 h-4" />
-                              Entregado
-                            </motion.button>
-                          )}
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
+                order={order}
+                isNew={newOrderIds.has(order.id)}
+                onAccept={(id) => handleStatusChange(id, 'ACCEPTED')}
+                onReject={handleCancel}
+                onMarkReady={(id) => handleStatusChange(id, 'READY')}
+                onMarkDelivered={(id) => handleStatusChange(id, 'DELIVERED')}
+              />
             ))}
           </AnimatePresence>
         </div>

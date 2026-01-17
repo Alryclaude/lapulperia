@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { TrendingUp, ShoppingBag, Star, DollarSign, ArrowUpRight } from 'lucide-react';
+import { TrendingUp, ShoppingBag, Star, ArrowUpRight } from 'lucide-react';
+import LempiraIcon from '../icons/LempiraIcon';
 
 // REVAMP: Enhanced StatsCards with vibrant gradients and glow effects
 const StatsCards = ({ stats, pulperia }) => {
@@ -17,7 +18,7 @@ const StatsCards = ({ stats, pulperia }) => {
         <div className="relative">
           <div className="flex items-center justify-between mb-3">
             <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-green-500/30 to-green-600/20 flex items-center justify-center shadow-[0_0_20px_rgba(34,197,94,0.2)]">
-              <DollarSign className="w-5 h-5 text-green-400" />
+              <LempiraIcon size={20} className="text-green-400" />
             </div>
             <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-green-500/20 text-green-400 border border-green-500/30">Hoy</span>
           </div>

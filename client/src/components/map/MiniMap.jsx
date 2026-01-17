@@ -64,7 +64,7 @@ const MiniMap = ({
   center,
   pulperias = [],
   className = '',
-  zoom = 14,
+  zoom = 15,
   showControls = false,
   dragging = false,
   touchZoom = false,
@@ -94,8 +94,8 @@ const MiniMap = ({
       style={{ zIndex: 1 }}
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
+        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
       />
 
       <MapCenterHandler center={center} />

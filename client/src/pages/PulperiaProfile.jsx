@@ -8,6 +8,7 @@ import {
   CheckCircle, Calendar, Globe, Tag,
 } from 'lucide-react';
 import SocialButtons from '../components/profile/SocialButtons';
+import PaymentMethodsDisplay from '../components/profile/PaymentMethodsDisplay';
 
 // Configuración de categorías para badges
 const CATEGORY_CONFIG = {
@@ -395,6 +396,15 @@ const PulperiaProfile = () => {
             >
               <SocialButtons socialLinks={pulperia.socialLinks} />
             </motion.div>
+          )}
+
+          {/* Payment Methods */}
+          {pulperia.paymentMethods && pulperia.paymentMethods.length > 0 && (
+            <PaymentMethodsDisplay
+              paymentMethods={pulperia.paymentMethods}
+              whatsapp={pulperia.whatsapp}
+              phone={pulperia.phone}
+            />
           )}
 
           {/* Stats Bar */}
