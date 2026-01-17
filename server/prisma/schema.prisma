@@ -91,10 +91,10 @@ model Pulperia {
   phone               String?
   whatsapp            String?
 
-  // Ubicacion
-  latitude            Float
-  longitude           Float
-  address             String
+  // Ubicacion (nullable para negocios online-only)
+  latitude            Float?
+  longitude           Float?
+  address             String?
   reference           String?         // "Frente al palo de mango"
 
   // Estado
@@ -121,6 +121,8 @@ model Pulperia {
   isVerified          Boolean         @default(false)
   isPermanentlyClosed Boolean         @default(false)
   isOnlineOnly        Boolean         @default(false)
+  originCity          String?         // Ciudad de origen para envios (negocios online)
+  shippingScope       String          @default("LOCAL")  // LOCAL, NACIONAL, DIGITAL
 
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
@@ -138,9 +140,26 @@ model Pulperia {
   promotions          Promotion[]
   services            PulperiaService[]
   stamps              Stamp[]
+  shippingMethods     ShippingMethod[]
 
   @@index([latitude, longitude])
   @@index([status])
+}
+
+// Metodos de envio para negocios online
+model ShippingMethod {
+  id            String    @id @default(cuid())
+  pulperiaId    String
+  name          String    // "Hugo", "Cargo Expreso", "Pickup", "Digital"
+  coverageArea  String?   // "Tegucigalpa", "Todo Honduras", "Internacional"
+  estimatedDays String?   // "1-2 dias", "3-5 dias"
+  baseCost      Float?    // Costo base en Lempiras
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+
+  pulperia      Pulperia  @relation(fields: [pulperiaId], references: [id], onDelete: Cascade)
+
+  @@index([pulperiaId])
 }
 
 // Productos

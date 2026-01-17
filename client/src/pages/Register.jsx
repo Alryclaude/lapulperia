@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
-import { Store, User, MapPin, Phone, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
+import { Store, User, MapPin, Phone, ArrowRight, ArrowLeft, Loader2, Globe } from 'lucide-react';
 import { reverseGeocode } from '../services/geocoding';
 import toast from 'react-hot-toast';
 
@@ -20,8 +20,11 @@ const Register = () => {
     reference: '',
     phone: '',
     whatsapp: '',
-    latitude: 14.0818,
-    longitude: -87.2068,
+    latitude: null,
+    longitude: null,
+    isOnlineOnly: false,
+    originCity: '',
+    shippingScope: 'LOCAL',
   });
   const [isGettingLocation, setIsGettingLocation] = useState(false);
 
@@ -91,12 +94,12 @@ const Register = () => {
     }
   }, []);
 
-  // Auto-obtener ubicación cuando llegamos al paso 3 (crear pulpería)
+  // Auto-obtener ubicación cuando llegamos al paso 3 (crear pulpería) - solo para negocios físicos
   useEffect(() => {
-    if (step === 3 && pulperiaData.latitude === 14.0818) {
+    if (step === 3 && !pulperiaData.isOnlineOnly && pulperiaData.latitude === null) {
       handleGetLocation();
     }
-  }, [step, handleGetLocation, pulperiaData.latitude]);
+  }, [step, handleGetLocation, pulperiaData.isOnlineOnly, pulperiaData.latitude]);
 
   const handleCreatePulperia = async (e) => {
     e.preventDefault();
@@ -217,6 +220,45 @@ const Register = () => {
         </div>
 
         <form onSubmit={handleCreatePulperia} className="space-y-5">
+          {/* Selector de tipo de negocio */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-300 mb-3">
+              Tipo de negocio
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setPulperiaData(prev => ({ ...prev, isOnlineOnly: false }))}
+                className={`p-4 rounded-xl border-2 transition-all ${
+                  !pulperiaData.isOnlineOnly
+                    ? 'border-primary-500 bg-primary-500/10'
+                    : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
+                }`}
+              >
+                <MapPin className="w-6 h-6 mx-auto mb-2 text-gray-300" />
+                <span className="text-sm font-medium text-gray-200">Tengo local fisico</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPulperiaData(prev => ({
+                  ...prev,
+                  isOnlineOnly: true,
+                  latitude: null,
+                  longitude: null,
+                  address: ''
+                }))}
+                className={`p-4 rounded-xl border-2 transition-all ${
+                  pulperiaData.isOnlineOnly
+                    ? 'border-primary-500 bg-primary-500/10'
+                    : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
+                }`}
+              >
+                <Globe className="w-6 h-6 mx-auto mb-2 text-gray-300" />
+                <span className="text-sm font-medium text-gray-200">Solo vendo en linea</span>
+              </button>
+            </div>
+          </div>
+
           {/* Name */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1.5">
@@ -232,73 +274,115 @@ const Register = () => {
             />
           </div>
 
-          {/* Address */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">
-              Direccion *
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="Ej: Col. Kennedy, Bloque A"
-              value={pulperiaData.address}
-              onChange={(e) => setPulperiaData({ ...pulperiaData, address: e.target.value })}
-              className="input"
-            />
-          </div>
+          {/* Campos para negocio fisico */}
+          {!pulperiaData.isOnlineOnly && (
+            <>
+              {/* Address */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                  Direccion *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ej: Col. Kennedy, Bloque A"
+                  value={pulperiaData.address}
+                  onChange={(e) => setPulperiaData({ ...pulperiaData, address: e.target.value })}
+                  className="input"
+                />
+              </div>
 
-          {/* Reference */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">
-              Referencia (como llegar)
-            </label>
-            <input
-              type="text"
-              placeholder="Ej: Frente al palo de mango, casa azul"
-              value={pulperiaData.reference}
-              onChange={(e) => setPulperiaData({ ...pulperiaData, reference: e.target.value })}
-              className="input"
-            />
-          </div>
+              {/* Reference */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                  Referencia (como llegar)
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej: Frente al palo de mango, casa azul"
+                  value={pulperiaData.reference}
+                  onChange={(e) => setPulperiaData({ ...pulperiaData, reference: e.target.value })}
+                  className="input"
+                />
+              </div>
 
-          {/* Location */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">
-              Ubicacion
-            </label>
-            <button
-              type="button"
-              onClick={handleGetLocation}
-              disabled={isGettingLocation}
-              className={`w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed rounded-xl transition-colors ${
-                pulperiaData.latitude !== 14.0818
-                  ? 'border-green-400 bg-green-50 text-green-700'
-                  : 'border-gray-300 text-gray-600 hover:border-primary-500 hover:text-primary-600'
-              } disabled:opacity-50`}
-            >
-              {isGettingLocation ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Obteniendo ubicacion...
-                </>
-              ) : pulperiaData.latitude !== 14.0818 ? (
-                <>
-                  <MapPin className="w-5 h-5" />
-                  Ubicacion obtenida - Click para actualizar
-                </>
-              ) : (
-                <>
-                  <MapPin className="w-5 h-5" />
-                  Obtener mi ubicacion actual
-                </>
-              )}
-            </button>
-            {pulperiaData.latitude !== 14.0818 && (
-              <p className="text-xs text-green-600 mt-2 text-center">
-                Tu pulperia aparecera en el mapa correctamente
-              </p>
-            )}
-          </div>
+              {/* Location */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                  Ubicacion
+                </label>
+                <button
+                  type="button"
+                  onClick={handleGetLocation}
+                  disabled={isGettingLocation}
+                  className={`w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed rounded-xl transition-colors ${
+                    pulperiaData.latitude !== null
+                      ? 'border-green-400 bg-green-900/20 text-green-400'
+                      : 'border-gray-600 text-gray-400 hover:border-primary-500 hover:text-primary-400'
+                  } disabled:opacity-50`}
+                >
+                  {isGettingLocation ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Obteniendo ubicacion...
+                    </>
+                  ) : pulperiaData.latitude !== null ? (
+                    <>
+                      <MapPin className="w-5 h-5" />
+                      Ubicacion obtenida - Click para actualizar
+                    </>
+                  ) : (
+                    <>
+                      <MapPin className="w-5 h-5" />
+                      Obtener mi ubicacion actual
+                    </>
+                  )}
+                </button>
+                {pulperiaData.latitude !== null && (
+                  <p className="text-xs text-green-400 mt-2 text-center">
+                    Tu pulperia aparecera en el mapa correctamente
+                  </p>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* Campos para negocio online */}
+          {pulperiaData.isOnlineOnly && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                  Ciudad de origen *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={pulperiaData.originCity}
+                  onChange={(e) => setPulperiaData(prev => ({ ...prev, originCity: e.target.value }))}
+                  placeholder="Ej: Tegucigalpa"
+                  className="input"
+                />
+                <p className="text-xs text-gray-500 mt-1.5">
+                  De donde despachas tus productos (no se mostrara tu direccion exacta)
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                  Alcance de envios
+                </label>
+                <select
+                  value={pulperiaData.shippingScope}
+                  onChange={(e) => setPulperiaData(prev => ({ ...prev, shippingScope: e.target.value }))}
+                  className="input"
+                >
+                  <option value="LOCAL">Solo mi ciudad</option>
+                  <option value="NACIONAL">Todo Honduras</option>
+                  <option value="DIGITAL">Productos/servicios digitales</option>
+                </select>
+              </div>
+            </>
+          )}
 
           {/* Phone */}
           <div className="grid grid-cols-2 gap-4">
@@ -331,7 +415,12 @@ const Register = () => {
           {/* Submit */}
           <button
             type="submit"
-            disabled={isLoading || !pulperiaData.name || !pulperiaData.address}
+            disabled={
+              isLoading ||
+              !pulperiaData.name ||
+              (!pulperiaData.isOnlineOnly && !pulperiaData.address) ||
+              (pulperiaData.isOnlineOnly && !pulperiaData.originCity)
+            }
             className="btn-primary w-full"
           >
             {isLoading ? (
