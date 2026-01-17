@@ -170,17 +170,28 @@ router.post('/', authenticate, async (req, res) => {
       select: { fcmToken: true },
     });
 
+    // Log de diagnóstico para notificaciones
+    console.log(`[NOTIF] Order ${order.orderNumber} - User ${pulperia.userId} fcmToken: ${pulperiaOwner?.fcmToken ? 'EXISTS' : 'NULL'}`);
+
     if (pulperiaOwner?.fcmToken) {
-      await sendPushNotification(
-        pulperiaOwner.fcmToken,
-        '¡Nueva orden recibida!',
-        `${req.user.name} hizo un pedido por L.${total.toFixed(2)}`,
-        {
-          type: 'new_order',
-          orderId: order.id,
-          isPulperia: 'true',
-        }
-      );
+      try {
+        console.log(`[NOTIF] Sending push to user ${pulperia.userId}...`);
+        await sendPushNotification(
+          pulperiaOwner.fcmToken,
+          '¡Nueva orden recibida!',
+          `${req.user.name} hizo un pedido por L.${total.toFixed(2)}`,
+          {
+            type: 'new_order',
+            orderId: order.id,
+            isPulperia: 'true',
+          }
+        );
+        console.log(`[NOTIF] Push sent successfully to user ${pulperia.userId}`);
+      } catch (pushError) {
+        console.error(`[NOTIF] Push failed for user ${pulperia.userId}:`, pushError.message);
+      }
+    } else {
+      console.log(`[NOTIF] Skipped - no fcmToken for user ${pulperia.userId}`);
     }
 
     res.status(201).json({ order });
@@ -278,17 +289,28 @@ router.post('/batch', authenticate, async (req, res) => {
         select: { fcmToken: true },
       });
 
+      // Log de diagnóstico para notificaciones (batch)
+      console.log(`[NOTIF-BATCH] Order ${order.orderNumber} - User ${pulperia.userId} fcmToken: ${pulperiaOwner?.fcmToken ? 'EXISTS' : 'NULL'}`);
+
       if (pulperiaOwner?.fcmToken) {
-        await sendPushNotification(
-          pulperiaOwner.fcmToken,
-          '¡Nueva orden recibida!',
-          `Nuevo pedido por L.${total.toFixed(2)}`,
-          {
-            type: 'new_order',
-            orderId: order.id,
-            isPulperia: 'true',
-          }
-        );
+        try {
+          console.log(`[NOTIF-BATCH] Sending push to user ${pulperia.userId}...`);
+          await sendPushNotification(
+            pulperiaOwner.fcmToken,
+            '¡Nueva orden recibida!',
+            `Nuevo pedido por L.${total.toFixed(2)}`,
+            {
+              type: 'new_order',
+              orderId: order.id,
+              isPulperia: 'true',
+            }
+          );
+          console.log(`[NOTIF-BATCH] Push sent successfully to user ${pulperia.userId}`);
+        } catch (pushError) {
+          console.error(`[NOTIF-BATCH] Push failed for user ${pulperia.userId}:`, pushError.message);
+        }
+      } else {
+        console.log(`[NOTIF-BATCH] Skipped - no fcmToken for user ${pulperia.userId}`);
       }
     }
 

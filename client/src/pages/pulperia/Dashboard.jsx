@@ -13,6 +13,8 @@ import {
   Clock,
   MapPin,
   ShoppingBag,
+  AlertCircle,
+  RefreshCw,
 } from 'lucide-react';
 import {
   StatusToggle,
@@ -100,13 +102,19 @@ const Dashboard = () => {
   }, [pulperia?.id, user?.id, queryClient]);
 
   // Fetch stats
-  const { data: statsData, isLoading: statsLoading } = useQuery({
+  const { data: statsData, isLoading: statsLoading, isError, error } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: () => statsApi.getDashboard(),
     refetchInterval: 30000,
+    retry: 2,
   });
 
   const stats = statsData?.data || {};
+
+  // Mostrar error en consola para debugging
+  if (isError) {
+    console.error('[Dashboard] Error cargando stats:', error?.response?.data || error?.message);
+  }
 
   // Toggle open/closed status
   const handleToggleStatus = async () => {
@@ -161,6 +169,27 @@ const Dashboard = () => {
         </div>
         <StatusToggle isOpen={isOpen} onToggle={handleToggleStatus} />
       </div>
+
+      {/* Error Banner */}
+      {isError && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-center gap-3"
+        >
+          <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-red-300 text-sm font-medium">Error cargando estadísticas</p>
+            <p className="text-red-400/70 text-xs">{error?.response?.data?.error?.message || 'Intenta recargar la página'}</p>
+          </div>
+          <button
+            onClick={() => queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] })}
+            className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
+          >
+            <RefreshCw className="w-4 h-4 text-red-400" />
+          </button>
+        </motion.div>
+      )}
 
       {/* Stats Cards - Always visible */}
       <StatsCards stats={stats} pulperia={pulperia} />
@@ -235,8 +264,8 @@ const Dashboard = () => {
                   </div>
                   <p className="text-2xl font-bold text-white">
                     {stats.lowStockProducts?.length > 0
-                      ? (pulperia?.productCount || 0) - stats.lowStockProducts.length
-                      : pulperia?.productCount || 0}
+                      ? (stats?.productCount || 0) - stats.lowStockProducts.length
+                      : stats?.productCount || 0}
                   </p>
                   <p className="text-sm text-gray-400">En Stock</p>
                 </motion.div>

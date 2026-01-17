@@ -180,11 +180,14 @@ router.get('/dashboard', authenticate, requirePulperia, async (req, res) => {
       distinct: ['productId'],
     });
 
+    // Filtrar nulls para evitar error de Prisma (productId puede ser null si producto fue eliminado)
+    const soldProductIds = recentSoldProductIds.map((p) => p.productId).filter(Boolean);
+
     const slowMovingProducts = await prisma.product.findMany({
       where: {
         pulperiaId,
         isAvailable: true,
-        id: { notIn: recentSoldProductIds.map((p) => p.productId) },
+        ...(soldProductIds.length > 0 && { id: { notIn: soldProductIds } }),
       },
       take: 10,
     });
@@ -232,6 +235,11 @@ router.get('/dashboard', authenticate, requirePulperia, async (req, res) => {
       where: { pulperiaId },
     });
 
+    // Total de productos para la sección de inventario
+    const productCount = await prisma.product.count({
+      where: { pulperiaId, isAvailable: true },
+    });
+
     res.json({
       today: todayStats,
       week: weekStats,
@@ -243,6 +251,7 @@ router.get('/dashboard', authenticate, requirePulperia, async (req, res) => {
       slowMovingProducts,
       dailyRevenue,
       achievements,
+      productCount,
     });
   } catch (error) {
     console.error('Get dashboard stats error:', error);

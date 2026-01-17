@@ -6,13 +6,23 @@ import api from '../services/api';
 // Función para registrar token FCM en el servidor
 const registerFcmToken = async () => {
   try {
+    console.log('[FCM] Solicitando permiso de notificaciones...');
     const fcmToken = await requestNotificationPermission();
+
     if (fcmToken) {
+      console.log('[FCM] Token obtenido, registrando en servidor...');
       await api.post('/auth/register-push-token', { fcmToken });
-      console.log('FCM token registrado exitosamente');
+      console.log('[FCM] Token registrado exitosamente');
+      // Solo mostrar toast en desarrollo para no molestar al usuario
+      if (import.meta.env.DEV) {
+        console.log('[FCM] Token:', fcmToken.substring(0, 20) + '...');
+      }
+    } else {
+      console.warn('[FCM] No se obtuvo token - puede que el usuario no haya dado permiso o el navegador no soporte notificaciones');
     }
   } catch (error) {
-    console.error('Error registrando token FCM:', error);
+    console.error('[FCM] Error registrando token:', error?.response?.data || error?.message || error);
+    // No mostramos toast de error para no confundir al usuario
   }
 };
 
