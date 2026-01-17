@@ -1,6 +1,6 @@
 // Notification Service for Push Notifications and Sounds
 
-import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import { getMessaging, getToken } from 'firebase/messaging';
 import { app } from './firebase';
 
 let messaging = null;
@@ -47,16 +47,6 @@ export const getFCMToken = async () => {
     console.error('Error getting FCM token:', error);
     return null;
   }
-};
-
-// Listen for foreground messages
-export const onForegroundMessage = (callback) => {
-  if (!messaging) return () => {};
-
-  return onMessage(messaging, (payload) => {
-    console.log('Foreground message:', payload);
-    callback(payload);
-  });
 };
 
 // Generate synthetic notification tones using Web Audio API
@@ -223,7 +213,6 @@ export default {
   initializeMessaging,
   requestPermission,
   getFCMToken,
-  onForegroundMessage,
   playNotificationSound,
   vibrate,
   showLocalNotification,

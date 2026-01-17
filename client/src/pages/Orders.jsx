@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Package, ChevronRight, Clock, CheckCircle, XCircle, Truck } from 'lucide-react';
+import { Package, ChevronRight, Clock, CheckCircle, XCircle, Truck, AlertCircle } from 'lucide-react';
 import { orderApi } from '../services/api';
 import NotificationPrompt from '../components/NotificationPrompt';
 
@@ -15,7 +15,7 @@ const statusConfig = {
 };
 
 const Orders = () => {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['my-orders'],
     queryFn: () => orderApi.getMyOrders({}),
   });
@@ -31,6 +31,30 @@ const Orders = () => {
             <div className="h-4 w-1/2 bg-dark-200 animate-pulse rounded" />
           </div>
         ))}
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="space-y-6">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-red-500/20 p-12 text-center"
+        >
+          <div className="w-16 h-16 rounded-2xl bg-red-500/20 flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-8 h-8 text-red-400" />
+          </div>
+          <h2 className="text-xl font-semibold text-white mb-2">Error al cargar pedidos</h2>
+          <p className="text-gray-400 mb-6">No pudimos obtener tu historial de pedidos</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-medium transition-colors"
+          >
+            Reintentar
+          </button>
+        </motion.div>
       </div>
     );
   }

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, X, Check, Loader2 } from 'lucide-react';
 import { requestNotificationPermission } from '../services/firebase';
-import { userApi } from '../services/api';
+import { userApi } from '../api/auth';
 
 const NotificationPrompt = ({ variant = 'banner' }) => {
   const [permission, setPermission] = useState('default');
