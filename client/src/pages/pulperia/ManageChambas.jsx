@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus, Briefcase, Wrench, Edit2, Trash2, X, Check, Users, Eye, EyeOff, Clock,
-  CheckCircle, XCircle, MessageCircle, Phone, Zap, HandCoins, DollarSign
+  CheckCircle, XCircle, MessageCircle, Phone, Zap, HelpCircle, DollarSign
 } from 'lucide-react';
 import { chambasApi } from '../../services/api';
 import toast from 'react-hot-toast';
@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 const TYPE_CONFIG = {
   EMPLOYMENT: { label: 'Empleo', icon: Briefcase, color: 'purple' },
   SERVICE: { label: 'Servicio', icon: Wrench, color: 'green' },
-  REQUEST: { label: 'Solicitud', icon: HandCoins, color: 'amber' }
+  REQUEST: { label: 'Solicitud', icon: HelpCircle, color: 'amber' }
 };
 
 const ManageChambas = () => {

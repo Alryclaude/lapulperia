@@ -17,7 +17,7 @@ import {
   DollarSign,
   User,
   Eye,
-  HandCoins
+  HelpCircle
 } from 'lucide-react';
 import { chambasApi } from '../services/api';
 import { useAuthStore } from '../stores/authStore';
@@ -40,7 +40,7 @@ const TYPE_CONFIG = {
   },
   REQUEST: {
     label: 'Solicitud',
-    icon: HandCoins,
+    icon: HelpCircle,
     color: 'amber',
     actionLabel: 'Ofrecer mi servicio',
     respondedLabel: 'Ya ofreciste tu servicio'
