@@ -32,6 +32,7 @@ import {
   PromotionsPanel,
   FinancePanel,
 } from '../../components/dashboard';
+import NotificationPrompt from '../../components/NotificationPrompt';
 
 const TABS = [
   { id: 'resumen', label: 'Resumen', icon: LayoutDashboard },
@@ -162,6 +163,9 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6 pb-24">
+      {/* Prompt para habilitar notificaciones (dueños de pulpería) */}
+      <NotificationPrompt />
+
       {/* Enhanced Dashboard Header */}
       <DashboardHeader
         pulperia={pulperia}

@@ -21,6 +21,7 @@ import { socketService } from '../../services/socket';
 import { playNotificationSound, vibrate } from '../../services/notifications';
 import { useAuthStore } from '../../stores/authStore';
 import { OrderCardEnhanced } from '../../components/orders';
+import NotificationPrompt from '../../components/NotificationPrompt';
 
 const statusConfig = {
   PENDING: { label: 'Nueva', color: 'yellow', icon: Bell },
@@ -157,6 +158,9 @@ const ManageOrders = () => {
 
   return (
     <div className="space-y-6 pb-24">
+      {/* Prompt para habilitar notificaciones (dueños de pulpería) */}
+      <NotificationPrompt />
+
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}

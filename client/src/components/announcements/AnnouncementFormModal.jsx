@@ -134,7 +134,7 @@ const AnnouncementFormModal = ({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 100, scale: 0.95 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="bg-dark-100 rounded-t-3xl sm:rounded-2xl max-w-lg w-full max-h-[90vh] sm:max-h-[85vh] flex flex-col sm:m-4 border border-white/10"
+          className="bg-dark-100 rounded-t-3xl sm:rounded-2xl max-w-lg w-full max-h-[80vh] sm:max-h-[85vh] flex flex-col sm:m-4 border border-white/10"
         >
           {/* Modal Header */}
           <div className="p-5 border-b border-white/5 flex items-center justify-between flex-shrink-0">
@@ -158,7 +158,7 @@ const AnnouncementFormModal = ({
 
           <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
             {/* Scrollable Content */}
-            <div className="p-5 space-y-5 overflow-y-auto flex-1">
+            <div className="p-5 pb-20 space-y-5 overflow-y-auto flex-1">
               {/* Imagen - Prominente */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
