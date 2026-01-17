@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Package, ChevronRight, Clock, CheckCircle, XCircle, Truck } from 'lucide-react';
 import { orderApi } from '../services/api';
+import NotificationPrompt from '../components/NotificationPrompt';
 
 const statusConfig = {
   PENDING: { label: 'Pendiente', color: 'text-yellow-400', bg: 'bg-yellow-500/20', border: 'border-yellow-500/30', icon: Clock },
@@ -49,6 +50,9 @@ const Orders = () => {
           <p className="text-gray-400 text-sm">{orders.length} pedido{orders.length !== 1 ? 's' : ''}</p>
         </div>
       </motion.div>
+
+      {/* Prompt para activar notificaciones */}
+      <NotificationPrompt />
 
       {orders.length > 0 ? (
         <motion.div

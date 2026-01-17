@@ -176,10 +176,15 @@ router.post('/', authenticate, async (req, res) => {
     if (pulperiaOwner?.fcmToken) {
       try {
         console.log(`[NOTIF] Sending push to user ${pulperia.userId}...`);
+        // Crear resumen creativo de productos
+        const productSummary = orderItems.slice(0, 2).map(i => i.productName).join(', ');
+        const extra = orderItems.length > 2 ? ` +${orderItems.length - 2} más` : '';
+        const notifBody = `${req.user.name}: ${productSummary}${extra} • L.${total.toFixed(2)}`;
+
         await sendPushNotification(
           pulperiaOwner.fcmToken,
-          '¡Nueva orden recibida!',
-          `${req.user.name} hizo un pedido por L.${total.toFixed(2)}`,
+          '🛒 ¡Nueva orden recibida!',
+          notifBody,
           {
             type: 'new_order',
             orderId: order.id,
@@ -295,10 +300,15 @@ router.post('/batch', authenticate, async (req, res) => {
       if (pulperiaOwner?.fcmToken) {
         try {
           console.log(`[NOTIF-BATCH] Sending push to user ${pulperia.userId}...`);
+          // Crear resumen creativo de productos
+          const productSummary = orderItems.slice(0, 2).map(i => i.productName).join(', ');
+          const extra = orderItems.length > 2 ? ` +${orderItems.length - 2} más` : '';
+          const notifBody = `${req.user.name}: ${productSummary}${extra} • L.${total.toFixed(2)}`;
+
           await sendPushNotification(
             pulperiaOwner.fcmToken,
-            '¡Nueva orden recibida!',
-            `Nuevo pedido por L.${total.toFixed(2)}`,
+            '🛒 ¡Nueva orden recibida!',
+            notifBody,
             {
               type: 'new_order',
               orderId: order.id,

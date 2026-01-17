@@ -67,24 +67,63 @@ export const sendPushNotification = async (token, title, body, data = {}) => {
       return;
     }
 
+    // Convertir todos los valores de data a strings (requerido por FCM)
+    const stringData = Object.fromEntries(
+      Object.entries(data).map(([k, v]) => [k, String(v)])
+    );
+
+    // Agregar click_url si hay orderId
+    if (data.orderId) {
+      stringData.click_url = `/order/${data.orderId}`;
+    }
+
     const message = {
       token,
       notification: {
         title,
         body,
       },
-      data,
+      data: stringData,
+      // Android: Prioridad alta para despertar el Service Worker
+      android: {
+        priority: 'high',
+        notification: {
+          channelId: 'orders',
+          priority: 'high',
+          sound: 'default',
+        },
+      },
+      // iOS: Configuración para notificaciones en background
+      apns: {
+        payload: {
+          aps: {
+            contentAvailable: true,
+            sound: 'default',
+          },
+        },
+        headers: {
+          'apns-priority': '10',
+        },
+      },
+      // Web Push: Configuración completa para PWA
       webpush: {
         notification: {
-          icon: '/icon-192.png',
-          badge: '/badge.png',
+          icon: '/icons/icon-192.png',
+          badge: '/icons/badge-72.png',
           vibrate: [200, 100, 200],
           requireInteraction: true,
+        },
+        fcmOptions: {
+          link: data.orderId ? `/order/${data.orderId}` : '/',
+        },
+        headers: {
+          Urgency: 'high',
         },
       },
     };
 
     await admin.messaging().send(message);
+    console.log(`[NOTIF] Push sent: "${title}" to token ${token.substring(0, 20)}...`);
   } catch (error) {
     console.error('Error sending push notification:', error);
   }

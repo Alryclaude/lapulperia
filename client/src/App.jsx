@@ -47,8 +47,12 @@ import PulperiaRoute from './components/auth/PulperiaRoute';
 // Hooks
 import { useSocket } from './hooks/useSocket';
 
+// Notifications
+import { onForegroundMessage } from './services/firebase';
+import { showNotificationWithEffects } from './services/notifications';
+
 function App() {
-  const { initialize, isLoading } = useAuthStore();
+  const { initialize, isLoading, user } = useAuthStore();
 
   // Initialize socket connection for real-time updates
   useSocket();
@@ -56,6 +60,35 @@ function App() {
   useEffect(() => {
     initialize();
   }, [initialize]);
+
+  // Escuchar notificaciones en foreground
+  useEffect(() => {
+    if (!user) return;
+
+    const unsubscribe = onForegroundMessage((payload) => {
+      console.log('[App] Foreground message received:', payload);
+
+      const { notification, data } = payload;
+      if (!notification) return;
+
+      // Determinar tipo de sonido según el tipo de notificación
+      const soundType = data?.type === 'new_order' ? 'order' : 'default';
+
+      showNotificationWithEffects(notification.title, {
+        body: notification.body,
+        soundType,
+        data,
+        onClick: () => {
+          // Navegar a la orden si hay orderId
+          if (data?.orderId) {
+            window.location.href = `/order/${data.orderId}`;
+          }
+        },
+      });
+    });
+
+    return () => unsubscribe?.();
+  }, [user]);
 
   if (isLoading) {
     return (
