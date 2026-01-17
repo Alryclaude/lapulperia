@@ -56,12 +56,17 @@ const PulperiaProfile = () => {
     setProductModalOpen(true);
   };
 
-  const { data: pulperiaData, isLoading } = useQuery({
+  const { data: pulperiaData, isLoading, error } = useQuery({
     queryKey: ['pulperia', id],
     queryFn: () => pulperiaApi.getById(id),
+    enabled: !!id,
     staleTime: 0,
     refetchOnMount: 'always',
+    retry: 1,
   });
+
+  // Debug: log para ver qué devuelve la API
+  console.log('PulperiaProfile debug:', { id, pulperiaData, error });
 
   const pulperia = pulperiaData?.data?.pulperia;
   const isFavorite = pulperiaData?.data?.isFavorite;
