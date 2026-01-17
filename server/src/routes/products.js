@@ -567,7 +567,7 @@ router.delete('/:id', authenticate, requirePulperia, async (req, res) => {
 });
 
 // Bulk create products with images
-router.post('/bulk-create-with-images', authenticate, requirePulperia, uploadProduct.array('images', 20), async (req, res) => {
+router.post('/bulk-create-with-images', authenticate, requirePulperia, uploadProduct.array('images'), async (req, res) => {
   try {
     const { products: productsJson } = req.body;
 
@@ -584,10 +584,6 @@ router.post('/bulk-create-with-images', authenticate, requirePulperia, uploadPro
 
     if (!Array.isArray(products) || products.length === 0) {
       return res.status(400).json({ error: { message: 'Se requiere al menos un producto' } });
-    }
-
-    if (products.length > 20) {
-      return res.status(400).json({ error: { message: 'Máximo 20 productos por carga' } });
     }
 
     if (!req.files || req.files.length === 0) {

@@ -6,7 +6,6 @@ import { productApi } from '../../services/api';
 import toast from 'react-hot-toast';
 import ImageProductCard from './ImageProductCard';
 
-const MAX_IMAGES = 20;
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
@@ -40,13 +39,6 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
       const errors = file.errors.map((e) => e.message).join(', ');
       toast.error(`${file.file.name}: ${errors}`);
     });
-
-    // Check total limit
-    const totalImages = images.length + acceptedFiles.length;
-    if (totalImages > MAX_IMAGES) {
-      toast.error(`Máximo ${MAX_IMAGES} imágenes. Se agregaron ${MAX_IMAGES - images.length} de ${acceptedFiles.length}`);
-      acceptedFiles = acceptedFiles.slice(0, MAX_IMAGES - images.length);
-    }
 
     // Create image objects with previews
     const newImages = acceptedFiles.map((file) => ({
@@ -207,7 +199,7 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
                 {isDragActive ? 'Suelta las imágenes aquí' : 'Arrastra imágenes o haz clic'}
               </h3>
               <p className="text-gray-400 text-sm mb-4">
-                Formatos: JPG, PNG, WEBP • Máximo 10MB cada una • Hasta {MAX_IMAGES} imágenes
+                Formatos: JPG, PNG, WEBP • Máximo 10MB cada una
               </p>
               <button
                 type="button"
@@ -221,14 +213,14 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
             /* Image Grid */
             <div className="space-y-4">
               {/* Add More Button */}
-              {images.length < MAX_IMAGES && !isUploading && (
+              {!isUploading && (
                 <div
                   {...getRootProps()}
                   className="border-2 border-dashed border-white/20 rounded-xl p-4 text-center hover:border-white/40 transition-colors cursor-pointer"
                 >
                   <input {...getInputProps()} />
                   <p className="text-gray-400 text-sm">
-                    <span className="text-primary-400">+ Agregar más imágenes</span> ({MAX_IMAGES - images.length} restantes)
+                    <span className="text-primary-400">+ Agregar más imágenes</span>
                   </p>
                 </div>
               )}
