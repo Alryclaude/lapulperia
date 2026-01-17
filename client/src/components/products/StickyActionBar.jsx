@@ -6,7 +6,7 @@ const StickyActionBar = ({ onAddProduct, onBulkImport }) => {
     <motion.div
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="fixed bottom-20 left-0 right-0 z-[55] px-4 md:hidden"
+      className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom)+0.75rem)] left-0 right-0 z-[55] px-4 md:hidden"
     >
       <div className="bg-dark-100/95 backdrop-blur-lg border border-white/10 rounded-2xl p-3 shadow-xl">
         <div className="flex gap-3">
