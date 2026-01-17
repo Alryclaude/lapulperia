@@ -413,8 +413,8 @@ const ManageProducts = () => {
       <BulkImageUpload
         isOpen={showBulkImport}
         onClose={() => setShowBulkImport(false)}
-        onSuccess={() => {
-          queryClient.invalidateQueries({ queryKey: ['my-products'] });
+        onSuccess={async () => {
+          await queryClient.refetchQueries({ queryKey: ['my-products'] });
           setShowBulkImport(false);
         }}
       />

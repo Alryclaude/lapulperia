@@ -6,7 +6,7 @@ import { PRODUCT_CATEGORIES } from '../../constants/categories';
 const ImageProductCard = ({ image, index, onUpdate, onRemove }) => {
   const [focused, setFocused] = useState(null);
 
-  const isComplete = image.name?.trim() && image.price > 0;
+  const isComplete = image.name?.trim() && image.price && parseFloat(image.price) > 0;
 
   const handleChange = (field, value) => {
     onUpdate(index, { ...image, [field]: value });

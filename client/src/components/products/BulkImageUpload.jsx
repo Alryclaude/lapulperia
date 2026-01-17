@@ -78,7 +78,7 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
     });
   };
 
-  const completeImages = images.filter((img) => img.name?.trim() && img.price > 0);
+  const completeImages = images.filter((img) => img.name?.trim() && img.price && parseFloat(img.price) > 0);
   const incompleteCount = images.length - completeImages.length;
 
   const handleSubmit = async () => {
@@ -124,18 +124,23 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
 
       const { created, errors } = response.data;
 
+      // Si no se creó ningún producto, no cerrar el modal
+      if (created === 0) {
+        toast.error('No se creó ningún producto. Verifica los datos.');
+        setIsUploading(false);
+        return;
+      }
+
       if (created > 0) {
         toast.success(`${created} producto${created > 1 ? 's' : ''} creado${created > 1 ? 's' : ''}`);
       }
 
       if (errors && errors.length > 0) {
-        toast.error(`${errors.length} producto${errors.length > 1 ? 's' : ''} con errores`);
+        toast.warning(`${errors.length} producto${errors.length > 1 ? 's' : ''} con errores`);
       }
 
-      // Close and trigger refresh
-      setTimeout(() => {
-        onSuccess?.();
-      }, 500);
+      // ESPERAR refetch antes de cerrar modal
+      await onSuccess?.();
     } catch (error) {
       console.error('Bulk upload error:', error);
       toast.error(error.response?.data?.error?.message || 'Error al crear productos');
