@@ -21,6 +21,10 @@ import businessHoursRoutes from './routes/business-hours.js';
 import promotionsRoutes from './routes/promotions.js';
 import pulperiaServicesRoutes from './routes/pulperia-services.js';
 import stampsRoutes from './routes/stamps.js';
+import paymentRoutes from './routes/payment.js';
+import fiadoRoutes from './routes/fiado.js';
+import shippingRoutes from './routes/shipping.js';
+import clientFeaturesRoutes from './routes/client-features.js';
 
 dotenv.config();
 
@@ -130,6 +134,10 @@ app.use('/api/business-hours', businessHoursRoutes);
 app.use('/api/promotions', promotionsRoutes);
 app.use('/api/pulperia-services', pulperiaServicesRoutes);
 app.use('/api/stamps', stampsRoutes);
+app.use('/api/payment', paymentRoutes);
+app.use('/api/fiado', fiadoRoutes);
+app.use('/api/shipping', shippingRoutes);
+app.use('/api/client', clientFeaturesRoutes);
 
 /* =========================
    SOCKET EVENTS

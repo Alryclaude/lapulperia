@@ -1,8 +1,11 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
-import { Package, ChevronRight, Clock, CheckCircle, XCircle, Truck, AlertCircle } from 'lucide-react';
-import { orderApi } from '../services/api';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Package, ChevronRight, Clock, CheckCircle, XCircle, Truck, AlertCircle, RefreshCw, Loader2 } from 'lucide-react';
+import { orderApi, clientFeaturesApi } from '../services/api';
+import { useCartStore } from '../stores/cartStore';
+import toast from 'react-hot-toast';
 import NotificationPrompt from '../components/NotificationPrompt';
 
 const statusConfig = {
@@ -14,13 +17,61 @@ const statusConfig = {
   CANCELLED: { label: 'Cancelado', color: 'text-red-400', bg: 'bg-red-500/20', border: 'border-red-500/30', icon: XCircle },
 };
 
+const DEFAULT_STATUS = { label: 'Desconocido', color: 'text-gray-400', bg: 'bg-gray-500/20', border: 'border-gray-500/30', icon: AlertCircle };
+
 const Orders = () => {
+  const navigate = useNavigate();
+  const { addItem, clearCart } = useCartStore();
+  const [reorderingId, setReorderingId] = useState(null);
+
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['my-orders'],
     queryFn: () => orderApi.getMyOrders({}),
   });
 
   const orders = data?.data?.orders || [];
+
+  const handleReorder = async (e, orderId, pulperiaId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setReorderingId(orderId);
+
+    try {
+      const response = await clientFeaturesApi.getReorderData(orderId);
+      const { items, pulperia, allAvailable, hasPriceChanges, newTotal } = response.data;
+
+      if (!allAvailable) {
+        const unavailable = items.filter(i => !i.isAvailable).length;
+        toast(`${unavailable} producto(s) ya no disponible(s)`, { icon: '!' });
+      }
+
+      if (hasPriceChanges) {
+        toast('Algunos precios han cambiado', { icon: 'i' });
+      }
+
+      // Limpiar carrito y agregar items disponibles
+      clearCart();
+      items.filter(i => i.isAvailable).forEach(item => {
+        addItem({
+          id: item.productId,
+          name: item.productName,
+          price: item.currentPrice,
+          image: item.productImage,
+          pulperiaId,
+          pulperiaName: pulperia.name,
+          quantity: item.quantity,
+        });
+      });
+
+      toast.success('Productos agregados al carrito');
+      navigate('/cart');
+    } catch (error) {
+      console.error('Reorder error:', error);
+      toast.error('Error al reordenar');
+    } finally {
+      setReorderingId(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -86,8 +137,9 @@ const Orders = () => {
           className="space-y-4"
         >
           {orders.map((order, index) => {
-            const status = statusConfig[order.status];
+            const status = statusConfig[order.status] || DEFAULT_STATUS;
             const StatusIcon = status.icon;
+            const pulperia = order.pulperia || {};
 
             return (
               <motion.div
@@ -102,16 +154,16 @@ const Orders = () => {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      {order.pulperia.logo ? (
-                        <img src={order.pulperia.logo} alt="" className="w-12 h-12 rounded-xl object-cover border border-white/10" />
+                      {pulperia.logo ? (
+                        <img src={pulperia.logo} alt="" className="w-12 h-12 rounded-xl object-cover border border-white/10" />
                       ) : (
                         <div className="w-12 h-12 rounded-xl bg-primary-500/20 flex items-center justify-center border border-primary-500/30">
                           <Package className="w-6 h-6 text-primary-400" />
                         </div>
                       )}
                       <div>
-                        <p className="font-semibold text-white">{order.pulperia.name}</p>
-                        <p className="text-sm text-gray-500">{order.orderNumber}</p>
+                        <p className="font-semibold text-white">{pulperia.name || 'Pulperia'}</p>
+                        <p className="text-sm text-gray-500">{order.orderNumber || 'Sin numero'}</p>
                       </div>
                     </div>
                     <ChevronRight className="w-5 h-5 text-gray-500 group-hover:text-gray-300 transition-colors" />
@@ -123,12 +175,35 @@ const Orders = () => {
                       {status.label}
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold text-white">L. {order.total.toFixed(2)}</p>
+                      <p className="font-semibold text-white">L. {(order.total || 0).toFixed(2)}</p>
                       <p className="text-xs text-gray-500">
-                        {new Date(order.createdAt).toLocaleDateString('es-HN')}
+                        {order.createdAt ? new Date(order.createdAt).toLocaleDateString('es-HN') : 'Sin fecha'}
                       </p>
                     </div>
                   </div>
+
+                  {/* Reorder button - solo para ordenes completadas */}
+                  {order.status === 'DELIVERED' && (
+                    <motion.button
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
+                      onClick={(e) => handleReorder(e, order.id, order.pulperiaId)}
+                      disabled={reorderingId === order.id}
+                      className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 bg-primary-500/10 hover:bg-primary-500/20 text-primary-400 rounded-xl font-medium transition-colors border border-primary-500/20 disabled:opacity-50"
+                    >
+                      {reorderingId === order.id ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Procesando...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="w-4 h-4" />
+                          Reordenar
+                        </>
+                      )}
+                    </motion.button>
+                  )}
                 </Link>
               </motion.div>
             );

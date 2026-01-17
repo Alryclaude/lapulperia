@@ -17,6 +17,8 @@ const statusConfig = {
   CANCELLED: { label: 'Cancelado', color: 'text-red-600', bg: 'bg-red-100', icon: XCircle },
 };
 
+const DEFAULT_STATUS = { label: 'Desconocido', color: 'text-gray-600', bg: 'bg-gray-100', icon: Package };
+
 const OrderDetail = () => {
   const { id } = useParams();
   const queryClient = useQueryClient();
@@ -54,9 +56,10 @@ const OrderDetail = () => {
   };
 
   const handleWhatsApp = () => {
-    const phone = order.pulperia.whatsapp || order.pulperia.phone;
+    const pulperiaData = order?.pulperia || {};
+    const phone = pulperiaData.whatsapp || pulperiaData.phone;
     if (phone) {
-      const message = `Hola! Tengo una consulta sobre mi pedido #${order.orderNumber}`;
+      const message = `Hola! Tengo una consulta sobre mi pedido #${order.orderNumber || ''}`;
       window.open(`https://wa.me/504${phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`, '_blank');
     }
   };
@@ -79,8 +82,10 @@ const OrderDetail = () => {
     );
   }
 
-  const status = statusConfig[order.status];
+  const status = statusConfig[order.status] || DEFAULT_STATUS;
   const StatusIcon = status.icon;
+  const pulperia = order.pulperia || {};
+  const items = order.items || [];
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -120,17 +125,17 @@ const OrderDetail = () => {
       </div>
 
       {/* Pulperia */}
-      <Link to={`/pulperia/${order.pulperia.id}`} className="card p-4 flex items-center gap-4">
-        {order.pulperia.logo ? (
-          <img src={order.pulperia.logo} alt="" className="w-14 h-14 rounded-xl object-cover" />
+      <Link to={`/pulperia/${pulperia.id || ''}`} className="card p-4 flex items-center gap-4">
+        {pulperia.logo ? (
+          <img src={pulperia.logo} alt="" className="w-14 h-14 rounded-xl object-cover" />
         ) : (
           <div className="w-14 h-14 rounded-xl bg-primary-100 flex items-center justify-center">
             <Store className="w-7 h-7 text-primary-600" />
           </div>
         )}
         <div className="flex-1">
-          <p className="font-semibold text-gray-900">{order.pulperia.name}</p>
-          <p className="text-sm text-gray-500">{order.pulperia.address}</p>
+          <p className="font-semibold text-gray-900">{pulperia.name || 'Pulperia'}</p>
+          <p className="text-sm text-gray-500">{pulperia.address || 'Sin direccion'}</p>
         </div>
       </Link>
 
@@ -138,24 +143,31 @@ const OrderDetail = () => {
       <div className="card overflow-hidden">
         <h3 className="px-5 py-3 bg-gray-50 font-medium text-gray-700">Productos</h3>
         <div className="divide-y">
-          {order.items.map((item) => (
-            <div key={item.id} className="p-4 flex items-center gap-4">
-              <img
-                src={item.product.imageUrl}
-                alt={item.product.name}
-                className="w-16 h-16 rounded-xl object-cover"
-              />
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-900 truncate">{item.product.name}</p>
-                <p className="text-sm text-gray-500">x{item.quantity}</p>
+          {items.map((item) => {
+            const productImage = item.productImage || item.product?.imageUrl || '/placeholder-product.png';
+            const productName = item.productName || item.product?.name || 'Producto';
+            const itemPrice = item.priceAtTime || item.price || 0;
+
+            return (
+              <div key={item.id} className="p-4 flex items-center gap-4">
+                <img
+                  src={productImage}
+                  alt={productName}
+                  className="w-16 h-16 rounded-xl object-cover"
+                  onError={(e) => { e.target.src = '/placeholder-product.png'; }}
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-gray-900 truncate">{productName}</p>
+                  <p className="text-sm text-gray-500">x{item.quantity || 1}</p>
+                </div>
+                <p className="font-semibold text-gray-900">L. {(itemPrice * (item.quantity || 1)).toFixed(2)}</p>
               </div>
-              <p className="font-semibold text-gray-900">L. {(item.price * item.quantity).toFixed(2)}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
         <div className="px-5 py-4 bg-gray-50 border-t flex justify-between">
           <span className="font-medium text-gray-700">Total</span>
-          <span className="text-xl font-bold text-primary-600">L. {order.total.toFixed(2)}</span>
+          <span className="text-xl font-bold text-primary-600">L. {(order.total || 0).toFixed(2)}</span>
         </div>
       </div>
 
@@ -175,9 +187,9 @@ const OrderDetail = () => {
             <span className="font-semibold">Tu pedido esta listo!</span>
           </div>
           <p className="text-green-600 mb-4">
-            Puedes pasar a recogerlo en {order.pulperia.name}
+            Puedes pasar a recogerlo en {pulperia.name || 'la pulperia'}
           </p>
-          {(order.pulperia.whatsapp || order.pulperia.phone) && (
+          {(pulperia.whatsapp || pulperia.phone) && (
             <button onClick={handleWhatsApp} className="btn-primary w-full">
               <MessageCircle className="w-5 h-5" />
               Contactar por WhatsApp

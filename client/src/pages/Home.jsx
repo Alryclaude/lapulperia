@@ -12,19 +12,34 @@ import {
   HowItWorks,
   FeaturesSection,
   MapSection,
-  StatsSection,
-  TestimonialsSection,
   OpenPulperiasSection,
+  OnlineStoresSection,
   FAQSection,
   CTASection,
 } from '../components/home';
 import FullscreenMap from '../components/map/FullscreenMap';
+
+// Hook para detectar primera visita
+const useFirstVisit = () => {
+  const [isFirstVisit, setIsFirstVisit] = useState(false);
+
+  useEffect(() => {
+    const hasVisited = localStorage.getItem('lapulperia_visited');
+    if (!hasVisited) {
+      setIsFirstVisit(true);
+      localStorage.setItem('lapulperia_visited', 'true');
+    }
+  }, []);
+
+  return isFirstVisit;
+};
 
 const Home = () => {
   const { isAuthenticated } = useAuthStore();
   const [location, setLocation] = useState(null);
   const [isFullMapOpen, setIsFullMapOpen] = useState(false);
   const { isInstallable, promptInstall, dismissPrompt } = useInstallPrompt();
+  const isFirstVisit = useFirstVisit();
 
   // Subscribe to real-time pulperia status updates
   usePulperiaStatusUpdates((data) => {
@@ -52,11 +67,11 @@ const Home = () => {
     }
   }, []);
 
-  // Fetch nearby pulperias
+  // Fetch nearby pulperias (locales)
   const { data: pulperiasData, isLoading } = useQuery({
     queryKey: ['pulperias', location],
     queryFn: () =>
-      pulperiaApi.getAll({
+      pulperiaApi.getLocalStores({
         lat: location?.lat,
         lng: location?.lng,
         radius: 5000,
@@ -67,7 +82,16 @@ const Home = () => {
     staleTime: 15000,
   });
 
+  // Fetch online stores (no necesitan ubicación)
+  const { data: onlineData, isLoading: isLoadingOnline } = useQuery({
+    queryKey: ['online-stores'],
+    queryFn: () => pulperiaApi.getOnlineStores({ limit: 6 }),
+    refetchInterval: 60000,
+    staleTime: 30000,
+  });
+
   const pulperias = pulperiasData?.data?.pulperias || [];
+  const onlineStores = onlineData?.data?.pulperias || [];
   const openPulperias = pulperias.filter((p) => p.status === 'OPEN');
 
   // Calculate total products count (approximate)
@@ -94,13 +118,10 @@ const Home = () => {
       {/* 3. Value Proposition */}
       <ValueProposition />
 
-      {/* 4. How It Works */}
-      <HowItWorks />
+      {/* 4. How It Works - Solo para primera visita */}
+      {isFirstVisit && <HowItWorks />}
 
-      {/* 5. Features Section */}
-      <FeaturesSection />
-
-      {/* 6. Map Section */}
+      {/* 5. Map Section */}
       <MapSection
         location={location}
         pulperias={pulperias}
@@ -108,19 +129,19 @@ const Home = () => {
         onOpenFullMap={() => setIsFullMapOpen(true)}
       />
 
-      {/* 7. Stats Section */}
-      <StatsSection />
-
-      {/* 8. Testimonials Section */}
-      <TestimonialsSection />
-
-      {/* 9. Open Pulperias Section */}
+      {/* 6. Open Pulperias Section */}
       <OpenPulperiasSection pulperias={openPulperias} />
 
-      {/* 10. FAQ Section */}
+      {/* 7. Online Stores Section */}
+      <OnlineStoresSection pulperias={onlineStores} isLoading={isLoadingOnline} />
+
+      {/* 8. Features Section - Solo para primera visita */}
+      {isFirstVisit && <FeaturesSection />}
+
+      {/* 8. FAQ Section */}
       <FAQSection />
 
-      {/* 11. CTA Section */}
+      {/* 9. CTA Section */}
       <CTASection isAuthenticated={isAuthenticated} />
 
       {/* Fullscreen Map Modal */}

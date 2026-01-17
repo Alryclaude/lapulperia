@@ -71,8 +71,10 @@ model User {
   favorites           Favorite[]
   shoppingLists       ShoppingList[]
   productAlerts       ProductAlert[]
+  productFavorites    ProductFavorite[]
   loyaltyPoints       LoyaltyPoint[]
   stamps              Stamp[]
+  fiadoAccounts       FiadoAccount[]
 
   @@index([email])
   @@index([firebaseUid])
@@ -141,6 +143,8 @@ model Pulperia {
   services            PulperiaService[]
   stamps              Stamp[]
   shippingMethods     ShippingMethod[]
+  paymentMethods      PaymentMethod[]
+  fiadoAccounts       FiadoAccount[]
 
   @@index([latitude, longitude])
   @@index([status])
@@ -160,6 +164,81 @@ model ShippingMethod {
   pulperia      Pulperia  @relation(fields: [pulperiaId], references: [id], onDelete: Cascade)
 
   @@index([pulperiaId])
+}
+
+// Metodos de pago configurados por pulpería
+enum PaymentProvider {
+  // Bancos Honduras
+  BAC
+  BANPAIS
+  FICOHSA
+  ATLANTIDA
+  DAVIVIENDA
+  OCCIDENTE
+  BANRURAL
+  LAFISE
+  // Billeteras
+  TIGO_MONEY
+  TENGO
+  // Otros
+  CASH
+  OTHER
+}
+
+model PaymentMethod {
+  id              String          @id @default(cuid())
+  pulperiaId      String
+  provider        PaymentProvider
+  accountName     String          // Nombre del titular
+  accountNumber   String          // Número de cuenta/teléfono
+  instructions    String?         // Instrucciones adicionales
+  isActive        Boolean         @default(true)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  pulperia        Pulperia        @relation(fields: [pulperiaId], references: [id], onDelete: Cascade)
+
+  @@index([pulperiaId])
+}
+
+// Sistema de Fiado
+model FiadoAccount {
+  id            String              @id @default(cuid())
+  pulperiaId    String
+  clientId      String
+  creditLimit   Float               @default(0)   // Límite definido por pulpería
+  currentBalance Float              @default(0)   // Deuda actual
+  isBlocked     Boolean             @default(false)
+  lastPaymentAt DateTime?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  pulperia      Pulperia            @relation(fields: [pulperiaId], references: [id], onDelete: Cascade)
+  client        User                @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  transactions  FiadoTransaction[]
+
+  @@unique([pulperiaId, clientId])
+  @@index([pulperiaId])
+  @@index([clientId])
+}
+
+enum FiadoType {
+  CREDIT    // Se fió algo (agrega deuda)
+  PAYMENT   // Abonó/pagó (reduce deuda)
+}
+
+model FiadoTransaction {
+  id          String      @id @default(cuid())
+  accountId   String
+  type        FiadoType
+  amount      Float
+  orderId     String?     // Referencia al pedido (si es CREDIT)
+  note        String?
+  createdAt   DateTime    @default(now())
+
+  account     FiadoAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
 }
 
 // Productos
@@ -196,6 +275,7 @@ model Product {
   pulperia            Pulperia        @relation(fields: [pulperiaId], references: [id], onDelete: Cascade)
   orderItems          OrderItem[]
   productAlerts       ProductAlert[]
+  productFavorites    ProductFavorite[]
 
   @@index([pulperiaId])
   @@index([category])
@@ -372,6 +452,21 @@ model ProductAlert {
   product             Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([userId, productId])
+}
+
+// Productos favoritos del cliente
+model ProductFavorite {
+  id                  String          @id @default(cuid())
+  userId              String
+  productId           String
+
+  createdAt           DateTime        @default(now())
+
+  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product             Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId])
 }
 
 // Push subscriptions

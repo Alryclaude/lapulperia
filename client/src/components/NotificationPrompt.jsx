@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, X, Check, Loader2 } from 'lucide-react';
+import { Bell, X, Check, Loader2, AlertTriangle } from 'lucide-react';
 import { requestNotificationPermission } from '../services/firebase';
 import { userApi } from '../api/auth';
+import toast from 'react-hot-toast';
 
 const NotificationPrompt = ({ variant = 'banner' }) => {
   const [permission, setPermission] = useState('default');
   const [isLoading, setIsLoading] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     // Verificar permiso actual
@@ -23,19 +25,61 @@ const NotificationPrompt = ({ variant = 'banner' }) => {
 
   const handleEnable = async () => {
     setIsLoading(true);
+    setError(null);
+
     try {
+      // Verificar si las notificaciones están soportadas
+      if (!('Notification' in window)) {
+        setError('Tu navegador no soporta notificaciones');
+        toast.error('Tu navegador no soporta notificaciones');
+        return;
+      }
+
+      // Verificar si el service worker está disponible
+      if (!('serviceWorker' in navigator)) {
+        setError('Service Worker no disponible');
+        toast.error('Service Worker no disponible en este navegador');
+        return;
+      }
+
+      // Registrar service worker si no está activo
+      const registration = await navigator.serviceWorker.ready;
+      console.log('[NotificationPrompt] Service Worker ready:', registration);
+
       const token = await requestNotificationPermission();
+
       if (token) {
+        console.log('[NotificationPrompt] FCM Token obtenido:', token.substring(0, 20) + '...');
+
         // Guardar token en el servidor
-        await userApi.updateFCMToken(token);
+        try {
+          await userApi.updateFCMToken(token);
+          console.log('[NotificationPrompt] Token registrado en servidor');
+        } catch (apiError) {
+          console.error('[NotificationPrompt] Error al guardar token:', apiError);
+          // Aun si falla el servidor, las notificaciones locales pueden funcionar
+        }
+
         setPermission('granted');
         setIsSuccess(true);
+        toast.success('Notificaciones activadas');
         setTimeout(() => setIsDismissed(true), 2000);
       } else {
-        setPermission(Notification.permission);
+        const currentPermission = Notification.permission;
+        setPermission(currentPermission);
+
+        if (currentPermission === 'denied') {
+          setError('Permiso denegado. Habilita notificaciones en la configuracion de tu navegador.');
+          toast.error('Notificaciones bloqueadas. Revisa la configuracion del navegador.');
+        } else {
+          setError('No se pudo obtener el token de notificaciones');
+          toast.error('Error al activar notificaciones. Intenta de nuevo.');
+        }
       }
     } catch (error) {
-      console.error('Error enabling notifications:', error);
+      console.error('[NotificationPrompt] Error:', error);
+      setError('Error al activar notificaciones');
+      toast.error('Error al activar notificaciones');
     } finally {
       setIsLoading(false);
     }
@@ -47,8 +91,32 @@ const NotificationPrompt = ({ variant = 'banner' }) => {
   };
 
   // No mostrar si ya tiene permisos o fue descartado
-  if (permission === 'granted' || permission === 'denied' || isDismissed) {
+  if (permission === 'granted' || isDismissed) {
     return null;
+  }
+
+  // Si fue denegado, mostrar mensaje de ayuda
+  if (permission === 'denied') {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 mb-4"
+      >
+        <div className="flex items-center gap-3">
+          <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0" />
+          <p className="text-sm text-amber-200">
+            Notificaciones bloqueadas. Para activarlas, haz click en el icono de candado junto a la URL.
+          </p>
+          <button
+            onClick={handleDismiss}
+            className="text-amber-400 hover:text-amber-300 text-xs underline flex-shrink-0"
+          >
+            Entendido
+          </button>
+        </div>
+      </motion.div>
+    );
   }
 
   // Variante compacta para usar en listas

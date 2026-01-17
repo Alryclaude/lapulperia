@@ -7,6 +7,7 @@ export { default as MapSection } from './MapSection';
 export { default as StatsSection } from './StatsSection';
 export { default as TestimonialsSection } from './TestimonialsSection';
 export { default as OpenPulperiasSection } from './OpenPulperiasSection';
+export { default as OnlineStoresSection } from './OnlineStoresSection';
 export { default as AllPulperiasSection } from './AllPulperiasSection';
 export { default as FAQSection } from './FAQSection';
 export { default as CTASection } from './CTASection';

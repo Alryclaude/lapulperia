@@ -3,8 +3,33 @@ import prisma from '../services/prisma.js';
 import { authenticate, optionalAuth, requirePulperia } from '../middleware/auth.js';
 import { uploadLogo, uploadBanner, uploadStory, deleteImage } from '../services/cloudinary.js';
 import { getDistance } from '../utils/geo.js';
+import { calculatePulperiaStatus } from '../utils/scheduleUtils.js';
 
 const router = express.Router();
+
+/**
+ * Calcula el estado de la pulpería basado en su horario
+ * @param {Object} pulperia - Datos de la pulpería con businessHours
+ * @returns {Object} Pulpería con estado calculado
+ */
+function enrichPulperiaWithStatus(pulperia) {
+  if (!pulperia) return pulperia;
+
+  const { status, opensAt, closesAt, statusMessage } = calculatePulperiaStatus(
+    pulperia.businessHours,
+    pulperia
+  );
+
+  return {
+    ...pulperia,
+    status,
+    opensAt,
+    closesAt,
+    statusMessage,
+    // Mantener businessHours pero no incluirlo en la respuesta principal
+    businessHours: undefined,
+  };
+}
 
 // Get all pulperias (with filters)
 router.get('/', optionalAuth, async (req, res) => {
@@ -18,11 +43,19 @@ router.get('/', optionalAuth, async (req, res) => {
       search,
       limit = 50,
       offset = 0,
+      type = 'all', // 'all' | 'local' | 'online'
     } = req.query;
 
     const where = {
       isPermanentlyClosed: false,
     };
+
+    // Filtro por tipo de negocio
+    if (type === 'local') {
+      where.isOnlineOnly = false;
+    } else if (type === 'online') {
+      where.isOnlineOnly = true;
+    }
 
     if (status) {
       where.status = status;
@@ -44,6 +77,11 @@ router.get('/', optionalAuth, async (req, res) => {
         user: {
           select: { name: true, avatar: true },
         },
+        businessHours: true,
+        shippingMethods: {
+          where: { isActive: true },
+          select: { id: true, name: true, coverageArea: true, estimatedDays: true, baseCost: true },
+        },
         _count: {
           select: { products: true, reviews: true },
         },
@@ -53,13 +91,20 @@ router.get('/', optionalAuth, async (req, res) => {
       orderBy: { rating: 'desc' },
     });
 
-    // Filter by distance if coordinates provided
+    // Enriquecer cada pulpería con su estado calculado basado en horario
+    pulperias = pulperias.map(enrichPulperiaWithStatus);
+
+    // Filter by distance if coordinates provided (solo para negocios locales)
     if (hasCoordinates) {
       const userLat = parseFloat(lat);
       const userLng = parseFloat(lng);
       const maxRadius = parseFloat(radius);
 
       pulperias = pulperias.filter((p) => {
+        // Negocios online no tienen ubicación, solo incluir si no se está filtrando por distancia
+        if (p.isOnlineOnly || p.latitude === null || p.longitude === null) {
+          return false; // Excluir de filtro por distancia
+        }
         const distance = getDistance(userLat, userLng, p.latitude, p.longitude);
         p.distance = distance;
         return distance <= maxRadius;
@@ -137,7 +182,7 @@ router.get('/me', authenticate, requirePulperia, async (req, res) => {
 // Get single pulperia (DEBE ir después de rutas específicas como /favorites y /me)
 router.get('/:id', optionalAuth, async (req, res) => {
   try {
-    const pulperia = await prisma.pulperia.findUnique({
+    let pulperia = await prisma.pulperia.findUnique({
       where: { id: req.params.id },
       include: {
         user: {
@@ -156,6 +201,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
         },
         achievements: true,
         loyaltyProgram: true,
+        businessHours: true,
         _count: {
           select: { products: true, reviews: true, orders: true },
         },
@@ -165,6 +211,9 @@ router.get('/:id', optionalAuth, async (req, res) => {
     if (!pulperia) {
       return res.status(404).json({ error: { message: 'Pulpería no encontrada' } });
     }
+
+    // Calcular estado basado en horario
+    pulperia = enrichPulperiaWithStatus(pulperia);
 
     // Check if user has favorited
     let isFavorite = false;

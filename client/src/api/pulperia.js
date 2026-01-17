@@ -2,6 +2,8 @@ import api from './client';
 
 export const pulperiaApi = {
   getAll: (params) => api.get('/pulperias', { params }),
+  getOnlineStores: (params) => api.get('/pulperias', { params: { ...params, type: 'online' } }),
+  getLocalStores: (params) => api.get('/pulperias', { params: { ...params, type: 'local' } }),
   getById: (id) => api.get(`/pulperias/${id}`),
   getMine: () => api.get('/pulperias/me'),
   getFavorites: () => api.get('/pulperias/favorites'),

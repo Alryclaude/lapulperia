@@ -38,6 +38,9 @@ import ManageJobs from './pages/pulperia/ManageJobs';
 import ManageServices from './pages/pulperia/ManageServices';
 import ManagePromotions from './pages/pulperia/ManagePromotions';
 import PulperiaSettings from './pages/pulperia/PulperiaSettings';
+import PaymentSettings from './pages/pulperia/PaymentSettings';
+import FiadoDashboard from './pages/pulperia/FiadoDashboard';
+import ShippingSettings from './pages/pulperia/ShippingSettings';
 
 // Components
 import StarField from './components/layout/StarField';
@@ -151,6 +154,9 @@ function App() {
           <Route path="/manage/services" element={<ManageServices />} />
           <Route path="/manage/promotions" element={<ManagePromotions />} />
           <Route path="/pulperia/settings" element={<PulperiaSettings />} />
+          <Route path="/pulperia/payments" element={<PaymentSettings />} />
+          <Route path="/pulperia/fiado" element={<FiadoDashboard />} />
+          <Route path="/pulperia/shipping" element={<ShippingSettings />} />
         </Route>
 
         {/* 404 */}

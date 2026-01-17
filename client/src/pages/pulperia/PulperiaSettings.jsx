@@ -4,8 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Store, MapPin, Phone, Camera, Save, Trash2, Download,
   AlertTriangle, Palmtree, X, Loader2, Settings, BookOpen,
-  Calendar, MessageCircle, Globe
+  Calendar, MessageCircle, Globe, CreditCard, Receipt, Truck,
+  ChevronRight
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { pulperiaApi, userApi } from '../../services/api';
 import { reverseGeocode } from '../../services/geocoding';
 import toast from 'react-hot-toast';
@@ -238,6 +240,65 @@ const PulperiaSettings = () => {
           <h1 className="text-2xl font-bold text-white">Configuración</h1>
           <p className="text-gray-400 text-sm">Personaliza tu pulpería</p>
         </div>
+      </motion.div>
+
+      {/* Quick Settings Links */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05 }}
+        className="grid grid-cols-1 sm:grid-cols-3 gap-3"
+      >
+        <Link to="/pulperia/payments">
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="bg-dark-100/60 backdrop-blur-sm rounded-xl border border-white/5 p-4 flex items-center gap-3 hover:border-green-500/30 transition-colors"
+          >
+            <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
+              <CreditCard className="w-5 h-5 text-green-400" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-white">Métodos de Pago</p>
+              <p className="text-xs text-gray-500">Bancos y billeteras</p>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-500" />
+          </motion.div>
+        </Link>
+
+        <Link to="/pulperia/fiado">
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="bg-dark-100/60 backdrop-blur-sm rounded-xl border border-white/5 p-4 flex items-center gap-3 hover:border-amber-500/30 transition-colors"
+          >
+            <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
+              <Receipt className="w-5 h-5 text-amber-400" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-white">Sistema de Fiado</p>
+              <p className="text-xs text-gray-500">Crédito a clientes</p>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-500" />
+          </motion.div>
+        </Link>
+
+        <Link to="/pulperia/shipping">
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="bg-dark-100/60 backdrop-blur-sm rounded-xl border border-white/5 p-4 flex items-center gap-3 hover:border-purple-500/30 transition-colors"
+          >
+            <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+              <Truck className="w-5 h-5 text-purple-400" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-white">Envíos</p>
+              <p className="text-xs text-gray-500">Tienda online</p>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-500" />
+          </motion.div>
+        </Link>
       </motion.div>
 
       {/* Banner & Logo */}

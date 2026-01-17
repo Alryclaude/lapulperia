@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Star, MapPin, Package, BadgeCheck, Store, Clock } from 'lucide-react';
+import { Star, MapPin, Package, BadgeCheck, Store, Clock, Globe, Truck } from 'lucide-react';
 import { CardGlow } from '@/components/ui/card';
 import { StatusBadge, Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -24,6 +24,7 @@ const PulperiaCard = ({ pulperia, className }) => {
   const status = statusMap[pulperia.status] || statusMap.CLOSED;
   const isOpen = pulperia.status === 'OPEN';
   const isClosed = pulperia.status === 'CLOSED';
+  const isOnlineOnly = pulperia.isOnlineOnly;
 
   const formatDistance = (distance) => {
     if (distance < 1000) {
@@ -94,11 +95,18 @@ const PulperiaCard = ({ pulperia, className }) => {
               initial={{ opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="absolute top-3 left-3"
+              className="absolute top-3 left-3 flex gap-1.5"
             >
-              <StatusBadge status={status.variant} className="shadow-lg backdrop-blur-sm">
-                {status.label}
-              </StatusBadge>
+              {isOnlineOnly ? (
+                <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 gap-1 shadow-lg backdrop-blur-sm">
+                  <Globe className="w-3 h-3" />
+                  Online
+                </Badge>
+              ) : (
+                <StatusBadge status={status.variant} className="shadow-lg backdrop-blur-sm">
+                  {status.label}
+                </StatusBadge>
+              )}
             </motion.div>
 
             {/* Verified badge - Top right */}
@@ -157,11 +165,22 @@ const PulperiaCard = ({ pulperia, className }) => {
                 </div>
               )}
 
-              {/* Distance */}
-              {pulperia.distance !== undefined && (
+              {/* Distance (solo para locales) */}
+              {!isOnlineOnly && pulperia.distance !== undefined && (
                 <div className="flex items-center gap-1 text-sm text-gray-400">
                   <MapPin className="w-3.5 h-3.5" />
                   <span>{formatDistance(pulperia.distance)}</span>
+                </div>
+              )}
+
+              {/* Shipping scope (solo para online) */}
+              {isOnlineOnly && pulperia.shippingScope && (
+                <div className="flex items-center gap-1 text-sm text-purple-400">
+                  <Truck className="w-3.5 h-3.5" />
+                  <span>
+                    {pulperia.shippingScope === 'NACIONAL' ? 'Nacional' :
+                     pulperia.shippingScope === 'DIGITAL' ? 'Digital' : 'Local'}
+                  </span>
                 </div>
               )}
 
@@ -174,8 +193,8 @@ const PulperiaCard = ({ pulperia, className }) => {
               )}
             </div>
 
-            {/* Closing time hint - Only when open */}
-            {isOpen && pulperia.closesAt && (
+            {/* Closing time hint - Only when open and local */}
+            {!isOnlineOnly && isOpen && pulperia.closesAt && (
               <div className="flex items-center gap-1.5 mt-3 px-2.5 py-1.5 bg-surface-2/80 rounded-lg border border-surface-3/50">
                 <Clock className="w-3.5 h-3.5 text-gray-500" />
                 <span className="text-xs text-gray-400">
@@ -184,12 +203,22 @@ const PulperiaCard = ({ pulperia, className }) => {
               </div>
             )}
 
-            {/* Opens at hint - Only when closed */}
-            {isClosed && pulperia.opensAt && (
+            {/* Opens at hint - Only when closed and local */}
+            {!isOnlineOnly && isClosed && pulperia.opensAt && (
               <div className="flex items-center gap-1.5 mt-3 px-2.5 py-1.5 bg-surface-2/60 rounded-lg">
                 <Clock className="w-3.5 h-3.5 text-gray-600" />
                 <span className="text-xs text-gray-500">
                   Abre a las {pulperia.opensAt}
+                </span>
+              </div>
+            )}
+
+            {/* Origin city hint - Only for online stores */}
+            {isOnlineOnly && pulperia.originCity && (
+              <div className="flex items-center gap-1.5 mt-3 px-2.5 py-1.5 bg-purple-500/10 rounded-lg border border-purple-500/20">
+                <Globe className="w-3.5 h-3.5 text-purple-400" />
+                <span className="text-xs text-purple-300">
+                  Desde {pulperia.originCity}
                 </span>
               </div>
             )}
