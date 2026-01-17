@@ -11,14 +11,14 @@ import {
   MapPin,
   Filter,
   Zap,
-  HandCoins
+  HelpCircle
 } from 'lucide-react';
 import { chambasApi } from '../services/api';
 
 const TYPE_LABELS = {
   EMPLOYMENT: { label: 'Empleos', icon: Briefcase, color: 'primary' },
   SERVICE: { label: 'Servicios', icon: Wrench, color: 'green' },
-  REQUEST: { label: 'Solicitudes', icon: HandCoins, color: 'amber' }
+  REQUEST: { label: 'Solicitudes', icon: HelpCircle, color: 'amber' }
 };
 
 const Chambas = () => {
