@@ -243,13 +243,28 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
                 : `${completeImages.length} de ${images.length} productos listos`}
             </p>
           </div>
-          <button
-            onClick={onClose}
-            disabled={isUploading}
-            className="p-2 rounded-lg hover:bg-white/5 transition-colors disabled:opacity-50"
-          >
-            <X className="w-5 h-5 text-gray-400" />
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Botón Crear - Arriba para accesibilidad móvil */}
+            {images.length > 0 && !isUploading && (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleSubmit}
+                disabled={completeImages.length === 0}
+                className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors text-sm"
+              >
+                <Upload className="w-4 h-4" />
+                <span className="hidden sm:inline">Crear</span> {completeImages.length}
+              </motion.button>
+            )}
+            <button
+              onClick={onClose}
+              disabled={isUploading}
+              className="p-2 rounded-lg hover:bg-white/5 transition-colors disabled:opacity-50"
+            >
+              <X className="w-5 h-5 text-gray-400" />
+            </button>
+          </div>
         </div>
 
         {/* Content */}
@@ -338,7 +353,7 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
           )}
         </div>
 
-        {/* Footer */}
+        {/* Footer - Solo progreso y acciones secundarias */}
         {images.length > 0 && (
           <div className="p-4 border-t border-white/10 bg-dark-200/50">
             {isUploading ? (
@@ -360,7 +375,7 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center justify-between">
                 <button
                   onClick={() => {
                     images.forEach((img) => {
@@ -368,24 +383,15 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
                     });
                     setImages([]);
                   }}
-                  className="px-4 py-2.5 text-gray-400 hover:text-white transition-colors"
+                  className="text-sm text-gray-400 hover:text-white transition-colors"
                 >
                   Limpiar todo
                 </button>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleSubmit}
-                  disabled={completeImages.length === 0}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-primary-500 hover:bg-primary-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors min-h-[44px]"
-                >
-                  {isUploading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <Upload className="w-5 h-5" />
-                  )}
-                  Crear {completeImages.length} producto{completeImages.length !== 1 ? 's' : ''}
-                </motion.button>
+                {incompleteCount > 0 && (
+                  <span className="text-xs text-amber-400">
+                    {incompleteCount} sin completar
+                  </span>
+                )}
               </div>
             )}
           </div>
