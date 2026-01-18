@@ -127,44 +127,48 @@ const ManageAnnouncements = () => {
   const isExpired = (expiresAt) => new Date(expiresAt) <= new Date();
 
   return (
-    <div className="min-h-screen bg-dark-400 pb-24">
+    <div className="space-y-6 pb-40 md:pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-dark-400/95 backdrop-blur-lg border-b border-white/5">
-        <div className="max-w-2xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center">
-                <Megaphone className="w-5 h-5 text-orange-400" />
-              </div>
-              <div>
-                <h1 className="text-white font-bold text-lg">Mis Anuncios</h1>
-                <p className="text-gray-400 text-sm">
-                  {counts.active}/{counts.maxAllowed} activos
-                </p>
-              </div>
-            </div>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={openCreateModal}
-              disabled={counts.active >= counts.maxAllowed}
-              className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Nuevo
-            </motion.button>
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between"
+      >
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-primary-500/20 flex items-center justify-center">
+            <Megaphone className="w-6 h-6 text-primary-400" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-white">Mis Anuncios</h1>
+            <p className="text-gray-400 text-sm">
+              {counts.active}/{counts.maxAllowed} activos
+            </p>
           </div>
         </div>
-      </div>
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={openCreateModal}
+          disabled={counts.active >= counts.maxAllowed}
+          className="hidden md:flex items-center gap-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors"
+        >
+          <Plus className="w-5 h-5" />
+          <span>Nuevo</span>
+        </motion.button>
+      </motion.div>
 
       {/* Tabs */}
-      <div className="max-w-2xl mx-auto px-4 pt-4">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+      >
         <div className="flex gap-2 mb-4">
           <button
             onClick={() => setActiveTab('active')}
             className={`flex-1 py-2.5 px-4 rounded-xl font-medium transition-colors ${
               activeTab === 'active'
-                ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
+                ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
                 : 'bg-dark-200/50 text-gray-400 border border-transparent hover:bg-dark-200'
             }`}
           >
@@ -197,8 +201,8 @@ const ManageAnnouncements = () => {
             animate={{ opacity: 1 }}
             className="text-center py-12"
           >
-            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-orange-500/10 flex items-center justify-center">
-              <Megaphone className="w-8 h-8 text-orange-400/50" />
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-primary-500/20 flex items-center justify-center">
+              <Megaphone className="w-8 h-8 text-primary-400" />
             </div>
             <h3 className="text-white font-semibold mb-2">
               {activeTab === 'active' ? 'Sin anuncios activos' : 'Sin anuncios expirados'}
@@ -213,7 +217,7 @@ const ManageAnnouncements = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={openCreateModal}
-                className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-medium transition-colors"
+                className="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-medium transition-colors"
               >
                 Crear primer anuncio
               </motion.button>
@@ -263,7 +267,7 @@ const ManageAnnouncements = () => {
                             {announcement.contactCount} contactos
                           </span>
                           {!isExpired(announcement.expiresAt) && (
-                            <span className="flex items-center gap-1 text-orange-400">
+                            <span className="flex items-center gap-1 text-primary-400">
                               <Clock className="w-3 h-3" />
                               {getDaysRemaining(announcement.expiresAt)} días
                             </span>
@@ -319,7 +323,7 @@ const ManageAnnouncements = () => {
             </AnimatePresence>
           </div>
         )}
-      </div>
+      </motion.div>
 
       {/* Modal de formulario */}
       <AnnouncementFormModal
@@ -376,6 +380,26 @@ const ManageAnnouncements = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Sticky Action Bar (Mobile) */}
+      <motion.div
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom)+0.75rem)] left-0 right-0 z-[55] px-4 md:hidden"
+      >
+        <div className="bg-dark-100/95 backdrop-blur-lg border border-white/10 rounded-2xl p-3 shadow-xl">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={openCreateModal}
+            disabled={counts.active >= counts.maxAllowed}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-primary-500 hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors min-h-[48px]"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Nuevo Anuncio</span>
+          </motion.button>
+        </div>
+      </motion.div>
     </div>
   );
 };

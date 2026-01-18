@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Plus, Search, Package, Filter, CheckCircle, AlertTriangle, XCircle, ChevronDown } from 'lucide-react';
+import { Plus, Search, Package, Filter, CheckCircle, AlertTriangle, XCircle, ChevronDown, Upload } from 'lucide-react';
 import { productApi } from '../../services/api';
 import toast from 'react-hot-toast';
 import { ManageProductCard, ProductFormModal, DeleteConfirmModal, StickyActionBar, BulkImageUpload } from '../../components/products';
@@ -202,15 +202,26 @@ const ManageProducts = () => {
             <p className="text-gray-400 text-sm">{allProducts.length} productos en tu inventario</p>
           </div>
         </div>
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => openModal()}
-          className="hidden md:flex items-center gap-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-medium transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          <span>Agregar</span>
-        </motion.button>
+        <div className="hidden md:flex items-center gap-3">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowBulkImport(true)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-dark-100 hover:bg-dark-200 text-white rounded-xl font-medium transition-colors border border-white/10"
+          >
+            <Upload className="w-5 h-5" />
+            <span>Importar</span>
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => openModal()}
+            className="flex items-center gap-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-medium transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Agregar</span>
+          </motion.button>
+        </div>
       </motion.div>
 
       {/* Filters Row */}
