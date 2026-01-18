@@ -55,13 +55,15 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
     setImages((prev) => [...prev, ...newImages]);
   }, [images.length]);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
     accept: {
       'image/*': ['.jpeg', '.jpg', '.png', '.webp'],
     },
     maxSize: MAX_FILE_SIZE,
     disabled: isUploading,
+    noClick: true,      // Desactivar click automático (fix móvil)
+    noKeyboard: true,   // Desactivar keyboard
   });
 
   const handleUpdate = (index, updatedImage) => {
@@ -271,6 +273,7 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
               </p>
               <button
                 type="button"
+                onClick={open}
                 className="inline-flex items-center gap-2 px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-medium transition-colors"
               >
                 <Upload className="w-5 h-5" />
@@ -284,6 +287,7 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
               {!isUploading && (
                 <div
                   {...getRootProps()}
+                  onClick={open}
                   className="border-2 border-dashed border-white/20 rounded-xl p-4 text-center hover:border-white/40 transition-colors cursor-pointer"
                 >
                   <input {...getInputProps()} />

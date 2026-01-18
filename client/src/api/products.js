@@ -17,5 +17,7 @@ export const productApi = {
   getLowStock: () => api.get('/products/low-stock'),
   bulkStockUpdate: (updates) => api.post('/products/bulk-stock', { updates }),
   // Bulk create with images
-  bulkCreateWithImages: (formData) => api.post('/products/bulk-create-with-images', formData),
+  bulkCreateWithImages: (formData) => api.post('/products/bulk-create-with-images', formData, {
+    timeout: 120000, // 2 minutos para uploads grandes en redes lentas
+  }),
 };
