@@ -474,8 +474,8 @@ router.delete('/:id', authenticate, requirePulperia, asyncHandler(async (req, re
   res.json({ message: 'Producto eliminado' });
 }));
 
-// Bulk create products with images
-router.post('/bulk-create-with-images', authenticate, requirePulperia, uploadProduct.array('images'), asyncHandler(async (req, res) => {
+// Bulk create products with images (transacción atómica)
+router.post('/bulk-create-with-images', authenticate, requirePulperia, uploadProduct.array('images', 50), asyncHandler(async (req, res) => {
   const DEBUG = true; // Toggle para debugging
 
   if (DEBUG) {
@@ -540,80 +540,111 @@ router.post('/bulk-create-with-images', authenticate, requirePulperia, uploadPro
     throw Errors.badRequest(`Cantidad de imágenes (${req.files.length}) no coincide con productos (${products.length})`);
   }
 
-  const createdProducts = [];
-  const errors = [];
+  // Validar todos los productos antes de la transacción
+  const validationErrors = [];
+  const validProducts = [];
 
   for (let i = 0; i < products.length; i++) {
     const product = products[i];
     const file = req.files[i];
 
     if (!product.name || product.name.trim().length === 0) {
-      errors.push({ index: i, message: 'Nombre requerido' });
+      validationErrors.push({ index: i, message: 'Nombre requerido' });
       continue;
     }
 
     const parsedPrice = parseFloat(product.price);
     if (isNaN(parsedPrice) || parsedPrice <= 0) {
-      errors.push({ index: i, message: 'Precio inválido' });
+      validationErrors.push({ index: i, message: 'Precio inválido' });
       continue;
     }
 
-    try {
-      // Prepare data with optional fields
-      const createData = {
-        pulperiaId: req.user.pulperia.id,
-        name: product.name.trim(),
-        description: product.description?.trim() || '',
-        price: parsedPrice,
-        category: product.category || null,
-        imageUrl: file.path,
-        imagePublicId: file.filename,
-      };
+    // Prepare data with optional fields
+    const createData = {
+      pulperiaId: req.user.pulperia.id,
+      name: product.name.trim(),
+      description: product.description?.trim() || '',
+      price: parsedPrice,
+      category: product.category || null,
+      imageUrl: file.path,
+      imagePublicId: file.filename,
+    };
 
-      // Add optional stock fields if provided
-      if (product.stockQuantity) {
-        const stockQty = parseInt(product.stockQuantity);
-        if (!isNaN(stockQty) && stockQty >= 0) {
-          createData.stockQuantity = stockQty;
-          createData.outOfStock = stockQty === 0;
-        }
-      }
-
-      if (product.sku) {
-        createData.sku = product.sku.trim().toUpperCase();
-      }
-
-      const created = await prisma.product.create({
-        data: createData,
-      });
-
-      if (DEBUG) {
-        console.log(`Created product[${i}]:`, created.id, created.name);
-      }
-
-      createdProducts.push({
-        id: created.id,
-        name: created.name,
-        imageUrl: created.imageUrl,
-      });
-    } catch (err) {
-      console.error(`Error creating product ${i}:`, err.message);
-      errors.push({ index: i, message: err.message || 'Error al crear producto' });
-      if (file.filename) {
-        await deleteImage(file.filename).catch(() => {});
+    // Add optional stock fields if provided
+    if (product.stockQuantity) {
+      const stockQty = parseInt(product.stockQuantity);
+      if (!isNaN(stockQty) && stockQty >= 0) {
+        createData.stockQuantity = stockQty;
+        createData.outOfStock = stockQty === 0;
       }
     }
+
+    if (product.sku) {
+      createData.sku = product.sku.trim().toUpperCase();
+    }
+
+    validProducts.push({ createData, file, index: i });
   }
+
+  // Si no hay productos válidos, limpiar imágenes y retornar error
+  if (validProducts.length === 0) {
+    await Promise.all(
+      req.files.map((f) => deleteImage(f.filename).catch(() => {}))
+    );
+    throw Errors.badRequest('No hay productos válidos para crear');
+  }
+
+  // Crear productos en una transacción atómica
+  let createdProducts = [];
+  try {
+    createdProducts = await prisma.$transaction(async (tx) => {
+      const results = [];
+
+      for (const { createData, index } of validProducts) {
+        const created = await tx.product.create({
+          data: createData,
+        });
+
+        if (DEBUG) {
+          console.log(`Created product[${index}]:`, created.id, created.name);
+        }
+
+        results.push({
+          id: created.id,
+          name: created.name,
+          imageUrl: created.imageUrl,
+        });
+      }
+
+      return results;
+    });
+  } catch (error) {
+    // Si la transacción falla, limpiar TODAS las imágenes de Cloudinary
+    console.error('Transaction failed, cleaning up Cloudinary images:', error.message);
+    await Promise.all(
+      req.files.map((f) => deleteImage(f.filename).catch(() => {}))
+    );
+    throw error;
+  }
+
+  // Limpiar imágenes de productos que no fueron validados
+  const invalidFileIndices = validationErrors.map((e) => e.index);
+  await Promise.all(
+    invalidFileIndices.map((i) => {
+      const file = req.files[i];
+      return file?.filename ? deleteImage(file.filename).catch(() => {}) : Promise.resolve();
+    })
+  );
 
   if (DEBUG) {
     console.log('=== BULK CREATE RESULT ===');
-    console.log('Created:', createdProducts.length, 'Errors:', errors.length);
+    console.log('Created:', createdProducts.length, 'Errors:', validationErrors.length);
   }
 
   res.status(201).json({
     created: createdProducts.length,
     products: createdProducts,
-    errors,
+    errors: validationErrors,
   });
 }));
 

@@ -98,6 +98,7 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
     setUploadProgress(0);
     setUploadStatus('Preparando datos...');
 
+    let progressInterval;
     try {
       const formData = new FormData();
 
@@ -139,7 +140,7 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
       setUploadStatus('Subiendo imágenes...');
 
       // Simulate progress (actual progress would require XMLHttpRequest)
-      const progressInterval = setInterval(() => {
+      progressInterval = setInterval(() => {
         setUploadProgress((prev) => {
           if (prev >= 90) {
             clearInterval(progressInterval);
@@ -209,7 +210,9 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
 
       toast.error(errorMessage, { duration: 5000 });
     } finally {
+      if (progressInterval) clearInterval(progressInterval);
       setIsUploading(false);
+      setUploadProgress(0);
       setUploadStatus('');
     }
   };
@@ -221,7 +224,7 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+      className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && !isUploading && onClose()}
     >
       <motion.div
