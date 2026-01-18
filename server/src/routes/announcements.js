@@ -275,9 +275,9 @@ router.post('/', authenticate, requirePulperia, uploadProduct.single('image'), a
     });
 
     if (activeCount >= MAX_ACTIVE_ANNOUNCEMENTS) {
-      // Eliminar imagen subida
-      if (req.file.public_id) {
-        await deleteImage(req.file.public_id);
+      // Eliminar imagen subida (usar filename que es el public_id de multer-storage-cloudinary)
+      if (req.file.filename) {
+        await deleteImage(req.file.filename);
       }
       return res.status(400).json({
         error: {
@@ -290,14 +290,15 @@ router.post('/', authenticate, requirePulperia, uploadProduct.single('image'), a
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + ANNOUNCEMENT_DURATION_DAYS);
 
+    // multer-storage-cloudinary: path = secure_url, filename = public_id
     const announcement = await prisma.announcement.create({
       data: {
         pulperiaId: req.user.pulperia.id,
         title: title.trim(),
         description: description?.trim() || null,
         price: price ? parseFloat(price) : null,
-        imageUrl: req.file.secure_url,
-        imagePublicId: req.file.public_id,
+        imageUrl: req.file.path,
+        imagePublicId: req.file.filename,
         imageAspectRatio: imageAspectRatio ? parseFloat(imageAspectRatio) : 1.0,
         expiresAt
       },
@@ -317,8 +318,8 @@ router.post('/', authenticate, requirePulperia, uploadProduct.single('image'), a
   } catch (error) {
     console.error('Error creating announcement:', error);
     // Limpiar imagen si hubo error
-    if (req.file?.public_id) {
-      await deleteImage(req.file.public_id).catch(console.error);
+    if (req.file?.filename) {
+      await deleteImage(req.file.filename).catch(console.error);
     }
     res.status(500).json({ error: { message: 'Error al crear anuncio' } });
   }
@@ -371,8 +372,9 @@ router.patch('/:id', authenticate, requirePulperia, uploadProduct.single('image'
       if (existing.imagePublicId) {
         await deleteImage(existing.imagePublicId).catch(console.error);
       }
-      updateData.imageUrl = req.file.secure_url;
-      updateData.imagePublicId = req.file.public_id;
+      // multer-storage-cloudinary: path = secure_url, filename = public_id
+      updateData.imageUrl = req.file.path;
+      updateData.imagePublicId = req.file.filename;
       if (imageAspectRatio) {
         updateData.imageAspectRatio = parseFloat(imageAspectRatio);
       }

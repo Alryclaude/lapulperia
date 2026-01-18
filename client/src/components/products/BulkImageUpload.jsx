@@ -45,7 +45,7 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
       file,
       preview: URL.createObjectURL(file),
       name: '',
-      price: 0,
+      price: '',
       description: '',
       category: '',
     }));
@@ -78,7 +78,10 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
     });
   };
 
-  const completeImages = images.filter((img) => img.name?.trim() && img.price && parseFloat(img.price) > 0);
+  const completeImages = images.filter((img) => {
+    const priceNum = parseFloat(img.price);
+    return img.name?.trim() && img.price !== '' && !isNaN(priceNum) && priceNum > 0;
+  });
   const incompleteCount = images.length - completeImages.length;
 
   const handleSubmit = async () => {
@@ -95,11 +98,11 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
 
       // Add only complete images and their data
       const productsData = [];
-      completeImages.forEach((img, index) => {
+      completeImages.forEach((img) => {
         formData.append('images', img.file);
         productsData.push({
           name: img.name.trim(),
-          price: img.price,
+          price: parseFloat(img.price),
           description: img.description?.trim() || '',
           category: img.category || null,
         });

@@ -6,7 +6,8 @@ import { PRODUCT_CATEGORIES } from '../../constants/categories';
 const ImageProductCard = ({ image, index, onUpdate, onRemove }) => {
   const [focused, setFocused] = useState(null);
 
-  const isComplete = image.name?.trim() && image.price && parseFloat(image.price) > 0;
+  const priceNum = parseFloat(image.price);
+  const isComplete = image.name?.trim() && image.price !== '' && !isNaN(priceNum) && priceNum > 0;
 
   const handleChange = (field, value) => {
     onUpdate(index, { ...image, [field]: value });
@@ -69,8 +70,12 @@ const ImageProductCard = ({ image, index, onUpdate, onRemove }) => {
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">L</span>
           <input
             type="number"
-            value={image.price || ''}
-            onChange={(e) => handleChange('price', parseFloat(e.target.value) || 0)}
+            value={image.price === 0 || image.price === '' ? '' : image.price}
+            onChange={(e) => {
+              const val = e.target.value;
+              // Guardar como string para permitir edición, se parsea al enviar
+              handleChange('price', val === '' ? '' : val);
+            }}
             onFocus={() => setFocused('price')}
             onBlur={() => setFocused(null)}
             placeholder="0.00"
@@ -78,7 +83,7 @@ const ImageProductCard = ({ image, index, onUpdate, onRemove }) => {
             step="0.01"
             className={`w-full pl-7 pr-3 py-2 bg-dark-200/50 border rounded-lg text-white text-sm placeholder:text-gray-500 focus:outline-none transition-all ${
               focused === 'price' ? 'border-primary-500/50 ring-1 ring-primary-500/20' : 'border-white/5'
-            } ${image.price !== undefined && image.price <= 0 ? 'border-red-500/50' : ''}`}
+            } ${image.price !== undefined && image.price !== '' && parseFloat(image.price) <= 0 ? 'border-red-500/50' : ''}`}
           />
         </div>
 
