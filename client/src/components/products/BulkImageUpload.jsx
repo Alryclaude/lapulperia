@@ -99,21 +99,21 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
     try {
       const formData = new FormData();
 
-      // Add images and product data as indexed fields (Multer parses these correctly)
-      completeImages.forEach((img, index) => {
+      // Agregar imágenes normalmente
+      completeImages.forEach((img) => {
         formData.append('images', img.file);
-        formData.append(`products[${index}][name]`, img.name.trim());
-        formData.append(`products[${index}][price]`, parseFloat(img.price));
-        formData.append(`products[${index}][description]`, img.description?.trim() || '');
-        formData.append(`products[${index}][category]`, img.category || '');
-        // Campos opcionales
-        if (img.stockQuantity) {
-          formData.append(`products[${index}][stockQuantity]`, parseInt(img.stockQuantity));
-        }
-        if (img.sku) {
-          formData.append(`products[${index}][sku]`, img.sku.trim());
-        }
       });
+
+      // Enviar productos como JSON string (más confiable que campos indexados)
+      const productsData = completeImages.map((img) => ({
+        name: img.name.trim(),
+        price: parseFloat(img.price),
+        description: img.description?.trim() || '',
+        category: img.category || '',
+        stockQuantity: img.stockQuantity ? parseInt(img.stockQuantity) : null,
+        sku: img.sku?.trim() || null,
+      }));
+      formData.append('products', JSON.stringify(productsData));
 
       // Debug: Log FormData contents
       if (DEBUG) {

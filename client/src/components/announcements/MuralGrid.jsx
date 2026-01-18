@@ -36,7 +36,7 @@ const MuralGrid = ({ announcements, onAnnouncementClick, isLoading }) => {
         animate={{ opacity: 1 }}
         className="text-center py-12"
       >
-        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-orange-500/10 flex items-center justify-center">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-primary-500/10 flex items-center justify-center">
           <span className="text-3xl">📢</span>
         </div>
         <h3 className="text-white font-semibold mb-2">No hay anuncios cerca</h3>

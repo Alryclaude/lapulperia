@@ -485,28 +485,44 @@ router.post('/bulk-create-with-images', authenticate, requirePulperia, uploadPro
     console.log('Body keys:', Object.keys(req.body));
   }
 
-  // Reconstruct products array from indexed fields (products[0][name], products[0][price], etc.)
-  const products = [];
-  let i = 0;
-  while (req.body[`products[${i}][name]`] !== undefined) {
-    const productData = {
-      name: req.body[`products[${i}][name]`],
-      price: req.body[`products[${i}][price]`],
-      description: req.body[`products[${i}][description]`] || '',
-      category: req.body[`products[${i}][category]`] || null,
-      stockQuantity: req.body[`products[${i}][stockQuantity]`] || null,
-      sku: req.body[`products[${i}][sku]`] || null,
-    };
-    products.push(productData);
-
-    if (DEBUG) {
-      console.log(`Product[${i}]:`, productData);
+  // Intentar parsear productos desde JSON string (formato preferido)
+  let products = [];
+  if (req.body.products) {
+    try {
+      products = JSON.parse(req.body.products);
+      if (DEBUG) {
+        console.log('Products parsed from JSON:', products.length);
+        products.forEach((p, i) => console.log(`Product[${i}]:`, p));
+      }
+    } catch (e) {
+      console.error('Error parsing products JSON:', e);
+      // Fallback: intentar formato indexado antiguo
     }
-    i++;
   }
 
-  if (DEBUG) {
-    console.log('Total products parsed:', products.length);
+  // Fallback: Reconstruct products array from indexed fields (products[0][name], etc.)
+  if (products.length === 0) {
+    let i = 0;
+    while (req.body[`products[${i}][name]`] !== undefined) {
+      const productData = {
+        name: req.body[`products[${i}][name]`],
+        price: req.body[`products[${i}][price]`],
+        description: req.body[`products[${i}][description]`] || '',
+        category: req.body[`products[${i}][category]`] || null,
+        stockQuantity: req.body[`products[${i}][stockQuantity]`] || null,
+        sku: req.body[`products[${i}][sku]`] || null,
+      };
+      products.push(productData);
+
+      if (DEBUG) {
+        console.log(`Product[${i}] (indexed):`, productData);
+      }
+      i++;
+    }
+
+    if (DEBUG) {
+      console.log('Total products parsed (indexed):', products.length);
+    }
   }
 
   if (products.length === 0) {

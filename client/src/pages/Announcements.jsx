@@ -99,8 +99,8 @@ const Announcements = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center"
         >
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-orange-500/20 flex items-center justify-center">
-            <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-primary-500/20 flex items-center justify-center">
+            <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
           </div>
           <h2 className="text-white font-semibold text-lg mb-2">
             Obteniendo tu ubicación
@@ -143,10 +143,10 @@ const Announcements = () => {
   }
 
   return (
-    <div className="min-h-screen bg-dark-400 pb-24">
+    <div className="space-y-6 pb-40 md:pb-24">
       {/* Header con ubicación y selector de radio */}
-      <div className="sticky top-0 z-40 bg-dark-400/95 backdrop-blur-lg border-b border-white/5">
-        <div className="max-w-2xl mx-auto px-4">
+      <div className="sticky top-0 z-40 bg-dark-100/95 backdrop-blur-lg border-b border-white/5 -mx-4 px-4 sm:-mx-6 sm:px-6">
+        <div className="px-0">
           <LocationHeader
             location={location}
             radius={radius}
@@ -157,15 +157,15 @@ const Announcements = () => {
       </div>
 
       {/* Contenido principal */}
-      <div className="max-w-2xl mx-auto px-4 py-4">
+      <div className="px-0 py-4">
         {/* Header decorativo */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-3 mb-5"
         >
-          <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center">
-            <Megaphone className="w-5 h-5 text-orange-400" />
+          <div className="w-10 h-10 rounded-xl bg-primary-500/20 flex items-center justify-center">
+            <Megaphone className="w-5 h-5 text-primary-400" />
           </div>
           <div>
             <h1 className="text-white font-bold text-lg">Mural de Ofertas</h1>

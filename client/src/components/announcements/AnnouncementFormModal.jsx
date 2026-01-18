@@ -139,8 +139,8 @@ const AnnouncementFormModal = ({
           {/* Modal Header */}
           <div className="p-5 border-b border-white/5 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center">
-                <Megaphone className="w-5 h-5 text-orange-400" />
+              <div className="w-10 h-10 rounded-xl bg-primary-500/20 flex items-center justify-center">
+                <Megaphone className="w-5 h-5 text-primary-400" />
               </div>
               <h2 className="text-xl font-bold text-white">
                 {editAnnouncement ? 'Editar Anuncio' : 'Nuevo Anuncio'}
@@ -193,10 +193,10 @@ const AnnouncementFormModal = ({
                   ) : (
                     <label
                       onClick={() => fileInputRef.current?.click()}
-                      className="flex flex-col items-center justify-center h-40 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-orange-500/50 hover:bg-orange-500/5 transition-colors"
+                      className="flex flex-col items-center justify-center h-40 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-primary-500/50 hover:bg-primary-500/5 transition-colors"
                     >
-                      <div className="w-12 h-12 rounded-xl bg-orange-500/20 flex items-center justify-center mb-3">
-                        <ImageIcon className="w-6 h-6 text-orange-400" />
+                      <div className="w-12 h-12 rounded-xl bg-primary-500/20 flex items-center justify-center mb-3">
+                        <ImageIcon className="w-6 h-6 text-primary-400" />
                       </div>
                       <span className="text-sm text-gray-400 font-medium">
                         Click para subir tu afiche
@@ -231,7 +231,7 @@ const AnnouncementFormModal = ({
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   maxLength={maxTitleLength}
-                  className="w-full px-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 transition-all"
+                  className="w-full px-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/20 transition-all"
                   placeholder="Ej: Pollo asado con papas L.85"
                   required
                 />
@@ -252,7 +252,7 @@ const AnnouncementFormModal = ({
                     min="0"
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    className="w-full pl-10 pr-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 transition-all"
+                    className="w-full pl-10 pr-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/20 transition-all"
                     placeholder="0.00"
                   />
                 </div>
@@ -273,14 +273,14 @@ const AnnouncementFormModal = ({
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   maxLength={200}
                   rows={3}
-                  className="w-full px-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 transition-all resize-none"
+                  className="w-full px-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/20 transition-all resize-none"
                   placeholder="Detalles adicionales de tu oferta..."
                 />
               </div>
 
               {/* Info */}
-              <div className="p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl">
-                <p className="text-sm text-orange-200">
+              <div className="p-4 bg-primary-500/10 border border-primary-500/20 rounded-xl">
+                <p className="text-sm text-primary-200">
                   Tu anuncio será visible por <strong>7 días</strong> para todos los clientes
                   cercanos a tu negocio.
                 </p>
@@ -307,7 +307,7 @@ const AnnouncementFormModal = ({
                   whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-primary-500 hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors"
                 >
                   {isSubmitting ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

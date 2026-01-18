@@ -124,7 +124,7 @@ const AnnouncementDetailModal = ({ isOpen, onClose, announcement }) => {
                 </span>
               )}
               <span className="flex items-center gap-1.5 px-3 py-1.5 bg-dark-200/50 rounded-lg text-sm text-gray-300">
-                <Clock className="w-4 h-4 text-orange-400" />
+                <Clock className="w-4 h-4 text-primary-400" />
                 {daysRemaining()} días restantes
               </span>
               <span className="flex items-center gap-1.5 px-3 py-1.5 bg-dark-200/50 rounded-lg text-sm text-gray-300">
