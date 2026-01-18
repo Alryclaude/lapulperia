@@ -1,17 +1,19 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Upload, ImagePlus, Check, AlertTriangle, Loader2 } from 'lucide-react';
+import { X, Upload, ImagePlus, Check, AlertTriangle, Loader2, Info } from 'lucide-react';
 import { productApi } from '../../services/api';
 import toast from 'react-hot-toast';
 import ImageProductCard from './ImageProductCard';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const DEBUG = true; // Toggle para debugging
 
 const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
   const [images, setImages] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStatus, setUploadStatus] = useState(''); // Estado descriptivo
 
   // Cleanup previews on unmount
   useEffect(() => {
@@ -92,6 +94,7 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
 
     setIsUploading(true);
     setUploadProgress(0);
+    setUploadStatus('Preparando datos...');
 
     try {
       const formData = new FormData();
@@ -103,7 +106,35 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
         formData.append(`products[${index}][price]`, parseFloat(img.price));
         formData.append(`products[${index}][description]`, img.description?.trim() || '');
         formData.append(`products[${index}][category]`, img.category || '');
+        // Campos opcionales
+        if (img.stockQuantity) {
+          formData.append(`products[${index}][stockQuantity]`, parseInt(img.stockQuantity));
+        }
+        if (img.sku) {
+          formData.append(`products[${index}][sku]`, img.sku.trim());
+        }
       });
+
+      // Debug: Log FormData contents
+      if (DEBUG) {
+        console.log('=== BULK UPLOAD DEBUG ===');
+        console.log('Total images to upload:', completeImages.length);
+        console.log('Products data:');
+        completeImages.forEach((img, i) => {
+          console.log(`  [${i}] ${img.name} - L${img.price} - File: ${img.file.name} (${(img.file.size / 1024).toFixed(1)}KB)`);
+        });
+        // Log FormData entries
+        console.log('FormData entries:');
+        for (const pair of formData.entries()) {
+          if (pair[1] instanceof File) {
+            console.log(`  ${pair[0]}: File(${pair[1].name}, ${pair[1].size} bytes)`);
+          } else {
+            console.log(`  ${pair[0]}: ${pair[1]}`);
+          }
+        }
+      }
+
+      setUploadStatus('Subiendo imágenes...');
 
       // Simulate progress (actual progress would require XMLHttpRequest)
       const progressInterval = setInterval(() => {
@@ -114,18 +145,27 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
           }
           return prev + 10;
         });
-      }, 200);
+      }, 300);
 
       const response = await productApi.bulkCreateWithImages(formData);
       clearInterval(progressInterval);
       setUploadProgress(100);
+      setUploadStatus('Completado');
 
-      const { created, errors } = response.data;
+      if (DEBUG) {
+        console.log('Server response:', response.data);
+      }
+
+      const { created, errors, products: createdProducts } = response.data;
 
       // Si no se creó ningún producto, no cerrar el modal
       if (created === 0) {
-        toast.error('No se creó ningún producto. Verifica los datos.');
+        const errorMsg = errors?.length > 0
+          ? `Error: ${errors[0].message}`
+          : 'No se creó ningún producto. Verifica los datos.';
+        toast.error(errorMsg);
         setIsUploading(false);
+        setUploadStatus('');
         return;
       }
 
@@ -134,16 +174,41 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
       }
 
       if (errors && errors.length > 0) {
-        toast.warning(`${errors.length} producto${errors.length > 1 ? 's' : ''} con errores`);
+        // Mostrar errores específicos
+        errors.forEach((err) => {
+          const productName = completeImages[err.index]?.name || `Producto ${err.index + 1}`;
+          toast.error(`${productName}: ${err.message}`, { duration: 5000 });
+        });
       }
 
       // ESPERAR refetch antes de cerrar modal
       await onSuccess?.();
     } catch (error) {
       console.error('Bulk upload error:', error);
-      toast.error(error.response?.data?.error?.message || 'Error al crear productos');
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
+
+      // Mensaje de error más descriptivo
+      let errorMessage = 'Error al crear productos';
+      if (error.response?.data?.error?.message) {
+        errorMessage = error.response.data.error.message;
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.status === 413) {
+        errorMessage = 'Archivos demasiado grandes. Reduce el tamaño de las imágenes.';
+      } else if (error.response?.status === 401) {
+        errorMessage = 'Sesión expirada. Por favor, inicia sesión nuevamente.';
+      } else if (!navigator.onLine) {
+        errorMessage = 'Sin conexión a internet';
+      }
+
+      toast.error(errorMessage, { duration: 5000 });
     } finally {
       setIsUploading(false);
+      setUploadStatus('');
     }
   };
 
@@ -229,15 +294,21 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
               )}
 
               {/* Status Summary */}
-              <div className="flex items-center gap-4 text-sm">
+              <div className="flex flex-wrap items-center gap-4 text-sm">
                 <div className="flex items-center gap-2 text-green-400">
                   <Check className="w-4 h-4" />
-                  <span>{completeImages.length} completos</span>
+                  <span>{completeImages.length} listo{completeImages.length !== 1 ? 's' : ''}</span>
                 </div>
                 {incompleteCount > 0 && (
-                  <div className="flex items-center gap-2 text-gray-400">
+                  <div className="flex items-center gap-2 text-amber-400">
                     <AlertTriangle className="w-4 h-4" />
-                    <span>{incompleteCount} pendientes</span>
+                    <span>{incompleteCount} sin completar (falta nombre o precio)</span>
+                  </div>
+                )}
+                {incompleteCount > 0 && completeImages.length > 0 && (
+                  <div className="flex items-center gap-1.5 text-gray-500 text-xs">
+                    <Info className="w-3.5 h-3.5" />
+                    <span>Los productos incompletos no se crearán</span>
                   </div>
                 )}
               </div>
@@ -266,7 +337,10 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
             {isUploading ? (
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-400">Subiendo productos...</span>
+                  <span className="text-gray-400 flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    {uploadStatus || 'Subiendo productos...'}
+                  </span>
                   <span className="text-primary-400">{uploadProgress}%</span>
                 </div>
                 <div className="w-full h-2 bg-dark-300 rounded-full overflow-hidden">
@@ -274,6 +348,7 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
                     initial={{ width: 0 }}
                     animate={{ width: `${uploadProgress}%` }}
                     className="h-full bg-primary-500 rounded-full"
+                    transition={{ duration: 0.3 }}
                   />
                 </div>
               </div>

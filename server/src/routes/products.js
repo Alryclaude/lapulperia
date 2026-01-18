@@ -476,28 +476,51 @@ router.delete('/:id', authenticate, requirePulperia, asyncHandler(async (req, re
 
 // Bulk create products with images
 router.post('/bulk-create-with-images', authenticate, requirePulperia, uploadProduct.array('images'), asyncHandler(async (req, res) => {
+  const DEBUG = true; // Toggle para debugging
+
+  if (DEBUG) {
+    console.log('=== BULK CREATE DEBUG ===');
+    console.log('User:', req.user?.id, 'Pulperia:', req.user?.pulperia?.id);
+    console.log('Files received:', req.files?.length || 0);
+    console.log('Body keys:', Object.keys(req.body));
+  }
+
   // Reconstruct products array from indexed fields (products[0][name], products[0][price], etc.)
   const products = [];
   let i = 0;
   while (req.body[`products[${i}][name]`] !== undefined) {
-    products.push({
+    const productData = {
       name: req.body[`products[${i}][name]`],
       price: req.body[`products[${i}][price]`],
       description: req.body[`products[${i}][description]`] || '',
       category: req.body[`products[${i}][category]`] || null,
-    });
+      stockQuantity: req.body[`products[${i}][stockQuantity]`] || null,
+      sku: req.body[`products[${i}][sku]`] || null,
+    };
+    products.push(productData);
+
+    if (DEBUG) {
+      console.log(`Product[${i}]:`, productData);
+    }
     i++;
   }
 
+  if (DEBUG) {
+    console.log('Total products parsed:', products.length);
+  }
+
   if (products.length === 0) {
+    console.error('BULK CREATE ERROR: No products in request body');
     throw Errors.badRequest('Se requiere al menos un producto');
   }
 
   if (!req.files || req.files.length === 0) {
+    console.error('BULK CREATE ERROR: No files in request');
     throw Errors.badRequest('Se requieren imágenes');
   }
 
   if (req.files.length !== products.length) {
+    console.error(`BULK CREATE ERROR: Mismatch - ${req.files.length} files vs ${products.length} products`);
     throw Errors.badRequest(`Cantidad de imágenes (${req.files.length}) no coincide con productos (${products.length})`);
   }
 
@@ -520,17 +543,37 @@ router.post('/bulk-create-with-images', authenticate, requirePulperia, uploadPro
     }
 
     try {
+      // Prepare data with optional fields
+      const createData = {
+        pulperiaId: req.user.pulperia.id,
+        name: product.name.trim(),
+        description: product.description?.trim() || '',
+        price: parsedPrice,
+        category: product.category || null,
+        imageUrl: file.path,
+        imagePublicId: file.filename,
+      };
+
+      // Add optional stock fields if provided
+      if (product.stockQuantity) {
+        const stockQty = parseInt(product.stockQuantity);
+        if (!isNaN(stockQty) && stockQty >= 0) {
+          createData.stockQuantity = stockQty;
+          createData.outOfStock = stockQty === 0;
+        }
+      }
+
+      if (product.sku) {
+        createData.sku = product.sku.trim().toUpperCase();
+      }
+
       const created = await prisma.product.create({
-        data: {
-          pulperiaId: req.user.pulperia.id,
-          name: product.name.trim(),
-          description: product.description?.trim() || '',
-          price: parsedPrice,
-          category: product.category || null,
-          imageUrl: file.path,
-          imagePublicId: file.filename,
-        },
+        data: createData,
       });
+
+      if (DEBUG) {
+        console.log(`Created product[${i}]:`, created.id, created.name);
+      }
 
       createdProducts.push({
         id: created.id,
@@ -538,12 +581,17 @@ router.post('/bulk-create-with-images', authenticate, requirePulperia, uploadPro
         imageUrl: created.imageUrl,
       });
     } catch (err) {
-      console.error(`Error creating product ${i}:`, err);
-      errors.push({ index: i, message: 'Error al crear producto' });
+      console.error(`Error creating product ${i}:`, err.message);
+      errors.push({ index: i, message: err.message || 'Error al crear producto' });
       if (file.filename) {
         await deleteImage(file.filename).catch(() => {});
       }
     }
+  }
+
+  if (DEBUG) {
+    console.log('=== BULK CREATE RESULT ===');
+    console.log('Created:', createdProducts.length, 'Errors:', errors.length);
   }
 
   res.status(201).json({
