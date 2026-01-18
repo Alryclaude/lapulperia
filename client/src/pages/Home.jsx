@@ -181,6 +181,7 @@ const Home = () => {
           onClose={() => setIsFullMapOpen(false)}
           center={location ? [location.lat, location.lng] : null}
           pulperias={pulperias}
+          onlineStores={onlineStores}
           userLocation={location ? [location.lat, location.lng] : null}
         />
       </div>
@@ -230,6 +231,7 @@ const Home = () => {
         onClose={() => setIsFullMapOpen(false)}
         center={location ? [location.lat, location.lng] : null}
         pulperias={pulperias}
+        onlineStores={onlineStores}
         userLocation={location ? [location.lat, location.lng] : null}
       />
     </div>

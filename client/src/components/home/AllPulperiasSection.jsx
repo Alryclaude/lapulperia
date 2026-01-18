@@ -13,7 +13,7 @@ const AllPulperiasSection = ({ pulperias, isLoading }) => {
           <div className="p-2 bg-dark-50 rounded-lg">
             <Store className="w-4 h-4 text-gray-400" />
           </div>
-          <h2 className="text-lg font-semibold text-white">Pulperias cerca</h2>
+          <h2 className="text-lg font-semibold text-white">Negocios cerca</h2>
         </div>
         <Link
           to="/search"
@@ -48,7 +48,7 @@ const AllPulperiasSection = ({ pulperias, isLoading }) => {
             <Store className="w-8 h-8 text-gray-500" />
           </div>
           <p className="text-gray-400">
-            No hay pulperias cerca de tu ubicacion
+            No hay negocios cerca de tu ubicacion
           </p>
           <Button asChild variant="secondary" className="mt-4">
             <Link to="/search">Buscar en otra zona</Link>

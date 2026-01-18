@@ -32,6 +32,9 @@ import shippingRoutes from './routes/shipping.js';
 import clientFeaturesRoutes from './routes/client-features.js';
 import announcementsRoutes from './routes/announcements.js';
 
+// Error handling middleware
+import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
+
 dotenv.config();
 
 const app = express();
@@ -203,20 +206,11 @@ io.on('connection', (socket) => {
    ERROR HANDLING
 ========================= */
 
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(err.status || 500).json({
-    error: {
-      message: err.message || 'Error interno del servidor',
-      ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
-    }
-  });
-});
+// 404 handler (must be before errorHandler)
+app.use(notFoundHandler);
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ error: { message: 'Ruta no encontrada' } });
-});
+// Centralized error handler (must be LAST)
+app.use(errorHandler);
 
 /* =========================
    SERVER START

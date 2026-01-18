@@ -15,7 +15,7 @@ const Footer = () => {
           <div className="space-y-4">
             <Logo size="sm" showText={true} />
             <p className="text-sm text-gray-400 max-w-xs">
-              Conectando pulperías hondureñas con sus comunidades. Tu tienda de barrio, ahora digital.
+              Conectando negocios hondureños con sus comunidades. Tu tienda de barrio, ahora digital.
             </p>
           </div>
 
@@ -41,15 +41,15 @@ const Footer = () => {
                 to="/map"
                 className="text-sm text-gray-400 hover:text-primary-400 transition-colors"
               >
-                Mapa de pulperías
+                Mapa de negocios
               </Link>
             </nav>
           </div>
 
-          {/* Para Pulperías */}
+          {/* Para Negocios */}
           <div className="space-y-4">
             <h3 className="font-semibold text-white text-sm uppercase tracking-wider">
-              Para Pulperías
+              Para Negocios
             </h3>
             <nav className="flex flex-col space-y-2">
               <Link
@@ -57,7 +57,7 @@ const Footer = () => {
                 className="text-sm text-gray-400 hover:text-primary-400 transition-colors flex items-center gap-2"
               >
                 <Store className="w-4 h-4" />
-                Registra tu pulpería
+                Registra tu negocio
               </Link>
               <a
                 href="mailto:soporte@lapulperiastore.net"

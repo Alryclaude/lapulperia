@@ -114,13 +114,13 @@ const HeroSection = ({ pulperiasCount = 0, productsCount = 0 }) => {
             <Button asChild size="lg">
               <Link to="/search">
                 <Search className="w-5 h-5" />
-                Explorar Pulperias
+                Explorar negocios
               </Link>
             </Button>
             <Button asChild variant="secondary" size="lg">
               <Link to="/register">
                 <Store className="w-5 h-5" />
-                Soy Pulpero
+                Registra tu negocio
               </Link>
             </Button>
           </motion.div>
@@ -138,7 +138,7 @@ const HeroSection = ({ pulperiasCount = 0, productsCount = 0 }) => {
                 <span className="font-semibold text-white">
                   {pulperiasCount > 0 ? `${pulperiasCount}+` : '50+'}
                 </span>{' '}
-                pulperias
+                negocios
               </span>
             </div>
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-2/60 border border-white/[0.06]">

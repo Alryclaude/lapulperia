@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import OnlineStoresPanel from './OnlineStoresPanel';
 
 // Status colors configuration (same as MiniMap)
 const STATUS_COLORS = {
@@ -95,6 +96,7 @@ const FullscreenMap = ({
   onClose,
   center,
   pulperias = [],
+  onlineStores = [],
   userLocation,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -169,7 +171,7 @@ const FullscreenMap = ({
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
-                placeholder="Buscar pulperia..."
+                placeholder="Buscar negocio..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 bg-dark-100 border-white/10"
@@ -187,6 +189,9 @@ const FullscreenMap = ({
             </Button>
           </div>
         </div>
+
+        {/* Online Stores Panel - Floating over map */}
+        <OnlineStoresPanel stores={onlineStores} onClose={onClose} />
 
         {/* Map */}
         <MapContainer
@@ -286,11 +291,11 @@ const FullscreenMap = ({
             <div className="flex items-center gap-2">
               <Store className="w-4 h-4 text-primary-400" />
               <span className="text-white font-medium">
-                {filteredPulperias.length} pulperia{filteredPulperias.length !== 1 ? 's' : ''}
+                {filteredPulperias.length} negocio{filteredPulperias.length !== 1 ? 's' : ''}
               </span>
             </div>
             <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-              {openCount} abierta{openCount !== 1 ? 's' : ''}
+              {openCount} abierto{openCount !== 1 ? 's' : ''}
             </Badge>
           </div>
         </div>

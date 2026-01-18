@@ -39,6 +39,11 @@ enum PulperiaCategory {
   COMER       // Restaurantes, baleadas, comida
   COMPRAR     // Abarrotes, mercados, tiendas
   SERVICIOS   // Talleres, recargas, pagos
+  SALUD       // Farmacias, clínicas, laboratorios
+  BELLEZA     // Salones, barberías, spa
+  EDUCACION   // Tutorías, academias, cursos
+  HOGAR       // Muebles, decoración, ferretería
+  TECNOLOGIA  // Celulares, computadoras, electrónica
 }
 
 enum PromotionType {

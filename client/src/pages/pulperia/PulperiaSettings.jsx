@@ -278,7 +278,7 @@ const PulperiaSettings = () => {
         </div>
         <div>
           <h1 className="text-2xl font-bold text-white">Configuración</h1>
-          <p className="text-gray-400 text-sm">Personaliza tu pulpería</p>
+          <p className="text-gray-400 text-sm">Personaliza tu negocio</p>
         </div>
       </motion.div>
 
@@ -402,7 +402,7 @@ const PulperiaSettings = () => {
 
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">
-            Nombre de la Pulpería
+            Nombre del negocio
           </label>
           <input
             type="text"
@@ -625,7 +625,7 @@ const PulperiaSettings = () => {
           )}
           {!formData.latitude && (
             <p className="text-xs text-yellow-400 mt-2 text-center">
-              Sin ubicación, tu pulpería no aparecerá en el mapa
+              Sin ubicación, tu negocio no aparecerá en el mapa
             </p>
           )}
         </div>
@@ -896,7 +896,7 @@ const PulperiaSettings = () => {
               </div>
 
               <p className="text-gray-400 mb-4">
-                Esta acción eliminará permanentemente tu pulpería, productos, órdenes y toda la información asociada.
+                Esta acción eliminará permanentemente tu negocio, productos, órdenes y toda la información asociada.
               </p>
 
               <p className="text-sm text-gray-500 mb-4">
@@ -908,7 +908,7 @@ const PulperiaSettings = () => {
                 value={deleteConfirm}
                 onChange={(e) => setDeleteConfirm(e.target.value)}
                 className="w-full px-4 py-3 bg-dark-200/50 border border-white/5 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-red-500/50 focus:ring-1 focus:ring-red-500/20 transition-all mb-4"
-                placeholder="Nombre de tu pulpería"
+                placeholder="Nombre de tu negocio"
               />
 
               <div className="flex gap-3">

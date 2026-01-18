@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 import { Store, User, MapPin, Phone, ArrowRight, ArrowLeft, Loader2, Globe } from 'lucide-react';
 import { reverseGeocode } from '../services/geocoding';
+import { BUSINESS_CATEGORIES } from '../constants/categories';
 import toast from 'react-hot-toast';
 
 const Register = () => {
@@ -14,6 +15,7 @@ const Register = () => {
   const [step, setStep] = useState(isNewUser && user ? 2 : 1);
   const [role, setRole] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [pulperiaData, setPulperiaData] = useState({
     name: '',
     address: '',
@@ -106,12 +108,16 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-      await registerAsPulperia(pulperiaData);
-      toast.success('Pulperia creada exitosamente!');
+      const dataWithCategory = {
+        ...pulperiaData,
+        categories: selectedCategory ? [selectedCategory] : [],
+      };
+      await registerAsPulperia(dataWithCategory);
+      toast.success('Negocio creado exitosamente!');
       navigate('/dashboard');
     } catch (error) {
       console.error('Create pulperia error:', error);
-      toast.error('Error al crear la pulperia');
+      toast.error('Error al crear el negocio');
     } finally {
       setIsLoading(false);
     }
@@ -180,7 +186,7 @@ const Register = () => {
               <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-primary-500 transition-colors mt-1" />
             </button>
 
-            {/* Pulperia Option */}
+            {/* Negocio Option */}
             <button
               onClick={() => handleRoleSelect('PULPERIA')}
               className="flex items-start gap-4 p-5 bg-dark-800 border-2 border-dark-600 rounded-2xl hover:border-primary-500 hover:bg-dark-700 transition-all text-left group"
@@ -189,9 +195,9 @@ const Register = () => {
                 <Store className="w-6 h-6 text-primary-600" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-white">Tengo una Pulperia</h3>
+                <h3 className="font-semibold text-white">Tengo un negocio</h3>
                 <p className="text-sm text-gray-500 mt-1">
-                  Quiero vender mis productos, recibir pedidos y ofrecer empleos
+                  Quiero vender productos o servicios, recibir pedidos y publicar empleos
                 </p>
               </div>
               <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-primary-500 transition-colors mt-1" />
@@ -215,7 +221,7 @@ const Register = () => {
         </button>
 
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-white">Tu Pulperia</h1>
+          <h1 className="text-2xl font-bold text-white">Tu Negocio</h1>
           <p className="text-gray-500 mt-1">Cuentanos sobre tu negocio</p>
         </div>
 
@@ -259,15 +265,44 @@ const Register = () => {
             </div>
           </div>
 
+          {/* Selector de categoría del negocio */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-300 mb-3">
+              Tipo de negocio
+            </label>
+            <div className="grid grid-cols-4 gap-2">
+              {BUSINESS_CATEGORIES.map(cat => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-1 ${
+                    selectedCategory === cat.id
+                      ? 'border-primary-500 bg-primary-500/10'
+                      : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
+                  }`}
+                >
+                  <span className="text-xl">{cat.emoji}</span>
+                  <span className="text-xs font-medium text-gray-200 text-center">{cat.label}</span>
+                </button>
+              ))}
+            </div>
+            {selectedCategory && (
+              <p className="text-xs text-gray-500 mt-2 text-center">
+                {BUSINESS_CATEGORIES.find(c => c.id === selectedCategory)?.description}
+              </p>
+            )}
+          </div>
+
           {/* Name */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1.5">
-              Nombre de la Pulperia *
+              Nombre del negocio *
             </label>
             <input
               type="text"
               required
-              placeholder="Ej: Pulperia Don Juan"
+              placeholder="Ej: Casa Maria, Taller Juan, Farmacia Central"
               value={pulperiaData.name}
               onChange={(e) => setPulperiaData({ ...pulperiaData, name: e.target.value })}
               className="input"
@@ -340,7 +375,7 @@ const Register = () => {
                 </button>
                 {pulperiaData.latitude !== null && (
                   <p className="text-xs text-green-400 mt-2 text-center">
-                    Tu pulperia aparecera en el mapa correctamente
+                    Tu negocio aparecera en el mapa correctamente
                   </p>
                 )}
               </div>
@@ -427,7 +462,7 @@ const Register = () => {
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
               <>
-                Crear mi Pulperia
+                Crear mi negocio
                 <ArrowRight className="w-5 h-5" />
               </>
             )}
