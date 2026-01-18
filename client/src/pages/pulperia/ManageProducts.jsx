@@ -434,6 +434,7 @@ const ManageProducts = () => {
       <StickyActionBar
         onAddProduct={() => openModal()}
         onBulkImport={() => setShowBulkImport(true)}
+        hidden={showModal || showBulkImport}
       />
     </div>
   );

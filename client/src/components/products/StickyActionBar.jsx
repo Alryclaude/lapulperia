@@ -1,7 +1,9 @@
 import { motion } from 'framer-motion';
 import { Plus, Upload } from 'lucide-react';
 
-const StickyActionBar = ({ onAddProduct, onBulkImport }) => {
+const StickyActionBar = ({ onAddProduct, onBulkImport, hidden }) => {
+  if (hidden) return null;
+
   return (
     <motion.div
       initial={{ y: 100, opacity: 0 }}
