@@ -476,20 +476,20 @@ router.delete('/:id', authenticate, requirePulperia, asyncHandler(async (req, re
 
 // Bulk create products with images
 router.post('/bulk-create-with-images', authenticate, requirePulperia, uploadProduct.array('images'), asyncHandler(async (req, res) => {
-  const { products: productsJson } = req.body;
-
-  if (!productsJson) {
-    throw Errors.badRequest('Se requiere lista de productos');
+  // Reconstruct products array from indexed fields (products[0][name], products[0][price], etc.)
+  const products = [];
+  let i = 0;
+  while (req.body[`products[${i}][name]`] !== undefined) {
+    products.push({
+      name: req.body[`products[${i}][name]`],
+      price: req.body[`products[${i}][price]`],
+      description: req.body[`products[${i}][description]`] || '',
+      category: req.body[`products[${i}][category]`] || null,
+    });
+    i++;
   }
 
-  let products;
-  try {
-    products = JSON.parse(productsJson);
-  } catch {
-    throw Errors.badRequest('JSON de productos inválido');
-  }
-
-  if (!Array.isArray(products) || products.length === 0) {
+  if (products.length === 0) {
     throw Errors.badRequest('Se requiere al menos un producto');
   }
 

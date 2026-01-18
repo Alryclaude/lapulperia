@@ -96,19 +96,14 @@ const BulkImageUpload = ({ isOpen, onClose, onSuccess }) => {
     try {
       const formData = new FormData();
 
-      // Add only complete images and their data
-      const productsData = [];
-      completeImages.forEach((img) => {
+      // Add images and product data as indexed fields (Multer parses these correctly)
+      completeImages.forEach((img, index) => {
         formData.append('images', img.file);
-        productsData.push({
-          name: img.name.trim(),
-          price: parseFloat(img.price),
-          description: img.description?.trim() || '',
-          category: img.category || null,
-        });
+        formData.append(`products[${index}][name]`, img.name.trim());
+        formData.append(`products[${index}][price]`, parseFloat(img.price));
+        formData.append(`products[${index}][description]`, img.description?.trim() || '');
+        formData.append(`products[${index}][category]`, img.category || '');
       });
-
-      formData.append('products', JSON.stringify(productsData));
 
       // Simulate progress (actual progress would require XMLHttpRequest)
       const progressInterval = setInterval(() => {
