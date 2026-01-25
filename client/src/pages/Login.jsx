@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuthStore } from '../stores/authStore';
 import { Store } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -44,22 +45,34 @@ const Login = () => {
   };
 
   return (
-    <div className="w-full max-w-md">
-      <div className="card p-8 shadow-xl">
+    <motion.div 
+      className="w-full max-w-md"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
+      <div className="card p-8 shadow-xl border border-white/5 rounded-2xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
+        <motion.div 
+          className="text-center mb-8"
+          initial={{ scale: 0.9 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.1 }}
+        >
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500 to-amber-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-red-500/20">
             <Store className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-white">Bienvenido</h1>
-          <p className="text-gray-500 mt-1">Inicia sesion para continuar</p>
-        </div>
+          <p className="text-gray-400 mt-1">Inicia sesión para continuar</p>
+        </motion.div>
 
-        {/* Google Login Button */}
-        <button
+        {/* Google Login Button - Touch target >= 44px */}
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={handleGoogleLogin}
           disabled={isLoading}
-          className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-dark-800 border border-dark-600 rounded-xl font-medium text-gray-200 hover:bg-dark-700 hover:border-dark-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-3 px-4 py-4 min-h-[48px] bg-surface-1 border border-white/10 rounded-2xl font-medium text-gray-200 hover:bg-white/5 hover:border-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
@@ -84,39 +97,44 @@ const Login = () => {
             </svg>
           )}
           {isLoading ? 'Conectando...' : 'Continuar con Google'}
-        </button>
+        </motion.button>
 
         {/* Divider */}
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-dark-600" />
+            <div className="w-full border-t border-white/10" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-dark-900 text-gray-400">o</span>
+            <span className="px-3 bg-surface-1 text-gray-500 rounded-full">o</span>
           </div>
         </div>
 
         {/* Info */}
-        <p className="text-center text-sm text-gray-500">
+        <p className="text-center text-sm text-gray-400">
           Al continuar, aceptas nuestros{' '}
-          <Link to="/terms" className="text-primary-600 hover:underline">
-            Terminos de Servicio
+          <Link to="/terms" className="text-amber-500 hover:text-amber-400 transition-colors">
+            Términos de Servicio
           </Link>{' '}
           y{' '}
-          <Link to="/privacy" className="text-primary-600 hover:underline">
-            Politica de Privacidad
+          <Link to="/privacy" className="text-amber-500 hover:text-amber-400 transition-colors">
+            Política de Privacidad
           </Link>
         </p>
       </div>
 
       {/* Footer */}
-      <p className="text-center text-sm text-gray-400 mt-6">
-        Nuevo aqui?{' '}
-        <Link to="/register" className="text-primary-400 hover:underline">
-          Crea tu cuenta o pulperia
+      <motion.p 
+        className="text-center text-sm text-gray-400 mt-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+      >
+        ¿Nuevo aquí?{' '}
+        <Link to="/register" className="text-red-500 hover:text-red-400 font-medium transition-colors">
+          Crea tu cuenta o pulpería
         </Link>
-      </p>
-    </div>
+      </motion.p>
+    </motion.div>
   );
 };
 

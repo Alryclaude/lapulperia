@@ -43,14 +43,14 @@ const Favorites = () => {
 
   return (
     <div className="space-y-6 pb-20">
-      {/* Header */}
+      {/* Header - Rojo de la paleta */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         className="flex items-center gap-4"
       >
-        <div className="w-12 h-12 rounded-xl bg-primary-500/20 flex items-center justify-center">
-          <Heart className="w-6 h-6 text-primary-400" />
+        <div className="w-12 h-12 rounded-2xl bg-red-500/20 flex items-center justify-center">
+          <Heart className="w-6 h-6 text-red-400" />
         </div>
         <div>
           <h1 className="text-2xl font-bold text-white">Mis Favoritos</h1>
@@ -58,13 +58,13 @@ const Favorites = () => {
         </div>
       </motion.div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 bg-dark-200/50 p-1 rounded-xl">
+      {/* Tabs - Touch targets >= 44px */}
+      <div className="flex gap-2 bg-surface-1 p-1.5 rounded-2xl border border-white/5">
         <button
           onClick={() => setActiveTab('pulperias')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg font-medium transition-all ${
+          className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 min-h-[44px] rounded-xl font-medium transition-all ${
             activeTab === 'pulperias'
-              ? 'bg-primary-500 text-white'
+              ? 'bg-red-500 text-white shadow-lg shadow-red-500/20'
               : 'text-gray-400 hover:text-white hover:bg-white/5'
           }`}
         >
@@ -72,7 +72,7 @@ const Favorites = () => {
           Pulperías
           {favoritePulperias.length > 0 && (
             <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-              activeTab === 'pulperias' ? 'bg-white/20' : 'bg-primary-500/20 text-primary-400'
+              activeTab === 'pulperias' ? 'bg-white/20' : 'bg-red-500/20 text-red-400'
             }`}>
               {favoritePulperias.length}
             </span>
@@ -80,9 +80,9 @@ const Favorites = () => {
         </button>
         <button
           onClick={() => setActiveTab('products')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg font-medium transition-all ${
+          className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 min-h-[44px] rounded-xl font-medium transition-all ${
             activeTab === 'products'
-              ? 'bg-primary-500 text-white'
+              ? 'bg-red-500 text-white shadow-lg shadow-red-500/20'
               : 'text-gray-400 hover:text-white hover:bg-white/5'
           }`}
         >
@@ -90,7 +90,7 @@ const Favorites = () => {
           Productos
           {favoriteProducts.length > 0 && (
             <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-              activeTab === 'products' ? 'bg-white/20' : 'bg-primary-500/20 text-primary-400'
+              activeTab === 'products' ? 'bg-white/20' : 'bg-red-500/20 text-red-400'
             }`}>
               {favoriteProducts.length}
             </span>

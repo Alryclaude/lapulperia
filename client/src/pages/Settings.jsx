@@ -108,11 +108,11 @@ const Settings = () => {
         animate={{ opacity: 1, y: 0 }}
         className="flex items-center gap-4"
       >
-        <div className="w-12 h-12 rounded-xl bg-primary-500/20 flex items-center justify-center">
-          <SettingsIcon className="w-6 h-6 text-primary-400" />
+        <div className="w-12 h-12 rounded-2xl bg-amber-500/20 flex items-center justify-center">
+          <SettingsIcon className="w-6 h-6 text-amber-400" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-white">Configuracion</h1>
+          <h1 className="text-2xl font-bold text-white">Configuración</h1>
           <p className="text-gray-400 text-sm">Personaliza tu experiencia</p>
         </div>
       </motion.div>

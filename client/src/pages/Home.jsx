@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { pulperiaApi } from '../services/api';
 import { useAuthStore } from '../stores/authStore';
@@ -19,6 +20,27 @@ import {
 } from '../components/home';
 import FullscreenMap from '../components/map/FullscreenMap';
 import StoreTypeToggle from '../components/map/StoreTypeToggle';
+
+// Animaciones staggered para "Vibrancia de Barrio"
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.05,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.4, ease: 'easeOut' },
+  },
+};
 
 // Hook para detectar primera visita
 const useFirstVisit = () => {
@@ -121,29 +143,44 @@ const Home = () => {
   // Primera visita (guest) - Experiencia completa de onboarding
   if (!isAuthenticated) {
     return (
-      <div className="space-y-8">
+      <motion.div 
+        className="space-y-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {/* 1. Install Prompt */}
-        <InstallPrompt
-          isInstallable={isInstallable}
-          promptInstall={promptInstall}
-          dismissPrompt={dismissPrompt}
-        />
+        <motion.div variants={itemVariants}>
+          <InstallPrompt
+            isInstallable={isInstallable}
+            promptInstall={promptInstall}
+            dismissPrompt={dismissPrompt}
+          />
+        </motion.div>
 
         {/* 2. Hero Section - Prominente para primera visita */}
-        <HeroSection
-          pulperiasCount={pulperias.length}
-          productsCount={totalProducts}
-        />
+        <motion.div variants={itemVariants}>
+          <HeroSection
+            pulperiasCount={pulperias.length}
+            productsCount={totalProducts}
+          />
+        </motion.div>
 
         {/* 3. Value Proposition */}
-        <ValueProposition />
+        <motion.div variants={itemVariants}>
+          <ValueProposition />
+        </motion.div>
 
         {/* 4. How It Works - Tutorial */}
-        {isFirstVisit && <HowItWorks />}
+        {isFirstVisit && (
+          <motion.div variants={itemVariants}>
+            <HowItWorks />
+          </motion.div>
+        )}
 
-        {/* 5. Map Section con Toggle de tipo */}
-        <div className="space-y-4">
-          {/* Toggle Físico/Online */}
+        {/* 5. Map Section con Toggle de tipo - PRIORIDAD */}
+        <motion.div variants={itemVariants} className="space-y-4">
+          {/* Toggle Físico/Online con mejor contraste Ámbar */}
           <div className="flex justify-center">
             <StoreTypeToggle
               selected={storeType}
@@ -158,22 +195,34 @@ const Home = () => {
             openCount={openPulperias.length}
             onOpenFullMap={() => setIsFullMapOpen(true)}
           />
-        </div>
+        </motion.div>
 
         {/* 6. Open Pulperias Section */}
-        <OpenPulperiasSection pulperias={openPulperias} />
+        <motion.div variants={itemVariants}>
+          <OpenPulperiasSection pulperias={openPulperias} />
+        </motion.div>
 
         {/* 7. Online Stores Section */}
-        <OnlineStoresSection pulperias={onlineStores} isLoading={isLoadingOnline} />
+        <motion.div variants={itemVariants}>
+          <OnlineStoresSection pulperias={onlineStores} isLoading={isLoadingOnline} />
+        </motion.div>
 
         {/* 8. Features Section */}
-        {isFirstVisit && <FeaturesSection />}
+        {isFirstVisit && (
+          <motion.div variants={itemVariants}>
+            <FeaturesSection />
+          </motion.div>
+        )}
 
         {/* 9. FAQ Section */}
-        <FAQSection />
+        <motion.div variants={itemVariants}>
+          <FAQSection />
+        </motion.div>
 
         {/* 10. CTA Section - Prominente para guest */}
-        <CTASection isAuthenticated={isAuthenticated} />
+        <motion.div variants={itemVariants}>
+          <CTASection isAuthenticated={isAuthenticated} />
+        </motion.div>
 
         {/* Fullscreen Map Modal */}
         <FullscreenMap
@@ -184,22 +233,29 @@ const Home = () => {
           onlineStores={onlineStores}
           userLocation={location ? [location.lat, location.lng] : null}
         />
-      </div>
+      </motion.div>
     );
   }
 
   // === Usuario Logueado - Experiencia simplificada ===
   return (
-    <div className="space-y-6">
+    <motion.div 
+      className="space-y-5"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
       {/* 1. Install Prompt */}
-      <InstallPrompt
-        isInstallable={isInstallable}
-        promptInstall={promptInstall}
-        dismissPrompt={dismissPrompt}
-      />
+      <motion.div variants={itemVariants}>
+        <InstallPrompt
+          isInstallable={isInstallable}
+          promptInstall={promptInstall}
+          dismissPrompt={dismissPrompt}
+        />
+      </motion.div>
 
       {/* 2. Toggle Físico/Online + Map Section - Protagonista */}
-      <div className="space-y-4">
+      <motion.div variants={itemVariants} className="space-y-4">
         <div className="flex justify-center">
           <StoreTypeToggle
             selected={storeType}
@@ -214,16 +270,22 @@ const Home = () => {
           openCount={openPulperias.length}
           onOpenFullMap={() => setIsFullMapOpen(true)}
         />
-      </div>
+      </motion.div>
 
       {/* 3. Open Pulperias Section - Compacto */}
-      <OpenPulperiasSection pulperias={openPulperias} />
+      <motion.div variants={itemVariants}>
+        <OpenPulperiasSection pulperias={openPulperias} />
+      </motion.div>
 
       {/* 4. Online Stores Section - Compacto */}
-      <OnlineStoresSection pulperias={onlineStores} isLoading={isLoadingOnline} compact />
+      <motion.div variants={itemVariants}>
+        <OnlineStoresSection pulperias={onlineStores} isLoading={isLoadingOnline} compact />
+      </motion.div>
 
       {/* 5. FAQ Section - Colapsado */}
-      <FAQSection collapsed />
+      <motion.div variants={itemVariants}>
+        <FAQSection collapsed />
+      </motion.div>
 
       {/* Fullscreen Map Modal */}
       <FullscreenMap
@@ -234,7 +296,7 @@ const Home = () => {
         onlineStores={onlineStores}
         userLocation={location ? [location.lat, location.lng] : null}
       />
-    </div>
+    </motion.div>
   );
 };
 
