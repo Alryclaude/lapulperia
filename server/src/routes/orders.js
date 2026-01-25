@@ -186,7 +186,8 @@ async function sendOrderNotification(pulperiaUserId, order, orderItems, total, c
         type: 'new_order',
         orderId: order.id,
         isPulperia: 'true',
-      }
+      },
+      pulperiaUserId
     );
     console.log(`[NOTIF] Push sent successfully to user ${pulperiaUserId}`);
   } catch (pushError) {
@@ -373,7 +374,8 @@ async function sendStatusNotification(userId, orderId, status) {
           orderId,
           status,
           isPulperia: 'false',
-        }
+        },
+        userId
       );
     }
   } catch (error) {
@@ -519,46 +521,52 @@ router.post('/quick-sale', authenticate, requirePulperia, asyncHandler(async (re
   const pulperiaId = req.user.pulperia.id;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  const parsedAmount = parseFloat(amount);
 
-  const order = await prisma.order.create({
-    data: {
-      orderNumber: `QS-${uuidv4().slice(0, 8).toUpperCase()}`,
-      userId: req.user.id,
-      pulperiaId,
-      total: parseFloat(amount),
-      notes: description || 'Venta rápida',
-      status: 'DELIVERED',
-      deliveredAt: new Date(),
-      isQuickSale: true,
-    }
-  });
+  // Wrap all operations in a transaction to prevent race conditions
+  const order = await prisma.$transaction(async (tx) => {
+    const createdOrder = await tx.order.create({
+      data: {
+        orderNumber: `QS-${uuidv4().slice(0, 8).toUpperCase()}`,
+        userId: req.user.id,
+        pulperiaId,
+        total: parsedAmount,
+        notes: description || 'Venta rápida',
+        status: 'DELIVERED',
+        deliveredAt: new Date(),
+        isQuickSale: true,
+      }
+    });
 
-  await prisma.dailyStat.upsert({
-    where: { pulperiaId_date: { pulperiaId, date: today } },
-    update: {
-      totalSales: { increment: parseFloat(amount) },
-      totalOrders: { increment: 1 }
-    },
-    create: {
-      pulperiaId,
-      date: today,
-      totalSales: parseFloat(amount),
-      totalOrders: 1
-    }
-  });
+    await tx.dailyStat.upsert({
+      where: { pulperiaId_date: { pulperiaId, date: today } },
+      update: {
+        totalSales: { increment: parsedAmount },
+        totalOrders: { increment: 1 }
+      },
+      create: {
+        pulperiaId,
+        date: today,
+        totalSales: parsedAmount,
+        totalOrders: 1
+      }
+    });
 
-  await prisma.pulperia.update({
-    where: { id: pulperiaId },
-    data: {
-      totalOrders: { increment: 1 },
-      totalSales: { increment: 1 }
-    }
+    await tx.pulperia.update({
+      where: { id: pulperiaId },
+      data: {
+        totalOrders: { increment: 1 },
+        totalSales: { increment: 1 }
+      }
+    });
+
+    return createdOrder;
   });
 
   res.status(201).json({
     success: true,
     order,
-    message: `Venta de L ${amount.toFixed(2)} registrada`
+    message: `Venta de L ${parsedAmount.toFixed(2)} registrada`
   });
 }));
 

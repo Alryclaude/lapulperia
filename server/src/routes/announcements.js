@@ -40,11 +40,14 @@ router.get('/', optionalAuth, async (req, res) => {
     const maxRadius = parseFloat(radius);
     const now = new Date();
 
-    // Obtener anuncios activos no expirados
+    // Obtener anuncios activos no expirados (excluyendo pulperías cerradas permanentemente)
     const announcements = await prisma.announcement.findMany({
       where: {
         isActive: true,
-        expiresAt: { gt: now }
+        expiresAt: { gt: now },
+        pulperia: {
+          isPermanentlyClosed: false
+        }
       },
       include: {
         pulperia: {

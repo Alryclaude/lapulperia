@@ -122,6 +122,36 @@ router.get('/pulperia/:pulperiaId', optionalAuth, asyncHandler(async (req, res) 
   });
 }));
 
+// Get low stock products (MUST be before /:id to avoid being interpreted as an ID)
+router.get('/low-stock', authenticate, requirePulperia, asyncHandler(async (req, res) => {
+  const products = await prisma.product.findMany({
+    where: {
+      pulperiaId: req.user.pulperia.id,
+      isAvailable: true,
+      OR: [
+        { outOfStock: true },
+        {
+          AND: [
+            { stockQuantity: { not: null } },
+            { lowStockAlert: { not: null } },
+          ],
+        },
+      ],
+    },
+    orderBy: { stockQuantity: 'asc' },
+  });
+
+  const lowStockProducts = products.filter((p) => {
+    if (p.outOfStock) return true;
+    if (p.stockQuantity !== null && p.lowStockAlert !== null) {
+      return p.stockQuantity <= p.lowStockAlert;
+    }
+    return false;
+  });
+
+  res.json({ products: lowStockProducts });
+}));
+
 // Get single product
 router.get('/:id', optionalAuth, asyncHandler(async (req, res) => {
   const product = await prisma.product.update({
@@ -349,36 +379,6 @@ router.patch('/:id/stock-quantity', authenticate, requirePulperia, asyncHandler(
   }
 
   res.json({ product: updatedProduct });
-}));
-
-// Get low stock products
-router.get('/low-stock', authenticate, requirePulperia, asyncHandler(async (req, res) => {
-  const products = await prisma.product.findMany({
-    where: {
-      pulperiaId: req.user.pulperia.id,
-      isAvailable: true,
-      OR: [
-        { outOfStock: true },
-        {
-          AND: [
-            { stockQuantity: { not: null } },
-            { lowStockAlert: { not: null } },
-          ],
-        },
-      ],
-    },
-    orderBy: { stockQuantity: 'asc' },
-  });
-
-  const lowStockProducts = products.filter((p) => {
-    if (p.outOfStock) return true;
-    if (p.stockQuantity !== null && p.lowStockAlert !== null) {
-      return p.stockQuantity <= p.lowStockAlert;
-    }
-    return false;
-  });
-
-  res.json({ products: lowStockProducts });
 }));
 
 // Bulk stock update

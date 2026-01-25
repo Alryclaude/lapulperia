@@ -60,7 +60,7 @@ export const verifyToken = async (token) => {
   }
 };
 
-export const sendPushNotification = async (token, title, body, data = {}) => {
+export const sendPushNotification = async (token, title, body, data = {}, userId = null) => {
   try {
     if (!firebaseInitialized) {
       console.log('Push notification skipped (Firebase not initialized):', { title, body, data });
@@ -125,7 +125,28 @@ export const sendPushNotification = async (token, title, body, data = {}) => {
     await admin.messaging().send(message);
     console.log(`[NOTIF] Push sent: "${title}" to token ${token.substring(0, 20)}...`);
   } catch (error) {
-    console.error('Error sending push notification:', error);
+    // Check if the error is due to an invalid/unregistered token
+    const errorCode = error.code || error.errorInfo?.code;
+    const isInvalidToken = errorCode === 'messaging/registration-token-not-registered' ||
+                           errorCode === 'messaging/invalid-registration-token' ||
+                           errorCode === 'messaging/invalid-argument';
+
+    if (isInvalidToken && userId) {
+      console.log(`[NOTIF] Invalid FCM token detected for user ${userId}, cleaning up...`);
+      try {
+        // Dynamic import to avoid circular dependency
+        const prisma = (await import('./prisma.js')).default;
+        await prisma.user.update({
+          where: { id: userId },
+          data: { fcmToken: null }
+        });
+        console.log(`[NOTIF] Cleaned invalid FCM token for user ${userId}`);
+      } catch (cleanupError) {
+        console.error(`[NOTIF] Failed to clean FCM token for user ${userId}:`, cleanupError.message);
+      }
+    } else {
+      console.error('Error sending push notification:', error);
+    }
   }
 };
 
