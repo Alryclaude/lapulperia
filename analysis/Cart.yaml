@@ -1,0 +1,21 @@
+vista: "Cart"
+archivo: "client/src/pages/Cart.jsx"
+problemas:
+  - problema: "Riesgo de error por proximidad: Los controles de cantidad y el botón de eliminar (Trash2) están demasiado juntos, facilitando eliminaciones accidentales en pantallas táctiles de gama media."
+    severidad: ALTA
+  - problema: "Falta de affordance en notas: El input de notas tiene 'border-none' y 'bg-transparent', lo que lo hace parecer texto estático. Un usuario no tecnológico no sabrá que es un campo editable."
+    severidad: ALTA
+  - problema: "Jerarquía visual débil en encabezados: El nombre de la pulpería y el precio total del grupo compiten en peso visual. El total (L. 0.00) en el Badge necesita más contraste para ser el foco de decisión."
+    severidad: MEDIA
+oportunidades:
+  - mejora: "Feedback preventivo en decremento: Cambiar el color del icono 'Minus' a Rojo #FF4747 cuando la cantidad sea 1, indicando visualmente que el siguiente toque eliminará el producto."
+    impacto: MEDIO
+    esfuerzo: BAJO
+  - mejora: "Refuerzo de marca en Empty State: Sustituir el ShoppingBag gris por un icono vibrante en Ámbar #FFB800 con un fondo suave del mismo tono para inyectar la 'Vibrancia de Barrio' desde el inicio."
+    impacto: ALTO
+    esfuerzo: BAJO
+  - mejora: "Elevación del Sticky Footer: Aplicar un borde superior más grueso con el color Gris #16161E o una sombra 'shadow-2xl' para separar claramente el resumen del total del contenido que hace scroll."
+    impacto: MEDIO
+    esfuerzo: BAJO
+prioridad_general: ALTA
+notas: "Se recomienda aumentar el padding horizontal entre el control de cantidad y el botón de basura a un mínimo de 'gap-4' para mejorar la ergonomía táctil (Fat Finger Syndrome)."

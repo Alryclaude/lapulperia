@@ -1,0 +1,21 @@
+vista: "Home"
+archivo: "client/src/pages/Home.jsx"
+problemas:
+  - problema: "El MapSection, punto central de interacción, queda relegado bajo 4-5 secciones (HeroSection, ValueProposition, HowItWorks), requiriendo scroll excesivo en móviles para ver el contenido principal."
+    severidad: ALTA
+  - problema: "Excesiva densidad vertical en la vista de invitado (10 secciones); el scroll infinito fatiga al usuario y diluye la jerarquía de las acciones principales."
+    severidad: MEDIA
+  - problema: "Inconsistencia de espaciado entre estados (space-y-8 vs space-y-6); en dispositivos de gama media con pantallas pequeñas, el espacio en blanco excesivo desconecta los elementos."
+    severidad: BAJA
+oportunidades:
+  - mejora: "Implementar esqueletos de carga (Skeletons) con la paleta de colores oscura (#16161E) para mejorar la percepción de velocidad en conexiones 3G."
+    impacto: ALTO
+    esfuerzo: MEDIO
+  - mejora: "Aplicar micro-interacciones de entrada (staggered animations) en las secciones del Hero para reforzar visualmente el concepto de 'Vibrancia de Barrio'."
+    impacto: MEDIO
+    esfuerzo: BAJO
+  - mejora: "Optimizar el contraste del color Ámbar (#FFB800) en el StoreTypeToggle y botones para asegurar legibilidad en exteriores bajo luz solar intensa."
+    impacto: ALTO
+    esfuerzo: BAJO
+prioridad_general: ALTA
+notas: "La arquitectura de 'experiencia diferenciada' es sólida, pero la vista de invitado requiere una curación visual más estricta para no abrumar al usuario nuevo."

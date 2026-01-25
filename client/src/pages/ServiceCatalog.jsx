@@ -283,8 +283,8 @@ const ServiceCatalog = ({ isOwner }) => {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-4"
         >
-          <div className="w-12 h-12 rounded-xl bg-primary-500/20 flex items-center justify-center">
-            <Wrench className="w-6 h-6 text-primary-400" />
+          <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center">
+            <Wrench className="w-6 h-6 text-emerald-400" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-white">Mis Servicios</h1>

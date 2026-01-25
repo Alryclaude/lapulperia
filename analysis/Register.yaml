@@ -1,0 +1,21 @@
+vista: "Register"
+archivo: "client/src/pages/Register.jsx"
+problemas:
+  - problema: "Inconsistencia cromática: El uso de azul (blue-600/blue-100) en la tarjeta de 'Soy Cliente' rompe la paleta de marca aprobada (Rojo/Ámbar), diluyendo la identidad visual en el primer punto de decisión."
+    severidad: MEDIA
+  - problema: "Densidad excesiva en categorías: El grid de 4 columnas para el tipo de negocio genera elementos táctiles muy pequeños y etiquetas de texto (text-xs) difíciles de leer en dispositivos de gama media."
+    severidad: MEDIA
+  - problema: "Affordance débil en geolocalización: El botón con 'border-dashed' se asemeja visualmente a un área de carga de archivos (dropzone) en lugar de una acción de sistema, lo que puede confundir al usuario no técnico."
+    severidad: BAJA
+oportunidades:
+  - mejora: "Implementar un indicador de progreso visual (3 pasos) en la parte superior para reducir la ansiedad del usuario y clarificar la duración del proceso de registro."
+    impacto: ALTO
+    esfuerzo: BAJO
+  - mejora: "Aplicar el color verde oficial de WhatsApp al borde o icono del campo correspondiente para generar 'puntos de anclaje' visuales familiares al usuario hondureño."
+    impacto: MEDIO
+    esfuerzo: BAJO
+  - mejora: "Sustituir los bordes grises de las tarjetas de rol por gradientes sutiles usando los colores primarios (#FF4747 y #FFB800) para elevar la 'vibrancia' y jerarquía visual."
+    impacto: ALTO
+    esfuerzo: MEDIO
+prioridad_general: MEDIA
+notas: "El flujo es intuitivo, pero la accesibilidad en pantallas pequeñas se ve comprometida por el tamaño de los botones de categoría. Se recomienda pasar a un grid de 2 o 3 columnas."

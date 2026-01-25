@@ -8,16 +8,17 @@ import { orderApi, reviewApi } from '../services/api';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
+// Status con colores de paleta "Vibrancia de Barrio" - Tema oscuro
 const statusConfig = {
-  PENDING: { label: 'Pendiente', color: 'text-yellow-600', bg: 'bg-yellow-100', icon: Clock },
-  ACCEPTED: { label: 'Aceptado', color: 'text-blue-600', bg: 'bg-blue-100', icon: CheckCircle },
-  PREPARING: { label: 'Preparando', color: 'text-purple-600', bg: 'bg-purple-100', icon: Package },
-  READY: { label: 'Listo para recoger', color: 'text-green-600', bg: 'bg-green-100', icon: Truck },
-  DELIVERED: { label: 'Entregado', color: 'text-gray-600', bg: 'bg-gray-100', icon: CheckCircle },
-  CANCELLED: { label: 'Cancelado', color: 'text-red-600', bg: 'bg-red-100', icon: XCircle },
+  PENDING: { label: 'Pendiente', color: 'text-amber-400', bg: 'bg-amber-500/20', icon: Clock },
+  ACCEPTED: { label: 'Aceptado', color: 'text-blue-400', bg: 'bg-blue-500/20', icon: CheckCircle },
+  PREPARING: { label: 'Preparando', color: 'text-purple-400', bg: 'bg-purple-500/20', icon: Package },
+  READY: { label: 'Listo para recoger', color: 'text-emerald-400', bg: 'bg-emerald-500/20', icon: Truck },
+  DELIVERED: { label: 'Entregado', color: 'text-gray-400', bg: 'bg-gray-500/20', icon: CheckCircle },
+  CANCELLED: { label: 'Cancelado', color: 'text-red-400', bg: 'bg-red-500/20', icon: XCircle },
 };
 
-const DEFAULT_STATUS = { label: 'Desconocido', color: 'text-gray-600', bg: 'bg-gray-100', icon: Package };
+const DEFAULT_STATUS = { label: 'Desconocido', color: 'text-gray-400', bg: 'bg-gray-500/20', icon: Package };
 
 const OrderDetail = () => {
   const { id } = useParams();

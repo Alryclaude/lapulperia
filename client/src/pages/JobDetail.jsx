@@ -7,6 +7,20 @@ import { jobApi } from '../services/api';
 import { useAuthStore } from '../stores/authStore';
 import toast from 'react-hot-toast';
 
+// Animación de entrada
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 15 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
+};
+
 const JobDetail = () => {
   const { id } = useParams();
   const { isAuthenticated } = useAuthStore();

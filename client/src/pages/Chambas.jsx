@@ -181,13 +181,13 @@ const Chambas = () => {
 
   return (
     <div className="space-y-4 pb-24">
-      {/* Header */}
+      {/* Header - Vibrancia de Barrio */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         className="flex items-center gap-4"
       >
-        <div className={`w-12 h-12 rounded-xl ${currentTab.bgColor} flex items-center justify-center`}>
+        <div className={`w-12 h-12 rounded-2xl ${currentTab.bgColor} flex items-center justify-center`}>
           <currentTab.icon className={`w-6 h-6 ${currentTab.textColor}`} />
         </div>
         <div>

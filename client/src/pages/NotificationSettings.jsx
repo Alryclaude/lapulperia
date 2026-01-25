@@ -97,12 +97,12 @@ const NotificationSettings = () => {
         animate={{ opacity: 1, y: 0 }}
         className="flex items-center gap-4"
       >
-        <div className="w-12 h-12 rounded-xl bg-primary-500/20 flex items-center justify-center">
-          <Bell className="w-6 h-6 text-primary-400" />
+        <div className="w-12 h-12 rounded-2xl bg-red-500/20 flex items-center justify-center">
+          <Bell className="w-6 h-6 text-red-400" />
         </div>
         <div>
           <h1 className="text-2xl font-bold text-white">Notificaciones</h1>
-          <p className="text-gray-400 text-sm">Configura que notificaciones quieres recibir</p>
+          <p className="text-gray-400 text-sm">Configura qué notificaciones quieres recibir</p>
         </div>
       </motion.div>
 

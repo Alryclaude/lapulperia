@@ -78,9 +78,9 @@ const Cart = () => {
           initial={{ scale: 0.8 }}
           animate={{ scale: 1 }}
           transition={{ type: 'spring', stiffness: 200, delay: 0.1 }}
-          className="w-20 h-20 bg-gray-100 rounded-3xl flex items-center justify-center mx-auto mb-6"
+          className="w-20 h-20 bg-amber-500/20 rounded-3xl flex items-center justify-center mx-auto mb-6"
         >
-          <ShoppingBag className="w-10 h-10 text-gray-400" />
+          <ShoppingBag className="w-10 h-10 text-amber-400" />
         </motion.div>
         <motion.h2
           initial={{ opacity: 0 }}
@@ -241,12 +241,16 @@ const Cart = () => {
                             </p>
                           </div>
 
-                          {/* Quantity Controls */}
-                          <div className="flex items-center gap-1.5">
+                          {/* Quantity Controls - Touch targets mejorados */}
+                          <div className="flex items-center gap-2">
                             <motion.button
                               whileTap={{ scale: 0.9 }}
                               onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                              className="w-8 h-8 rounded-lg bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors"
+                              className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
+                                item.quantity === 1 
+                                  ? 'bg-red-500/20 hover:bg-red-500/30 text-red-400' 
+                                  : 'bg-muted hover:bg-muted/80'
+                              }`}
                             >
                               <Minus className="w-4 h-4" />
                             </motion.button>
@@ -261,18 +265,18 @@ const Cart = () => {
                             <motion.button
                               whileTap={{ scale: 0.9 }}
                               onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                              className="w-8 h-8 rounded-lg bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors"
+                              className="w-10 h-10 rounded-xl bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors"
                             >
                               <Plus className="w-4 h-4" />
                             </motion.button>
                           </div>
 
-                          {/* Remove Button */}
+                          {/* Remove Button - Separación mejorada */}
                           <motion.button
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
                             onClick={() => removeItem(item.product.id)}
-                            className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                            className="p-2.5 ml-2 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-colors"
                           >
                             <Trash2 className="w-5 h-5" />
                           </motion.button>

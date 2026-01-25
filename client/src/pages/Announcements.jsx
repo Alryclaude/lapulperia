@@ -158,17 +158,17 @@ const Announcements = () => {
 
       {/* Contenido principal */}
       <div className="px-0 py-4">
-        {/* Header decorativo */}
+        {/* Header decorativo - Vibrancia de Barrio */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-3 mb-5"
         >
-          <div className="w-10 h-10 rounded-xl bg-primary-500/20 flex items-center justify-center">
-            <Megaphone className="w-5 h-5 text-primary-400" />
+          <div className="w-12 h-12 rounded-2xl bg-red-500/20 flex items-center justify-center">
+            <Megaphone className="w-6 h-6 text-red-400" />
           </div>
           <div>
-            <h1 className="text-white font-bold text-lg">Mural de Ofertas</h1>
+            <h1 className="text-white font-bold text-xl">Mural de Ofertas</h1>
             <p className="text-gray-400 text-sm">
               {announcements.length > 0
                 ? `${announcements.length} ofertas en tu zona`
