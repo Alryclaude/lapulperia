@@ -8,31 +8,16 @@ import { useCartStore } from '../stores/cartStore';
 import toast from 'react-hot-toast';
 import NotificationPrompt from '../components/NotificationPrompt';
 
-// Status con colores de paleta "Vibrancia de Barrio"
 const statusConfig = {
-  PENDING: { label: 'Pendiente', color: 'text-amber-400', bg: 'bg-amber-500/20', border: 'border-amber-500/30', icon: Clock },
+  PENDING: { label: 'Pendiente', color: 'text-yellow-400', bg: 'bg-yellow-500/20', border: 'border-yellow-500/30', icon: Clock },
   ACCEPTED: { label: 'Aceptado', color: 'text-blue-400', bg: 'bg-blue-500/20', border: 'border-blue-500/30', icon: CheckCircle },
   PREPARING: { label: 'Preparando', color: 'text-purple-400', bg: 'bg-purple-500/20', border: 'border-purple-500/30', icon: Package },
-  READY: { label: 'Listo', color: 'text-emerald-400', bg: 'bg-emerald-500/20', border: 'border-emerald-500/30', icon: Truck },
+  READY: { label: 'Listo', color: 'text-green-400', bg: 'bg-green-500/20', border: 'border-green-500/30', icon: Truck },
   DELIVERED: { label: 'Entregado', color: 'text-gray-400', bg: 'bg-gray-500/20', border: 'border-gray-500/30', icon: CheckCircle },
   CANCELLED: { label: 'Cancelado', color: 'text-red-400', bg: 'bg-red-500/20', border: 'border-red-500/30', icon: XCircle },
 };
 
 const DEFAULT_STATUS = { label: 'Desconocido', color: 'text-gray-400', bg: 'bg-gray-500/20', border: 'border-gray-500/30', icon: AlertCircle };
-
-// Animaciones staggered
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.05 },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 15 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
-};
 
 const Orders = () => {
   const navigate = useNavigate();
@@ -132,8 +117,8 @@ const Orders = () => {
         animate={{ opacity: 1, y: 0 }}
         className="flex items-center gap-4"
       >
-        <div className="w-12 h-12 rounded-2xl bg-red-500/20 flex items-center justify-center">
-          <Package className="w-6 h-6 text-red-400" />
+        <div className="w-12 h-12 rounded-xl bg-primary-500/20 flex items-center justify-center">
+          <Package className="w-6 h-6 text-primary-400" />
         </div>
         <div>
           <h1 className="text-2xl font-bold text-white">Mis Pedidos</h1>

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { Shield, Eye, MapPin, Users, Download } from 'lucide-react';
 import { userApi } from '../services/api';
 import toast from 'react-hot-toast';
@@ -63,51 +62,38 @@ const PrivacySettings = () => {
   ];
 
   return (
-    <motion.div 
-      className="space-y-6"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <div className="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center">
-          <Shield className="w-6 h-6 text-blue-400" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-white">Privacidad</h1>
-          <p className="text-gray-400 text-sm">Controla cómo se usa tu información</p>
-        </div>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Privacidad</h1>
+        <p className="text-gray-500 mt-1">Controla cómo se usa tu información</p>
       </div>
 
-      <div className="bg-surface-1 rounded-2xl border border-white/5 divide-y divide-white/5">
+      <div className="card divide-y divide-gray-100">
         {privacyOptions.map((option) => {
           const Icon = option.icon;
           return (
             <div key={option.key} className="p-4 flex items-center justify-between">
               <div className="flex items-start gap-3">
-                <div className="p-2.5 bg-white/5 rounded-xl">
-                  <Icon className="w-5 h-5 text-gray-400" />
+                <div className="p-2 bg-gray-100 rounded-lg">
+                  <Icon className="w-5 h-5 text-gray-600" />
                 </div>
                 <div>
-                  <h3 className="font-medium text-white">{option.title}</h3>
-                  <p className="text-sm text-gray-400">{option.description}</p>
+                  <h3 className="font-medium text-gray-900">{option.title}</h3>
+                  <p className="text-sm text-gray-500">{option.description}</p>
                 </div>
               </div>
-              <motion.button
-                whileTap={{ scale: 0.95 }}
+              <button
                 onClick={() => handleToggle(option.key)}
-                className={`relative w-12 h-7 rounded-full transition-colors ${
-                  settings[option.key] ? 'bg-emerald-500' : 'bg-surface-0'
+                className={`relative w-12 h-6 rounded-full transition-colors ${
+                  settings[option.key] ? 'bg-primary-600' : 'bg-gray-300'
                 }`}
               >
-                <motion.span
-                  layout
-                  className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow ${
-                    settings[option.key] ? 'right-1' : 'left-1'
+                <span
+                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                    settings[option.key] ? 'translate-x-6' : 'translate-x-0'
                   }`}
                 />
-              </motion.button>
+              </button>
             </div>
           );
         })}

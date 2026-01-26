@@ -58,18 +58,18 @@ const Profile = () => {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      {/* Profile Header - Colores "Vibrancia de Barrio" */}
+      {/* Profile Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-surface-1 backdrop-blur-sm rounded-2xl border border-white/5 p-6"
+        className="bg-dark-100/60 backdrop-blur-sm rounded-2xl border border-white/5 p-6"
       >
         <div className="flex items-center gap-4">
           {user?.avatar ? (
-            <img src={user.avatar} alt="" className="w-20 h-20 rounded-2xl object-cover border-2 border-amber-500/30" />
+            <img src={user.avatar} alt="" className="w-20 h-20 rounded-2xl object-cover border border-white/10" />
           ) : (
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500/20 to-amber-500/20 flex items-center justify-center border border-amber-500/30">
-              <User className="w-10 h-10 text-amber-400" />
+            <div className="w-20 h-20 rounded-2xl bg-primary-500/20 flex items-center justify-center border border-primary-500/30">
+              <User className="w-10 h-10 text-primary-400" />
             </div>
           )}
           <div className="flex-1">

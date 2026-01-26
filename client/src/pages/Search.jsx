@@ -11,21 +11,6 @@ import {
   PulperiaResults,
 } from '../components/search';
 
-// Animaciones slide-up para "Vibrancia de Barrio"
-const pageVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: { duration: 0.3, ease: 'easeOut' }
-  },
-  exit: { 
-    opacity: 0, 
-    y: -10,
-    transition: { duration: 0.2 }
-  }
-};
-
 const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get('q') || '');
@@ -75,13 +60,7 @@ const Search = () => {
   };
 
   return (
-    <motion.div 
-      className="space-y-5"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
-    >
-      {/* Barra de búsqueda con min-h para touch targets */}
+    <div className="space-y-6">
       <SearchBar
         query={query}
         onQueryChange={setQuery}
@@ -89,7 +68,6 @@ const Search = () => {
         onClear={clearSearch}
       />
 
-      {/* Controles con mejor espaciado móvil */}
       <SearchControls
         view={view}
         onViewChange={setView}
@@ -101,22 +79,20 @@ const Search = () => {
         pulperiasCount={pulperias.length}
       />
 
-      {/* Mapa con feedback de ubicación */}
       <SearchMap
         showMap={showMap}
         location={location}
         pulperias={pulperias}
       />
 
-      {/* Resultados con animaciones slide-up */}
+      {/* Results */}
       <AnimatePresence mode="wait">
         {view === 'products' ? (
           <motion.div
             key="products"
-            variants={pageVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
           >
             <ProductResults
               products={products}
@@ -128,10 +104,9 @@ const Search = () => {
         ) : (
           <motion.div
             key="pulperias"
-            variants={pageVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
           >
             <PulperiaResults
               pulperias={pulperias}
@@ -140,7 +115,7 @@ const Search = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 };
 

@@ -3,27 +3,26 @@ import { useQuery } from '@tanstack/react-query';
 import { Briefcase, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { jobApi } from '../services/api';
 
-// Status con tema oscuro - Vibrancia de Barrio
 const statusConfig = {
   PENDING: {
     label: 'Pendiente',
     icon: Clock,
-    color: 'text-amber-400 bg-amber-500/20',
+    color: 'text-yellow-600 bg-yellow-50',
   },
   REVIEWING: {
     label: 'En revisión',
     icon: AlertCircle,
-    color: 'text-blue-400 bg-blue-500/20',
+    color: 'text-blue-600 bg-blue-50',
   },
   ACCEPTED: {
     label: 'Aceptada',
     icon: CheckCircle,
-    color: 'text-emerald-400 bg-emerald-500/20',
+    color: 'text-green-600 bg-green-50',
   },
   REJECTED: {
     label: 'Rechazada',
     icon: XCircle,
-    color: 'text-red-400 bg-red-500/20',
+    color: 'text-red-600 bg-red-50',
   },
 };
 

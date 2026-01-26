@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { useAuthStore } from '../stores/authStore';
 import { Store, User, MapPin, Phone, ArrowRight, ArrowLeft, Loader2, Globe } from 'lucide-react';
 import { reverseGeocode } from '../services/geocoding';
@@ -170,43 +169,39 @@ const Register = () => {
           </div>
 
           <div className="grid gap-4">
-            {/* Client Option - Ámbar de la paleta */}
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            {/* Client Option */}
+            <button
               onClick={() => handleRoleSelect('CLIENT')}
-              className="flex items-start gap-4 p-5 bg-surface-1 border-2 border-white/10 rounded-2xl hover:border-amber-500/50 hover:bg-amber-500/5 transition-all text-left group min-h-[88px]"
+              className="flex items-start gap-4 p-5 bg-dark-800 border-2 border-dark-600 rounded-2xl hover:border-primary-500 hover:bg-dark-700 transition-all text-left group"
             >
-              <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-amber-500/30 transition-colors">
-                <User className="w-6 h-6 text-amber-400" />
+              <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-200 transition-colors">
+                <User className="w-6 h-6 text-blue-600" />
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-white">Soy Cliente</h3>
-                <p className="text-sm text-gray-400 mt-1">
-                  Quiero comprar en pulperías cerca de mí, buscar empleos y ofrecer mis servicios
+                <p className="text-sm text-gray-500 mt-1">
+                  Quiero comprar en pulperias cerca de mi, buscar empleos y ofrecer mis servicios
                 </p>
               </div>
-              <ArrowRight className="w-5 h-5 text-gray-500 group-hover:text-amber-400 transition-colors mt-1" />
-            </motion.button>
+              <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-primary-500 transition-colors mt-1" />
+            </button>
 
-            {/* Negocio Option - Rojo de la paleta */}
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            {/* Negocio Option */}
+            <button
               onClick={() => handleRoleSelect('PULPERIA')}
-              className="flex items-start gap-4 p-5 bg-surface-1 border-2 border-white/10 rounded-2xl hover:border-red-500/50 hover:bg-red-500/5 transition-all text-left group min-h-[88px]"
+              className="flex items-start gap-4 p-5 bg-dark-800 border-2 border-dark-600 rounded-2xl hover:border-primary-500 hover:bg-dark-700 transition-all text-left group"
             >
-              <div className="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-red-500/30 transition-colors">
-                <Store className="w-6 h-6 text-red-400" />
+              <div className="w-12 h-12 rounded-xl bg-primary-100 flex items-center justify-center flex-shrink-0 group-hover:bg-primary-200 transition-colors">
+                <Store className="w-6 h-6 text-primary-600" />
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-white">Tengo un negocio</h3>
-                <p className="text-sm text-gray-400 mt-1">
+                <p className="text-sm text-gray-500 mt-1">
                   Quiero vender productos o servicios, recibir pedidos y publicar empleos
                 </p>
               </div>
-              <ArrowRight className="w-5 h-5 text-gray-500 group-hover:text-red-400 transition-colors mt-1" />
-            </motion.button>
+              <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-primary-500 transition-colors mt-1" />
+            </button>
           </div>
         </div>
       </div>

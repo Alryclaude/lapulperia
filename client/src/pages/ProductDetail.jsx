@@ -91,7 +91,7 @@ const ProductDetail = () => {
     );
   }
 
-  // Not found state - Tema oscuro
+  // Not found state
   if (!product) {
     return (
       <motion.div
@@ -99,11 +99,11 @@ const ProductDetail = () => {
         animate={{ opacity: 1, y: 0 }}
         className="text-center py-16"
       >
-        <div className="w-16 h-16 bg-amber-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <Package className="w-8 h-8 text-amber-400" />
+        <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <Package className="w-8 h-8 text-gray-400" />
         </div>
-        <h2 className="text-xl font-semibold text-white mb-2">Producto no encontrado</h2>
-        <p className="text-gray-400 mb-6">No pudimos encontrar este producto</p>
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">Producto no encontrado</h2>
+        <p className="text-muted-foreground mb-6">No pudimos encontrar este producto</p>
         <Button asChild variant="outline">
           <Link to="/">Volver al inicio</Link>
         </Button>

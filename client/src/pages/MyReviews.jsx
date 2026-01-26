@@ -33,12 +33,12 @@ const MyReviews = () => {
         animate={{ opacity: 1, y: 0 }}
         className="flex items-center gap-4"
       >
-        <div className="w-12 h-12 rounded-2xl bg-amber-500/20 flex items-center justify-center">
-          <Star className="w-6 h-6 text-amber-400" />
+        <div className="w-12 h-12 rounded-xl bg-yellow-500/20 flex items-center justify-center">
+          <Star className="w-6 h-6 text-yellow-400" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-white">Mis Reseñas</h1>
-          <p className="text-gray-400 text-sm">Reseñas que has dejado en pulperías</p>
+          <h1 className="text-2xl font-bold text-white">Mis Resenas</h1>
+          <p className="text-gray-400 text-sm">Resenas que has dejado en pulperias</p>
         </div>
       </motion.div>
 
