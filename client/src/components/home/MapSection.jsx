@@ -1,10 +1,20 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, ChevronRight, Expand, Store } from 'lucide-react';
+import { MapPin, ChevronRight, Expand, Store, Bell, Share2, Coffee, ShoppingBasket } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { FadeInView } from '@/components/ui';
 import ConstellationMap from '../map/ConstellationMap';
 import CategoryPills from '../map/CategoryPills';
+
+// Productos populares Honduras para empty state
+const popularProducts = [
+  { icon: '🌽', name: 'Tortillas' },
+  { icon: '☕', name: 'Café' },
+  { icon: '🫘', name: 'Frijoles' },
+  { icon: '🥚', name: 'Huevos' },
+  { icon: '🧀', name: 'Queso' },
+  { icon: '🍞', name: 'Pan' },
+];
 
 // Ilustración SVG para estado vacío - Estilo "Constelación"
 const EmptyMapIllustration = () => (
@@ -84,31 +94,65 @@ const MapSection = ({ location, pulperias, openCount = 0, onOpenFullMap }) => {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-2xl bg-dark-100 border border-dark-50 p-8 text-center"
-            style={{ height: '45vh', minHeight: '320px' }}
+            className="rounded-2xl bg-gradient-to-b from-dark-100 to-dark-200 border border-dark-50 p-6 text-center"
+            style={{ minHeight: '380px' }}
           >
-            <div className="h-full flex flex-col items-center justify-center">
+            <div className="flex flex-col items-center justify-center">
               <EmptyMapIllustration />
-              <h3 className="text-lg font-semibold text-white mt-4 mb-2">
-                No hay pulperías abiertas cerca
+              <h3 className="text-lg font-semibold text-white mt-4 mb-1">
+                Tu barrio aún no despierta 🌙
               </h3>
-              <p className="text-sm text-gray-400 mb-6 max-w-xs mx-auto">
-                Las pulperías de tu zona aún no han abierto. ¡Vuelve más tarde o explora otras áreas!
+              <p className="text-sm text-gray-400 mb-5 max-w-xs mx-auto">
+                Las pulpes de tu zona están cerradas. ¡Pero podés explorar o invitar a tu favorita!
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <button
+              
+              {/* Acciones principales */}
+              <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  whileHover={{ scale: 1.02 }}
                   onClick={onOpenFullMap}
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-dark-200 hover:bg-dark-50 border border-dark-50 rounded-xl text-sm font-medium text-gray-300 hover:text-white transition-all"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-dark-300 hover:bg-dark-50 border border-dark-50 rounded-xl text-sm font-medium text-gray-300 hover:text-white transition-all"
                 >
                   <Expand className="w-4 h-4" />
                   Explorar mapa
-                </button>
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  whileHover={{ scale: 1.02 }}
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-accent-500/20 hover:bg-accent-500/30 border border-accent-500/30 rounded-xl text-sm font-medium text-accent-400 hover:text-accent-300 transition-all"
+                >
+                  <Bell className="w-4 h-4" />
+                  Avisame cuando abran
+                </motion.button>
+              </div>
+
+              {/* Productos populares */}
+              <div className="w-full max-w-sm">
+                <p className="text-xs text-gray-500 mb-3">🔥 Lo más buscado en Honduras</p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {popularProducts.map((product) => (
+                    <motion.span
+                      key={product.name}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-dark-300/50 hover:bg-dark-300 border border-dark-50 rounded-full text-xs text-gray-400 hover:text-white cursor-pointer transition-all"
+                    >
+                      <span>{product.icon}</span>
+                      {product.name}
+                    </motion.span>
+                  ))}
+                </div>
+              </div>
+
+              {/* CTA secundario */}
+              <div className="mt-6 pt-4 border-t border-dark-50 w-full max-w-sm">
                 <Link
                   to="/auth"
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 rounded-xl text-sm font-medium text-white transition-all"
+                  className="inline-flex items-center justify-center gap-2 text-sm text-primary-400 hover:text-primary-300 transition-colors"
                 >
                   <Store className="w-4 h-4" />
-                  Registrar mi pulpería
+                  ¿Sos dueño de pulpe? Registrate aquí
                 </Link>
               </div>
             </div>

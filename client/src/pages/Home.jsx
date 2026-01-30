@@ -169,8 +169,8 @@ const Home = () => {
         {/* 8. Features Section */}
         {isFirstVisit && <FeaturesSection />}
 
-        {/* 9. FAQ Section */}
-        <FAQSection />
+        {/* 9. FAQ Section - Solo primera visita */}
+        {isFirstVisit && <FAQSection />}
 
         {/* 10. CTA Section - Prominente para guest */}
         <CTASection isAuthenticated={isAuthenticated} />

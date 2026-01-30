@@ -93,9 +93,9 @@ const BottomNav = ({ isPulperia = false }) => {
                 <motion.div
                   className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200"
                   initial={false}
-                  animate={{
-                    scale: isActive ? 1 : 1,
-                  }}
+                  whileTap={{ scale: 0.92 }}
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                 >
                   {/* Icon container with glow effect */}
                   <div
